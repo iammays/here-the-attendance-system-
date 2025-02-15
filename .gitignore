@@ -1,1 +1,9 @@
-__pycache__/
+# تجاهل مجلد الـ __pycache__ داخل مجلد ai
+ai/__pycache__/
+
+# تجاهل المجلد الافتراضي للبيئة الافتراضية (venv)
+venv/
+
+# تجاهل مجلد students_faces
+students_faces/
+
