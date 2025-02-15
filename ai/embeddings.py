@@ -19,7 +19,7 @@ app = FaceAnalysis()  # إنشاء كائن لتحليل الوجوه
 app.prepare(ctx_id=0)  # تهيئة النموذج لاستخدام وحدة المعالجة الرسومية إذا كانت متاحة
 
 # تحديد مسار مجلد صور الطلاب
-dataset_path = "ai\students_faces"  # المسار الذي يحتوي على مجلدات صور كل طالب
+dataset_path = "students_faces"  # المسار الذي يحتوي على مجلدات صور كل طالب
 
 # استخراج التضمينات لكل طالب
 for student_name in os.listdir(dataset_path):  # التكرار على جميع المجلدات داخل dataset_path
