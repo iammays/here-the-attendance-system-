@@ -1,75 +1,77 @@
-import os  # للتعامل مع الملفات والمجلدات
-import numpy as np  # للتعامل مع العمليات الحسابية والمصفوفات
-import cv2  # لمعالجة الصور
-import pymongo  # للتعامل مع قاعدة بيانات MongoDB
-from insightface.app import FaceAnalysis  # مكتبة التعرف على الوجوه
-from scipy.spatial.distance import cosine  # لحساب المسافة بين التضمينات
-from pymongo import MongoClient  # لاستيراد عميل MongoDB
+import cv2
+import numpy as np
+import pymongo
+from insightface.app import FaceAnalysis
+from scipy.spatial.distance import cosine
+from pymongo import MongoClient
 
-# تحميل نموذج ArcFace للتعرف على الوجوه
-app = FaceAnalysis()  # إنشاء كائن لتحليل الوجوه
-app.prepare(ctx_id=0)  # تهيئة النموذج لاستخدام وحدة المعالجة الرسومية إذا كانت متاحة
+# تحميل نموذج ArcFace
+app = FaceAnalysis()
+app.prepare(ctx_id=0)
 
 # الاتصال بقاعدة البيانات
-mongo_client = MongoClient("mongodb://localhost:27017")  # الاتصال بقاعدة البيانات المحلية
-db = mongo_client["face_attendance"]  # اختيار قاعدة البيانات "face_attendance"
-students_collection = db["students_embeddings"]  # اختيار مجموعة (Collection) لتخزين التضمينات
+mongo_client = MongoClient("mongodb://localhost:27017")
+db = mongo_client["face_attendance"]
+students_collection = db["students_embeddings"]
 
 def load_student_embeddings():
-    """
-    تحميل التضمينات المخزنة مباشرة من قاعدة البيانات كمصفوفات NumPy.
-    """
-    students_embeddings = {}  # قاموس لتخزين تضمينات الطلاب
-    students = students_collection.find({}, {"name": 1, "embedding": 1})  # استرجاع أسماء الطلاب وتضميناتهم من MongoDB
+    students_embeddings = {}
+    students = students_collection.find({}, {"name": 1, "embedding": 1})
 
-    for student in students:  # التكرار على جميع الطلاب المخزنين في قاعدة البيانات
-        if "embedding" in student:  # التحقق من وجود تضمين لكل طالب
-            students_embeddings[student["name"]] = np.array(student["embedding"], dtype=np.float32)  # تحويل التضمين إلى مصفوفة NumPy
+    for student in students:
+        if "embedding" in student:
+            students_embeddings[student["name"]] = np.array(student["embedding"], dtype=np.float32)
 
-    print(f"✅ Loaded {len(students_embeddings)} student embeddings.")  # طباعة عدد التضمينات المحملة
+    print(f"✅ Loaded {len(students_embeddings)} student embeddings.")
     return students_embeddings
 
-students_embeddings = load_student_embeddings()  # تحميل التضمينات عند بدء التنفيذ
+students_embeddings = load_student_embeddings()
 
-def recognize_faces(image_path):
+def recognize_faces_from_video(video_path):
     """
-    يكتشف الوجوه باستخدام ArcFace مباشرةً دون الحاجة إلى YOLO.
+    يفتح فيديو ويتعرف على الوجوه فريمًا فريمًا باستخدام ArcFace.
     """
-    img = cv2.imread(image_path)  # تحميل الصورة
-    if img is None:  # التحقق من تحميل الصورة بنجاح
-        print("❌ Failed to load image.")  # طباعة رسالة خطأ
-        return []  # إرجاع قائمة فارغة
+    cap = cv2.VideoCapture(video_path)
 
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # تحويل الصورة إلى RGB لأن InsightFace يستخدم هذا التنسيق
+    if not cap.isOpened():
+        print("❌ Failed to open video.")
+        return
 
-    # استخراج الوجوه باستخدام ArcFace
-    faces = app.get(img)  # استخدام النموذج لاكتشاف الوجوه
-    if not faces:  # التحقق من العثور على وجوه في الصورة
-        print("❌ No faces found.")  # طباعة رسالة خطأ
-        return []  # إرجاع قائمة فارغة
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
 
-    recognized_faces = []  # قائمة لتخزين الأسماء المعترف بها
+        img_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        faces = app.get(img_rgb)
 
-    for i, face in enumerate(faces):  # التكرار على كل الوجوه المكتشفة في الصورة
-        face_embedding = face.embedding.flatten()  # استخراج التضمين وتحويله إلى مصفوفة أحادية البعد
+        for face in faces:
+            face_embedding = face.embedding.flatten()
+            best_match = None
+            best_score = 1.0
 
-        best_match = None  # تخزين أفضل تطابق
-        best_score = 1.0  # يبدأ من أعلى قيمة للمسافة
+            for student_name, stored_embedding in students_embeddings.items():
+                score = cosine(face_embedding, stored_embedding)
 
-        for student_name, stored_embedding in students_embeddings.items():  # التكرار على جميع تضمينات الطلاب المخزنة
-            stored_embedding = np.array(stored_embedding, dtype=np.float32)  # تحويل التضمين إلى مصفوفة NumPy
-            score = cosine(face_embedding, stored_embedding)  # حساب المسافة الكونية بين التضمينات
+                if score < best_score:
+                    best_score = score
+                    best_match = student_name
 
-            if score < best_score:  # إذا كان التطابق أفضل من السابق
-                best_score = score  # تحديث أفضل درجة تطابق
-                best_match = student_name  # تخزين اسم الطالب الذي يطابق الوجه
+            if best_match and best_score < 0.5:
+                label = best_match
+                print(f"✅ Recognized: {best_match} (Similarity: {1 - best_score:.2f})")
+            else:
+                label = "Unknown"
+                print("❌ Face is unknown.")
 
-        # استخدام عتبة مناسبة للتعرف الصحيح
-        if best_match and best_score < 0.5:  # التحقق من أن التطابق أقل من العتبة المحددة
-            recognized_faces.append(best_match)  # إضافة الاسم إلى القائمة
-            print(f"✅ Recognized: {best_match} (Similarity: {1 - best_score:.2f})")  # طباعة النتيجة
-        else:
-            recognized_faces.append("Unknown")  # إضافة "غير معروف" في حالة عدم التطابق
-            print("❌ Face is unknown.")  # طباعة رسالة خطأ
+            x1, y1, x2, y2 = face.bbox.astype(int)
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-    return recognized_faces  # إرجاع قائمة الأسماء المعترف بها
+        cv2.imshow("Face Recognition", frame)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
