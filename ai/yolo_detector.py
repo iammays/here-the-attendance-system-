@@ -12,7 +12,7 @@ temp = pathlib.PosixPath
 pathlib.PosixPath = pathlib.WindowsPath
 
 # تحميل YOLOv5 مع تفعيل التسريع (GPU) إن أمكن
-model = torch.hub.load("ultralytics/yolov5", "custom", path="C:\\Users\\MaysM.M\\yolov5\\best.pt", force_reload=True)
+model = torch.hub.load("ultralytics/yolov5", "custom", path="C:\\Users\\user\\yolov5\\best.pt", force_reload=True)
 model.conf = 0.5  # تعديل العتبة لزيادة الدقة
 model.iou = 0.45  # تحسين اكتشاف الأجسام المتداخلة
 
