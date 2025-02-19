@@ -1,5 +1,7 @@
 package com.here.backend.Teacher;
 
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -9,7 +11,7 @@ public class TeacherEntity {
     private String id;         // Change to String to work with MongoDB
     private String name;
     private String email;
-
+    private List<String> courseIds;
     // Constructor
     public TeacherEntity(String id, String name, String email) {
         this.id = id;
@@ -40,5 +42,13 @@ public class TeacherEntity {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public List<String> getCourseIds() {
+        return courseIds;
+    }
+
+    public void setCourseIds(List<String> courseIds) {
+        this.courseIds = courseIds;
     }
 }
