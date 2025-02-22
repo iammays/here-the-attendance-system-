@@ -73,26 +73,48 @@ public class WebSecurityConfig {
     return filterRegistrationBean;
   }
   
+  // @Bean
+  // public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+  //     http.csrf(csrf -> csrf.disable())
+  //       .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+  //       .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+  //       .authorizeHttpRequests(auth ->
+  //           auth
+  //           .requestMatchers("/api/auth/**").permitAll()
+  //           .requestMatchers("/teacher/**").authenticated()
+  //           .requestMatchers(HttpMethod.PUT,"/teachers/**").authenticated()
+  //           .requestMatchers("/swagger-ui.html").permitAll()
+  //           .requestMatchers("/swagger-ui/**").permitAll()
+  //           .requestMatchers("/api-docs/**").permitAll()
+  //           .anyRequest().denyAll());
+
+  //     http.authenticationProvider(authenticationProvider());
+  //     http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+  //     return http.build();
+  // }
+
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-      http.csrf(csrf -> csrf.disable())
-        .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth ->
-            auth
-            .requestMatchers("/api/auth/**").permitAll()
-            .requestMatchers("/teacher/**").authenticated()
-            .requestMatchers(HttpMethod.PUT,"/teachers/**").authenticated()
-            .requestMatchers("/swagger-ui.html").permitAll()
-            .requestMatchers("/swagger-ui/**").permitAll()
-            .requestMatchers("/api-docs/**").permitAll()
-            .anyRequest().denyAll());
+    http.csrf(csrf -> csrf.disable())
+      .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+      .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+      .authorizeHttpRequests(auth ->
+        auth
+        .requestMatchers("/api/auth/**").permitAll()  // السماح بمسارات التسجيل والدخول بدون مصادقة
+        .requestMatchers(HttpMethod.GET, "/teachers/**").authenticated() // السماح بـ GET للمصادق عليهم
+        .requestMatchers(HttpMethod.PUT, "/teachers/**").authenticated() // السماح بـ PUT للمصادق عليهم
+        .requestMatchers(HttpMethod.POST, "/teachers/**").authenticated() // السماح بـ POST للمصادق عليهم
+        .requestMatchers(HttpMethod.DELETE, "/teachers/**").authenticated() // السماح بـ DELETE للمصادق عليهم
+        .requestMatchers("/swagger-ui.html").permitAll()
+        .requestMatchers("/swagger-ui/**").permitAll()
+        .requestMatchers("/api-docs/**").permitAll()
+        .anyRequest().denyAll()); // رفض أي طلب غير مذكور
 
-      http.authenticationProvider(authenticationProvider());
-      http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-      return http.build();
+    http.authenticationProvider(authenticationProvider());
+    http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+    return http.build();
   }
-    
+
   @Bean
   CorsConfigurationSource corsConfigurationSource() {
       CorsConfiguration configuration = new CorsConfiguration();
