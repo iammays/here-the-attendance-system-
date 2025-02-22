@@ -1,4 +1,4 @@
-from recognition import recognize_faces_from_video
+from yolo_detector import process_video_stream
 
-video_path = "1.mp4"  # اسم الفيديو
-recognize_faces_from_video(video_path)
+video_path = "3.mp4"  # اسم الفيديو
+process_video_stream(video_path)

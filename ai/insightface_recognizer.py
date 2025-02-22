@@ -1,53 +1,18 @@
-import os  # للتعامل مع الملفات والمجلدات
-import numpy as np  # للتعامل مع العمليات الحسابية والمصفوفات
-import cv2  # لمعالجة الصور
-import pymongo  # للتعامل مع قاعدة بيانات MongoDB
-from insightface.app import FaceAnalysis  # مكتبة التعرف على الوجوه
-
-# إعداد الاتصال بقاعدة بيانات MongoDB
-mongo_client = pymongo.MongoClient("mongodb://localhost:27017")  # الاتصال بقاعدة البيانات المحلية
-db = mongo_client["face_attendance"]  # اختيار قاعدة البيانات "face_attendance"
-students_collection = db["students_embeddings"]  # اختيار مجموعة (Collection) لتخزين التضمينات
-
-# تحميل نموذج التعرف على الوجوه
-app = FaceAnalysis()  # إنشاء كائن لتحليل الوجوه
-app.prepare(ctx_id=0)  # تهيئة النموذج لاستخدام وحدة المعالجة الرسومية إذا كانت متاحة (استخدم ctx_id=-1 إذا كنت تعمل بدون GPU)
-
 import cv2
 import numpy as np
-import pymongo
-from insightface.app import FaceAnalysis
 from scipy.spatial.distance import cosine
-from pymongo import MongoClient
+from insightface.app import FaceAnalysis
+from ai.utils import load_student_embeddings
 
 # تحميل نموذج ArcFace
-app = FaceAnalysis()
-app.prepare(ctx_id=0)
+app = FaceAnalysis(providers=['CPUExecutionProvider'])
+app.prepare(ctx_id=0, det_size=(640, 640))
 
-# الاتصال بقاعدة البيانات
-mongo_client = MongoClient("mongodb://localhost:27017")
-db = mongo_client["face_attendance"]
-students_collection = db["students_embeddings"]
-
-def load_student_embeddings():
-    students_embeddings = {}
-    students = students_collection.find({}, {"name": 1, "embedding": 1})
-
-    for student in students:
-        if "embedding" in student:
-            students_embeddings[student["name"]] = np.array(student["embedding"], dtype=np.float32)
-
-    print(f"✅ Loaded {len(students_embeddings)} student embeddings.")
-    return students_embeddings
-
+# تحميل التضمينات
 students_embeddings = load_student_embeddings()
 
 def recognize_faces_from_video(video_path):
-    """
-    يفتح فيديو ويتعرف على الوجوه فريمًا فريمًا باستخدام ArcFace.
-    """
     cap = cv2.VideoCapture(video_path)
-
     if not cap.isOpened():
         print("❌ Failed to open video.")
         return
@@ -64,15 +29,13 @@ def recognize_faces_from_video(video_path):
             face_embedding = face.embedding.flatten()
             best_match = None
             best_score = 1.0
-
             for student_name, stored_embedding in students_embeddings.items():
                 score = cosine(face_embedding, stored_embedding)
-
                 if score < best_score:
                     best_score = score
                     best_match = student_name
 
-            if best_match and best_score < 0.5:
+            if best_match and best_score < 0.3:  # عتبة أكثر صرامة
                 label = best_match
                 print(f"✅ Recognized: {best_match} (Similarity: {1 - best_score:.2f})")
             else:
@@ -84,11 +47,9 @@ def recognize_faces_from_video(video_path):
             cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
         cv2.imshow("Face Recognition", frame)
-
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
     cap.release()
     cv2.destroyAllWindows()
 
-#file: ai/recognition.py
