@@ -10,5 +10,10 @@ students_faces/
 # تجاهل ملفات الفيديو بصيغة MP4
 *.mp4
 
+*.npy
+
+*.jpg
+
+
 screenshots/
 students_embeddings_from_mongodb.npy
