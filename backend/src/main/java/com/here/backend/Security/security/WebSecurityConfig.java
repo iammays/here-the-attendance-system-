@@ -108,7 +108,8 @@ public class WebSecurityConfig {
         .requestMatchers("/swagger-ui.html").permitAll()
         .requestMatchers("/swagger-ui/**").permitAll()
         .requestMatchers("/api-docs/**").permitAll()
-        .anyRequest().denyAll()); // رفض أي طلب غير مذكور
+        .requestMatchers("/api/excel/**").permitAll());
+        // .anyRequest().denyAll()); // رفض أي طلب غير مذكور
 
     http.authenticationProvider(authenticationProvider());
     http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
