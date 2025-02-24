@@ -10,18 +10,24 @@ public class TeacherEntity {
     private String id;         // Change to String to work with MongoDB
     private String username;
     private String email;
-    private List<String> courseIds;
     private String password;;
+    private List<String> courseIds;
 
     // Constructor
     public TeacherEntity() {}
 
-    public TeacherEntity(String username, String email,String password) {
+    public TeacherEntity(String username, String email,String password ) {
         this.username = username;
         this.email = email;
         this.password = password;
     }
+    public TeacherEntity(String username, String email,String password , List<String> courseIds) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.courseIds = courseIds;
 
+    }
     // public TeacherEntity(String id, String username, String email) {
     //     this.id = id;
     //     this.username = username;

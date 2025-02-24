@@ -21,6 +21,12 @@ public class SchedualEntity {
         this.sessionIds = sessionIds;
     }
 
+
+
+    public SchedualEntity(String scheduleId, String roomId) {
+        this.scheduleId = scheduleId;
+        this.roomId = roomId;
+    }
     // Getters and Setters
     public String getScheduleId() {
         return scheduleId;

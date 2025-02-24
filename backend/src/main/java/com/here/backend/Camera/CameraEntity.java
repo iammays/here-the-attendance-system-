@@ -1,5 +1,8 @@
 package com.here.backend.Camera;
 
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "cameras")
 public class CameraEntity {
     private String cameraId;
     private String roomId;

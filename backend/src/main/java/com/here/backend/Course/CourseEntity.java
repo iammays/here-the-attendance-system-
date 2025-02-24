@@ -1,6 +1,4 @@
 package com.here.backend.Course;
-
-import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -9,25 +7,22 @@ public class CourseEntity {
     @Id
     private String courseId;
     private String courseName;
-    private String category;  // التصنيف (مثل "Humanity")
+    private String roomId;
     private String teacherId;
-    private List<String> roomIds;
+    private String startTime;
+    private String endTime;
+    private String day;
 
     public CourseEntity() {}
 
-    public CourseEntity(String name, String category, String teacherId) {
-        this.courseName = name;
-        this.category = category;
-        this.teacherId = teacherId;
-    }
-
-
-    // Constructor
-    public CourseEntity(String courseId, String courseName, String teacherId, List<String> roomIds) {
+    public CourseEntity(String courseId, String courseName, String roomId, String teacherId, String startTime, String endTime, String day) {
         this.courseId = courseId;
         this.courseName = courseName;
+        this.roomId = roomId;
         this.teacherId = teacherId;
-        this.roomIds = roomIds;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.day = day;
     }
 
     // Getters and Setters
@@ -47,6 +42,14 @@ public class CourseEntity {
         this.courseName = courseName;
     }
 
+    public String getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
+    }
+
     public String getTeacherId() {
         return teacherId;
     }
@@ -55,20 +58,27 @@ public class CourseEntity {
         this.teacherId = teacherId;
     }
 
-    public String getCategory() { 
-        return category; 
-    
+    public String getStartTime() {
+        return startTime;
     }
 
-    public void setCategory(String category) { 
-        this.category = category; 
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
     }
 
-    public List<String> getRoomIds() {
-        return roomIds;
+    public String getEndTime() {
+        return endTime;
     }
 
-    public void setRoomIds(List<String> roomIds) {
-        this.roomIds = roomIds;
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
+    }
+
+    public String getDay() {
+        return day;
+    }
+
+    public void setDay(String day) {
+        this.day = day;
     }
 }
