@@ -52,7 +52,7 @@ public class AuthController {
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
         Authentication authentication = authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+        new UsernamePasswordAuthenticationToken(loginRequest.getName(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
@@ -60,15 +60,15 @@ public class AuthController {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();   
 
         return ResponseEntity.ok(new JwtResponse(jwt, 
-        userDetails.getId(), 
-        userDetails.getUsername(), 
-        userDetails.getEmail() 
+            userDetails.getId(), 
+            userDetails.getName(), 
+            userDetails.getEmail() 
         ));
     }
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUserByUsername(@Valid @RequestBody SignupRequest signUpRequest) {
-        if (TeacherRepository.existsByUsername(signUpRequest.getUsername())) {
+        if (TeacherRepository.existsByName(signUpRequest.getName())) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
         }
 
@@ -78,7 +78,7 @@ public class AuthController {
 
         // Create new user's account
         TeacherEntity user = new TeacherEntity(
-            signUpRequest.getUsername(),
+            signUpRequest.getName(),
             signUpRequest.getEmail(),
             encoder.encode(signUpRequest.getPassword())
         );
@@ -87,7 +87,7 @@ public class AuthController {
 
         // Authenticate the user
         Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(signUpRequest.getUsername(), signUpRequest.getPassword())
+            new UsernamePasswordAuthenticationToken(signUpRequest.getName(), signUpRequest.getPassword())
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -96,7 +96,7 @@ public class AuthController {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
         // Create response with token
-        JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail());
+        JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getName(), userDetails.getEmail());
 
         return ResponseEntity.ok(jwtResponse);
     }

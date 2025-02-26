@@ -1,102 +1,94 @@
 package com.here.backend.Course;
 
-import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "courses")
 public class CourseEntity {
     @Id
-    private String courseId;
-    private String courseName;
-    private String category;  // التصنيف (مثل "Humanity")
-    private String semester; 
-    private String department;  
-    private String teacherId;
-    private List<String> roomIds;
-    private List<String> studentIds;// coursese in students
-
+    private String CourseId;
+    private String name;
+    private String RoomId;
+    private String TeacherId;
+    private String startTime;
+    private String endTime;
+    private String day;
+    private String category;
     
     public CourseEntity() {}
 
-    public CourseEntity(String name, String category, String teacherId) {
-        this.courseName = name;
+    public CourseEntity(String courseId, String name, String roomId, String teacherId, String startTime, String endTime, String day, String category) {
+        this.CourseId = courseId;
+        this.name = name;
+        this.RoomId = roomId;
+        this.TeacherId = teacherId;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.day = day;
         this.category = category;
-        this.teacherId = teacherId;
     }
 
-
-    // Constructor
-    public CourseEntity(String courseId, String courseName, String teacherId, List<String> roomIds) {
-        this.courseId = courseId;
-        this.courseName = courseName;
-        this.teacherId = teacherId;
-        this.roomIds = roomIds;
-    }
-
-    // Getters and Setters
     public String getCourseId() {
-        return courseId;
-    }
-    
-    public void setCourseId(String courseId) {
-        this.courseId = courseId;
+        return CourseId;
     }
 
-    public String getCourseName() {
-        return courseName;
+    public void setCourseId(String courseid) {
+        CourseId = courseid;
     }
-    
-    public void setCourseName(String courseName) {
-        this.courseName = courseName;
+
+    public String getName() {
+        return name;
     }
-    
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getRoomId() {
+        return RoomId;
+    }
+
+    public void setRoomId(String roomid) {
+        RoomId = roomid;
+    }
+
     public String getTeacherId() {
-        return teacherId;
-    }
-    
-    public void setTeacherId(String teacherId) {
-        this.teacherId = teacherId;
-    }
-    
-    public String getCategory() { 
-        return category; 
-        
-    }
-    
-    public void setCategory(String category) { 
-        this.category = category; 
-    }
-    
-    public List<String> getRoomIds() {
-        return roomIds;
+        return TeacherId;
     }
 
-    public void setRoomIds(List<String> roomIds) {
-        this.roomIds = roomIds;
+    public void setTeacherId(String teacherid) {
+        TeacherId = teacherid;
     }
 
-    public List<String> getStudentIds() {
-        return studentIds;
-    }
-    
-    public void setStudentIds(List<String> studentIds) {
-        this.studentIds = studentIds;
+    public String getStartTime() {
+        return startTime;
     }
 
-    public String getSemester() {
-        return semester;
+    public void setStartTime(String starttime) {
+        this.startTime = starttime;
     }
 
-    public void setSemester(String semester) {
-        this.semester = semester;
+    public String getEndTime() {
+        return endTime;
     }
 
-    public String getDepartment() {
-        return department;
+    public void setEndTime(String endtime) {
+        this.endTime = endtime;
     }
 
-    public void setDepartment(String department) {
-        this.department = department;
+    public String getDay() {
+        return day;
+    }
+
+    public void setDay(String day) {
+        this.day = day;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

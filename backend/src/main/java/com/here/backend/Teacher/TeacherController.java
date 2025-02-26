@@ -54,20 +54,20 @@ public class TeacherController {
 
     @GetMapping("/course/{courseId}/all")
     public ResponseEntity<?> getAllTeachersForCourse(@PathVariable String courseId) {
-        List<TeacherEntity> teachers = teacherRepository.findByCourseIds(courseId);
+        List<TeacherEntity> teachers = teacherRepository.findByCourseId(courseId);
         if (teachers.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No teachers found for this course.");
         }
         return ResponseEntity.ok(teachers);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/Teacherid/{id}")
     public ResponseEntity<?> getTeacherById(@PathVariable String id) {
-        Optional<TeacherEntity> teacher = teacherRepository.findById(id);
+        Optional<TeacherEntity> teacher = teacherRepository.findByTeacherId(id);
         return teacher.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/{name}")
+    @GetMapping("/name/{name}")
     public ResponseEntity<?> getTeacherByName(@PathVariable String name) {
         List<TeacherEntity> teachers = teacherRepository.findByNameContainingIgnoreCase(name);
         if (teachers.isEmpty()) {
@@ -76,7 +76,7 @@ public class TeacherController {
         return ResponseEntity.ok(teachers);
     }
 
-    @GetMapping("/{email}")
+    @GetMapping("/email/{email}")
     public ResponseEntity<Map<String, Object>> getTeacherByEmail(@RequestParam String email) {
         Optional<TeacherEntity> teacher = teacherRepository.findByEmail(email);
         if (teacher.isPresent()) {
@@ -88,7 +88,7 @@ public class TeacherController {
 
     @GetMapping("/course/{courseId}")
     public ResponseEntity<?> getTeachersByCourse(@PathVariable String courseId) {
-        List<TeacherEntity> teachers = teacherRepository.findByCourseIds(courseId);
+        List<TeacherEntity> teachers = teacherRepository.findByCourseId(courseId);
         if (teachers.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No teachers found for this course.");
         }
@@ -97,7 +97,7 @@ public class TeacherController {
 
     @GetMapping("/{id}/courses/all")
     public ResponseEntity<?> getTeacherWithCourses(@PathVariable String id) {
-        Optional<TeacherEntity> teacher = teacherRepository.findById(id);
+        Optional<TeacherEntity> teacher = teacherRepository.findByTeacherId(id);
         if (teacher.isPresent()) {
             List<CourseEntity> courses = courseRepository.findByTeacherId(id);
             Map<String, Object> response = new HashMap<>();
@@ -129,7 +129,7 @@ public class TeacherController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error: You are not allowed to create a course for this teacher.");
         }
 
-        Optional<TeacherEntity> teacher = teacherRepository.findById(id);
+        Optional<TeacherEntity> teacher = teacherRepository.findByTeacherId(id);
         if (teacher.isPresent()) {
             course.setTeacherId(id);
             CourseEntity savedCourse = courseRepository.save(course);
@@ -145,7 +145,7 @@ public class TeacherController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error: You are not allowed to update this profile.");
         }
 
-        Optional<TeacherEntity> existingTeacher = teacherRepository.findById(id);
+        Optional<TeacherEntity> existingTeacher = teacherRepository.findByTeacherId(id);
         if (existingTeacher.isPresent()) {
             TeacherEntity teacher = existingTeacher.get();
             teacher.setName(updatedTeacher.getName());
@@ -164,7 +164,7 @@ public class TeacherController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error: You are not allowed to update this password.");
         }
 
-        Optional<TeacherEntity> teacher = teacherRepository.findById(id);
+        Optional<TeacherEntity> teacher = teacherRepository.findByTeacherId(id);
         if (teacher.isPresent()) {
             TeacherEntity updatedTeacher = teacher.get();
             updatedTeacher.setPassword(encoder.encode(newPassword));

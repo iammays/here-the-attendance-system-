@@ -16,11 +16,21 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private TeacherRepository teacherRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<TeacherEntity> teacher = teacherRepository.findByUsername(username);
+    public UserDetails loadUserByUsername(String name) throws UsernameNotFoundException {
+        Optional<TeacherEntity> teacher = teacherRepository.findByName(name);
         
         if (teacher.isEmpty()) {
-            throw new UsernameNotFoundException("User Not Found with username: " + username);
+            throw new UsernameNotFoundException("User Not Found with username: " + name);
+        }
+        
+        return UserDetailsImpl.build(teacher.get());
+    }
+
+    public UserDetails loadUserByName(String name) throws UsernameNotFoundException {
+        Optional<TeacherEntity> teacher = teacherRepository.findByName(name);
+        
+        if (teacher.isEmpty()) {
+            throw new UsernameNotFoundException("User Not Found with username: " + name);
         }
         
         return UserDetailsImpl.build(teacher.get());

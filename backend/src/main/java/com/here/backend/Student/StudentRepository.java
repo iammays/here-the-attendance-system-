@@ -7,13 +7,13 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 public interface StudentRepository extends MongoRepository<StudentEntity, String> {
     
     List<StudentEntity> findByName(String name);
-    List<StudentEntity> findByAdvisorName(String advisorName);
+    List<StudentEntity> findByAdvisor(String advisorName);
     // List<StudentEntity> findByMajor(String major);
     // List<StudentEntity> findByGpa(double gpa);
-    List<StudentEntity> findByCourseIds(String courseId);
+    List<StudentEntity> findByCourseId(String courseId);
     List<StudentEntity> findByemail(String email);
-    Optional<StudentEntity> findById(String id);
-    List<StudentEntity> findByAdvisorNameAndCourseIds(String advisorName, String courseId);
+    Optional<StudentEntity> findByStudentId(String id);
+    List<StudentEntity> findByAdvisorAndCourseId(String advisorName, String courseId);
     //List<StudentEntity> findByCourseIdAndAdvisorName(String courseId, String advisorName);
-    List<StudentEntity> findByCourseIdsAndAdvisorName(String courseId, String advisorName);
+    List<StudentEntity> findByCourseIdAndAdvisor(String courseId, String advisorName);
 }

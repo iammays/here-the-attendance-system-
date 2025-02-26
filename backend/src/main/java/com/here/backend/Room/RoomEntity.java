@@ -3,36 +3,34 @@ package com.here.backend.Room;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.List;
-
 @Document(collection = "rooms")
 public class RoomEntity {
 
     @Id
-    private String roomId;
-    private List<String> courseIds;
+    private String Room_id;
+    private String Course_id;
 
     public RoomEntity() {
     }
 
-    public RoomEntity(String roomId, List<String> courseIds) {
-        this.roomId = roomId;
-        this.courseIds = courseIds;
+    public RoomEntity(String roomId, String courseId) {
+        this.Room_id = roomId;
+        this.Course_id = courseId;
     }
 
-    public String getRoomId() {
-        return roomId;
+    public String getRoom_id() {
+        return Room_id;
     }
 
-    public void setRoomId(String roomId) {
-        this.roomId = roomId;
+    public void setRoom_id(String room_id) {
+        Room_id = room_id;
     }
 
-    public List<String> getCourseIds() {
-        return courseIds;
+    public String getCourse_id() {
+        return Course_id;
     }
 
-    public void setCourseIds(List<String> courseIds) {
-        this.courseIds = courseIds;
+    public void setCourse_id(String course_id) {
+        Course_id = course_id;
     }
 }

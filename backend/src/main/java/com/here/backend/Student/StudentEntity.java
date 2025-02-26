@@ -8,30 +8,28 @@ import java.util.List;
 public class StudentEntity {
 
     @Id
-    private String id;
+    private String StudentId;
     private String name;
     private String email;
-    private String advisorName;
-    private List<String> courseIds;
-    private int totalAbsences;
+    private String advisor;
+    private List<String> CourseId;
 
     // Constructors
     public StudentEntity() {}
 
-    public StudentEntity(String name, String email, String advisorName, List<String> courseIds) {
+    public StudentEntity(String name, String email, String advisorName, List<String> courseId) {
         this.name = name;
         this.email = email;
-        this.advisorName = advisorName;
-        this.courseIds = courseIds;
+        this.advisor = advisorName;
+        this.CourseId = courseId;
     }
 
-    // Getters and Setters
-    public String getId() {
-        return id;
+    public String getStudentId() {
+        return StudentId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setStudentId(String student_id) {
+        StudentId = student_id;
     }
 
     public String getName() {
@@ -50,27 +48,19 @@ public class StudentEntity {
         this.email = email;
     }
 
-    public String getAdvisorName() {
-        return advisorName;
+    public String getAdvisor() {
+        return advisor;
     }
 
-    public void setAdvisorName(String advisorName) {
-        this.advisorName = advisorName;
+    public void setAdvisor(String advisor) {
+        this.advisor = advisor;
     }
 
-    public List<String> getCourseIds() {
-        return courseIds;
+    public List<String> getCourseId() {
+        return CourseId;
     }
 
-    public void setCourseIds(List<String> courseIds) {
-        this.courseIds = courseIds;
-    }
-
-    public int getTotalAbsences() {
-        return totalAbsences;
-    }
-
-    public void setTotalAbsences(int totalAbsences) {
-        this.totalAbsences = totalAbsences;
+    public void setCourseId(List<String> courseid) {
+        CourseId = courseid;
     }
 }

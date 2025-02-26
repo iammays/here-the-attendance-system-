@@ -30,7 +30,6 @@ public class StudentController {
     // Create a new student ✅
     // add new course for student by id //401
     // add new advisor for student by id --- update advisor name
-    // add new student in session
     // add new student in course
     // update student by id
     // update student photo by id
@@ -41,7 +40,7 @@ public class StudentController {
 
     @GetMapping("/{id}")
     public ResponseEntity<StudentEntity> getStudentById(@PathVariable String id) {
-        return studentRepository.findById(id)
+        return studentRepository.findByStudentId(id)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
     }
@@ -53,15 +52,15 @@ public class StudentController {
 
     @GetMapping("/course/{courseId}")
     public List<StudentEntity> getStudentsByCourse(@PathVariable String courseId) {
-        return studentRepository.findByCourseIds(courseId);
+        return studentRepository.findByCourseId(courseId);
     }
 
     @GetMapping("/{id}/courses")
     public ResponseEntity<?> getAllCoursesForStudent(@PathVariable String id) {
-        Optional<StudentEntity> student = studentRepository.findById(id);
+        Optional<StudentEntity> student = studentRepository.findByStudentId(id);
 
         if (student.isPresent()) {
-            List<String> courseIds = student.get().getCourseIds();
+            List<String> courseIds = student.get().getCourseId();
             return ResponseEntity.ok(courseIds);
         }
 
@@ -71,12 +70,12 @@ public class StudentController {
 
     @GetMapping("/advisor/{advisorName}")
     public List<StudentEntity> getStudentsByAdvisor(@PathVariable String advisorName) {
-        return studentRepository.findByAdvisorName(advisorName);
+        return studentRepository.findByAdvisor(advisorName);
     }
 
     @GetMapping("/advisor/{advisorName}/course/{courseId}")
     public List<StudentEntity> getStudentsByAdvisorAndCourse(@PathVariable String advisorName, @PathVariable String courseId) {
-        return studentRepository.findByAdvisorNameAndCourseIds(advisorName, courseId);
+        return studentRepository.findByAdvisorAndCourseId(advisorName, courseId);
     }
 
     @PostMapping
@@ -86,13 +85,13 @@ public class StudentController {
 
     @PostMapping("/{id}/courses")
     public ResponseEntity<?> addCourseToStudent(@PathVariable String id, @RequestBody String courseId) {
-        Optional<StudentEntity> student = studentRepository.findById(id);
+        Optional<StudentEntity> student = studentRepository.findByStudentId(id);
         if (student.isPresent()) {
             StudentEntity updatedStudent = student.get();
-            List<String> courses = updatedStudent.getCourseIds();
+            List<String> courses = updatedStudent.getCourseId();
             if (!courses.contains(courseId)) {
                 courses.add(courseId);
-                updatedStudent.setCourseIds(courses);
+                updatedStudent.setCourseId(courses);
                 studentRepository.save(updatedStudent);
                 return ResponseEntity.ok("Course added successfully to student.");
             }
@@ -103,42 +102,25 @@ public class StudentController {
 
     @PutMapping("/{id}/advisor")
     public ResponseEntity<?> updateStudentAdvisor(@PathVariable String id, @RequestBody String advisorName) {
-        Optional<StudentEntity> student = studentRepository.findById(id);
+        Optional<StudentEntity> student = studentRepository.findByStudentId(id);
         if (student.isPresent()) {
             StudentEntity updatedStudent = student.get();
-            updatedStudent.setAdvisorName(advisorName);
+            updatedStudent.setAdvisor(advisorName);
             studentRepository.save(updatedStudent);
             return ResponseEntity.ok("Advisor updated successfully.");
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found.");
     }
 
-    // @PostMapping("/{id}/session")
-    // public ResponseEntity<?> addStudentToSession(@PathVariable String id, @RequestBody String sessionId) {
-    //     Optional<StudentEntity> student = studentRepository.findById(id);
-    //     if (student.isPresent()) {
-    //         StudentEntity updatedStudent = student.get();
-    //         List<String> sessions = updatedStudent.getSessionIds();
-    //         if (!sessions.contains(sessionId)) {
-    //             sessions.add(sessionId);
-    //             updatedStudent.setSessionIds(sessions);
-    //             studentRepository.save(updatedStudent);
-    //             return ResponseEntity.ok("Student added to session successfully.");
-    //         }
-    //         return ResponseEntity.badRequest().body("Student is already in this session.");
-    //     }
-    //     return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found.");
-    // }
-
     @PostMapping("/course/{courseId}/students/{studentId}")
     public ResponseEntity<?> enrollStudentInCourse(@PathVariable String courseId, @PathVariable String studentId) {
-        Optional<StudentEntity> student = studentRepository.findById(studentId);
+        Optional<StudentEntity> student = studentRepository.findByStudentId(studentId);
         if (student.isPresent()) {
             StudentEntity updatedStudent = student.get();
-            List<String> courses = updatedStudent.getCourseIds();
+            List<String> courses = updatedStudent.getCourseId();
             if (!courses.contains(courseId)) {
                 courses.add(courseId);
-                updatedStudent.setCourseIds(courses);
+                updatedStudent.setCourseId(courses);
                 studentRepository.save(updatedStudent);
                 return ResponseEntity.ok("Student enrolled in course successfully.");
             }
@@ -149,12 +131,12 @@ public class StudentController {
 
     @PutMapping("/{id}")
     public ResponseEntity<StudentEntity> updateStudent(@PathVariable String id, @RequestBody StudentEntity studentDetails) {
-        return studentRepository.findById(id)
+        return studentRepository.findByStudentId(id)
         .map(student -> {
             student.setName(studentDetails.getName());
             student.setEmail(studentDetails.getEmail());
-            student.setAdvisorName(studentDetails.getAdvisorName());
-            student.setCourseIds(studentDetails.getCourseIds());
+            student.setAdvisor(studentDetails.getAdvisor());
+            student.setCourseId(studentDetails.getCourseId());
             return ResponseEntity.ok(studentRepository.save(student));
         })
         .orElse(ResponseEntity.notFound().build());
@@ -162,7 +144,7 @@ public class StudentController {
 
     // @PutMapping("/{id}/photo")
     // public ResponseEntity<?> updateStudentPhoto(@PathVariable String id, @RequestBody String photoUrl) {
-    //     Optional<StudentEntity> student = studentRepository.findById(id);
+    //     Optional<StudentEntity> student = studentRepository.findByStudentId(id);
     //     if (student.isPresent()) {
     //         StudentEntity updatedStudent = student.get();
     //         updatedStudent.setPhoto(photoUrl);
@@ -174,7 +156,7 @@ public class StudentController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteStudent(@PathVariable String id) {
-        return studentRepository.findById(id)
+        return studentRepository.findByStudentId(id)
         .map(student -> {
             studentRepository.delete(student);
             return ResponseEntity.ok().<Void>build();
@@ -184,7 +166,7 @@ public class StudentController {
 
     @PostMapping("/{id}/email")
     public ResponseEntity<?> sendEmailToStudent(@PathVariable String id, @RequestBody String emailContent) {
-        Optional<StudentEntity> student = studentRepository.findById(id);
+        Optional<StudentEntity> student = studentRepository.findByStudentId(id);
         if (student.isPresent()) {
             String subject = "Important Update"; // Customize the subject as needed
             emailService.sendEmail(student.get().getEmail(), subject, emailContent);

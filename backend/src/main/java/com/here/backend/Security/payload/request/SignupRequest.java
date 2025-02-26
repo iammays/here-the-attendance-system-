@@ -9,7 +9,7 @@ public class SignupRequest {
 
   @NotBlank
   @Size(min = 3, max = 20,message = "The Size of username mustbe between 3 and 20")
-  private String username;
+  private String name;
 
   @NotBlank
   @Size(max = 50)
@@ -33,7 +33,7 @@ public class SignupRequest {
 
   public SignupRequest(@NotBlank @Size(min = 3, max = 20) String username,
   @NotBlank @Size(max = 50) @Email String email, @NotBlank @Size(min = 6, max = 40) String password) {
-  this.username = username;
+  this.name = username;
   this.email = email;
   this.password = password;
 }
@@ -51,12 +51,12 @@ public class SignupRequest {
   //   this.age=getAge();
   // }
 
-  public String getUsername() {
-    return username;
+  public String getName() {
+    return name;
   }
 
-  public void setUsername(String username) {
-    this.username = username;
+  public void getName(String username) {
+    this.name = username;
   }
 
   public String getEmail() {
