@@ -1,14 +1,15 @@
 package com.here.backend.Security.payload.request;
 
 public class PasswordChangeRequest {
-    private String username;
+    private String name;
     private String currentPassword;
     private String newPassword;
-    public String getUsername() {
-        return username;
+
+    public String getName() {
+        return name;
     }
-    public void setUsername(String username) {
-        this.username = username;
+    public void getName(String username) {
+        this.name = username;
     }
     public String getCurrentPassword() {
         return currentPassword;

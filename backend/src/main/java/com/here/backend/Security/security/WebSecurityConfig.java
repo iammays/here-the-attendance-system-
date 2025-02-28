@@ -38,7 +38,7 @@ public class WebSecurityConfig {
 
   @Value("${frontend.url}")
   private String frontendUrl;
-  
+
   @Bean
   public AuthTokenFilter authenticationJwtTokenFilter() {
     return new AuthTokenFilter();
@@ -72,43 +72,37 @@ public class WebSecurityConfig {
     filterRegistrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
     return filterRegistrationBean;
   }
-  
-  // @Bean
-  // public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-  //     http.csrf(csrf -> csrf.disable())
-  //       .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-  //       .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-  //       .authorizeHttpRequests(auth ->
-  //           auth
-  //           .requestMatchers("/api/auth/**").permitAll()
-  //           .requestMatchers("/teacher/**").authenticated()
-  //           .requestMatchers(HttpMethod.PUT,"/teachers/**").authenticated()
-  //           .requestMatchers("/swagger-ui.html").permitAll()
-  //           .requestMatchers("/swagger-ui/**").permitAll()
-  //           .requestMatchers("/api-docs/**").permitAll()
-  //           .anyRequest().denyAll());
-
-  //     http.authenticationProvider(authenticationProvider());
-  //     http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-  //     return http.build();
-  // }
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http.csrf(csrf -> csrf.disable())
-      .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-      .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-      .authorizeHttpRequests(auth ->
-        auth
-        .requestMatchers("/api/auth/**").permitAll()  // السماح بمسارات التسجيل والدخول بدون مصادقة
-        .requestMatchers(HttpMethod.GET, "/teachers/**").authenticated() // السماح بـ GET للمصادق عليهم
-        .requestMatchers(HttpMethod.PUT, "/teachers/**").authenticated() // السماح بـ PUT للمصادق عليهم
-        .requestMatchers(HttpMethod.POST, "/teachers/**").authenticated() // السماح بـ POST للمصادق عليهم
-        .requestMatchers(HttpMethod.DELETE, "/teachers/**").authenticated() // السماح بـ DELETE للمصادق عليهم
-        .requestMatchers("/swagger-ui.html").permitAll()
-        .requestMatchers("/swagger-ui/**").permitAll()
-        .requestMatchers("/api-docs/**").permitAll()
-        .anyRequest().denyAll()); // رفض أي طلب غير مذكور
+    .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+    .authorizeHttpRequests(auth ->
+    auth
+      .requestMatchers("/api/auth/**").permitAll()
+      .requestMatchers("/api/excel/**").permitAll()
+
+      .requestMatchers("/teachers/**").authenticated()
+      // .requestMatchers(HttpMethod.GET, "/teachers/**").authenticated() 
+      // .requestMatchers(HttpMethod.PUT, "/teachers/**").authenticated()
+      // .requestMatchers(HttpMethod.POST, "/teachers/**").authenticated()
+      // .requestMatchers(HttpMethod.DELETE, "/teachers/**").authenticated()
+      .requestMatchers("/students/**").authenticated()
+      // .requestMatchers(HttpMethod.GET, "/courses/**").authenticated()
+      // .requestMatchers(HttpMethod.PUT, "/courses/**").authenticated()
+      // .requestMatchers(HttpMethod.POST, "/courses/**").authenticated()
+      // .requestMatchers(HttpMethod.DELETE, "/courses/**").authenticated()
+      .requestMatchers("/courses/**").authenticated()
+      // .requestMatchers(HttpMethod.GET, "/students/**").authenticated()
+      // .requestMatchers(HttpMethod.PUT, "/students/**").authenticated()
+      // .requestMatchers(HttpMethod.POST, "/students/**").authenticated()
+      // .requestMatchers(HttpMethod.DELETE, "/students/**").authenticated()
+
+      .requestMatchers("/swagger-ui.html").permitAll()
+      .requestMatchers("/swagger-ui/**").permitAll()
+      .requestMatchers("/api-docs/**").permitAll()
+      .anyRequest().denyAll()); 
 
     http.authenticationProvider(authenticationProvider());
     http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
@@ -117,18 +111,18 @@ public class WebSecurityConfig {
 
   @Bean
   CorsConfigurationSource corsConfigurationSource() {
-      CorsConfiguration configuration = new CorsConfiguration();
-      configuration.setAllowedOrigins(List.of(frontendUrl));
-      configuration.addAllowedHeader("*");
-      configuration.addAllowedMethod("*");
-      configuration.setAllowCredentials(true);
-      UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
-      urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", configuration);
-      return urlBasedCorsConfigurationSource;
+    CorsConfiguration configuration = new CorsConfiguration();
+    configuration.setAllowedOrigins(List.of(frontendUrl));
+    configuration.addAllowedHeader("*");
+    configuration.addAllowedMethod("*");
+    configuration.setAllowCredentials(true);
+    UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
+    urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", configuration);
+    return urlBasedCorsConfigurationSource;
   }
-  
+
   @Bean
   public PasswordEncoder passwordEncoder() {
-      return new BCryptPasswordEncoder();
+    return new BCryptPasswordEncoder();
   }
 }

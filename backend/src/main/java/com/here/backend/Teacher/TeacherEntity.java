@@ -4,45 +4,45 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "teachers") // Specify the MongoDB collection name
+@Document(collection = "teachers")
 public class TeacherEntity {
     @Id
-    private String id;         // Change to String to work with MongoDB
-    private String username;
+    private String teacherId;
+    private String name;
     private String email;
-    private List<String> courseIds;
-    private String password;;
+    private String password;
+    private List<String> courseId;
 
     // Constructor
     public TeacherEntity() {}
 
-    public TeacherEntity(String username, String email,String password) {
-        this.username = username;
+    public TeacherEntity(String name, String email, String password) {
+        this.name = name;
         this.email = email;
         this.password = password;
     }
 
-    // public TeacherEntity(String id, String username, String email) {
-    //     this.id = id;
-    //     this.username = username;
-    //     this.email = email;
-    // }
-
-    // Getters and Setters
-    public String getId() {
-        return id;
+    public TeacherEntity(String name, String email, String password, List<String> courseIds) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.courseId = courseIds;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public String getTeacherId() {
+        return teacherId;
+    }
+
+    public void setTeacherId(String teacherid) {
+        this.teacherId = teacherid;
     }
 
     public String getName() {
-        return username;
+        return name;
     }
 
-    public void setName(String username) {
-        this.username = username;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getEmail() {
@@ -53,19 +53,19 @@ public class TeacherEntity {
         this.email = email;
     }
 
-    public List<String> getCourseIds() {
-        return courseIds;
-    }
-
-    public void setCourseIds(List<String> courseIds) {
-        this.courseIds = courseIds;
-    }
-
     public String getPassword() {
         return password;
     }
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public List<String> getCourseId() {
+        return courseId; 
+    }
+
+    public void setCourseId(List<String> courseid) {
+        this.courseId = courseid;
     }
 }

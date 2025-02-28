@@ -2,17 +2,17 @@ package com.here.backend.Security.payload.request;
 
 public class PasswordValidationRequest {
 
-    private String username;
+    private String name;
     private String password;
 
     // Getters and setters
 
-    public String getUsername() {
-        return username;
+    public String getName() {
+        return name;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void getName(String username) {
+        this.name = username;
     }
 
     public String getPassword() {

@@ -1,74 +1,94 @@
 package com.here.backend.Course;
 
-import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "courses")
 public class CourseEntity {
     @Id
-    private String courseId;
-    private String courseName;
-    private String category;  // التصنيف (مثل "Humanity")
-    private String teacherId;
-    private List<String> roomIds;
-
+    private String CourseId;
+    private String name;
+    private String RoomId;
+    private String TeacherId;
+    private String startTime;
+    private String endTime;
+    private String day;
+    private String category;
+    
     public CourseEntity() {}
 
-    public CourseEntity(String name, String category, String teacherId) {
-        this.courseName = name;
+    public CourseEntity(String courseId, String name, String roomId, String teacherId, String startTime, String endTime, String day, String category) {
+        this.CourseId = courseId;
+        this.name = name;
+        this.RoomId = roomId;
+        this.TeacherId = teacherId;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.day = day;
         this.category = category;
-        this.teacherId = teacherId;
     }
 
-
-    // Constructor
-    public CourseEntity(String courseId, String courseName, String teacherId, List<String> roomIds) {
-        this.courseId = courseId;
-        this.courseName = courseName;
-        this.teacherId = teacherId;
-        this.roomIds = roomIds;
-    }
-
-    // Getters and Setters
     public String getCourseId() {
-        return courseId;
+        return CourseId;
     }
 
-    public void setCourseId(String courseId) {
-        this.courseId = courseId;
+    public void setCourseId(String courseid) {
+        CourseId = courseid;
     }
 
-    public String getCourseName() {
-        return courseName;
+    public String getName() {
+        return name;
     }
 
-    public void setCourseName(String courseName) {
-        this.courseName = courseName;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getRoomId() {
+        return RoomId;
+    }
+
+    public void setRoomId(String roomid) {
+        RoomId = roomid;
     }
 
     public String getTeacherId() {
-        return teacherId;
+        return TeacherId;
     }
 
-    public void setTeacherId(String teacherId) {
-        this.teacherId = teacherId;
+    public void setTeacherId(String teacherid) {
+        TeacherId = teacherid;
     }
 
-    public String getCategory() { 
-        return category; 
-    
+    public String getStartTime() {
+        return startTime;
     }
 
-    public void setCategory(String category) { 
-        this.category = category; 
+    public void setStartTime(String starttime) {
+        this.startTime = starttime;
     }
 
-    public List<String> getRoomIds() {
-        return roomIds;
+    public String getEndTime() {
+        return endTime;
     }
 
-    public void setRoomIds(List<String> roomIds) {
-        this.roomIds = roomIds;
+    public void setEndTime(String endtime) {
+        this.endTime = endtime;
+    }
+
+    public String getDay() {
+        return day;
+    }
+
+    public void setDay(String day) {
+        this.day = day;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

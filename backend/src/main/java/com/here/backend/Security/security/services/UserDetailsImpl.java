@@ -13,24 +13,24 @@ public class UserDetailsImpl implements UserDetails {
 
   private String id;
 
-  private String username;
+  private String name;
 
   private String email;
 
   @JsonIgnore
   private String password;
 
-  public UserDetailsImpl(String id, String username2, String email2, String password2) {
+  public UserDetailsImpl(String id, String name, String email, String password) {
     this.id = id;
-    this.username = username2;
-    this.email = email2;
-    this.password = password2;
+    this.name = name;
+    this.email = email;
+    this.password = password;
   }
 
   public static UserDetailsImpl build(TeacherEntity user) {
 
     return new UserDetailsImpl(
-      user.getId(), 
+      user.getTeacherId(), 
       user.getName(), 
       user.getEmail(),
       user.getPassword())
@@ -55,9 +55,14 @@ public class UserDetailsImpl implements UserDetails {
     return password;
   }
 
+  // @Override
+  public String getName() {
+    return name;
+  }
+
   @Override
   public String getUsername() {
-    return username;
+    return name;
   }
 
   @Override
