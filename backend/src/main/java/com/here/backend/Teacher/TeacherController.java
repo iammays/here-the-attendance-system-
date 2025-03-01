@@ -3,6 +3,7 @@ package com.here.backend.Teacher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import com.here.backend.Course.CourseEntity;
 import com.here.backend.Course.CourseRepository;
 import com.here.backend.Security.payload.response.MessageResponse;
@@ -32,33 +33,19 @@ public class TeacherController {
         this.courseRepository = courseRepository;
     }
 
-    // get all teachers ✅
-    // get all teacher for a course
-    // get teacher by id //401
-    // get teacher by name //401
-    // get teacher by email //---
-    // get teacher by course
-    // get teacher with courses ✅
-    // get teacher courses
-    // create teacher ✅
-    // create course for teacher by id ✅
-    // update teacher by id
-    // update teacher password by id
-    // delete teacher by id
-    // get username and pass for test
+    // get all teachers ✅  getAllTeachers()
+    // get teacher by id ✅  getTeacherById()
+    // get teacher by name ✅ getTeacherByName()
+    // get all teachers for a course ✅ getTeachersByCourseId()
+    // get teacher by email ✅ getTeacherByEmail()
+    // get teacher with courses ✅ getTeacherWithCourses()
+    // get all courses for a teacher ✅ getAllCoursesForTeacher()
+    // update teacher password by id ✅ updateTeacherPassword()
 
-    @GetMapping //✅
+
+    @GetMapping
     public List<TeacherEntity> getAllTeachers() {
         return teacherRepository.findAll();
-    }
-
-    @GetMapping("/course/{courseId}/all")
-    public ResponseEntity<?> getAllTeachersForCourse(@PathVariable String courseId) {
-        List<TeacherEntity> teachers = teacherRepository.findByCourseId(courseId);
-        if (teachers.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No teachers found for this course.");
-        }
-        return ResponseEntity.ok(teachers);
     }
 
     @GetMapping("/Teacherid/{id}")
@@ -76,89 +63,81 @@ public class TeacherController {
         return ResponseEntity.ok(teachers);
     }
 
-    @GetMapping("/email/{email}")
-    public ResponseEntity<Map<String, Object>> getTeacherByEmail(@RequestParam String email) {
-        Optional<TeacherEntity> teacher = teacherRepository.findByEmail(email);
-        if (teacher.isPresent()) {
-            return ResponseEntity.ok(Collections.singletonMap("teacher", teacher.get()));
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-        .body(Collections.singletonMap("message", "Teacher not found with this email."));
-    }
-
-    @GetMapping("/course/{courseId}")
-    public ResponseEntity<?> getTeachersByCourse(@PathVariable String courseId) {
-        List<TeacherEntity> teachers = teacherRepository.findByCourseId(courseId);
+    @GetMapping("/course/{courseId}/all")
+    public ResponseEntity<?> getTeachersByCourseId(@PathVariable String courseId) {
+        Set<TeacherEntity> teachers = teacherRepository.findByCourseId(courseId);
         if (teachers.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No teachers found for this course.");
         }
         return ResponseEntity.ok(teachers);
     }
 
-    @GetMapping("/{id}/courses/all")
-    public ResponseEntity<?> getTeacherWithCourses(@PathVariable String id) {
-        Optional<TeacherEntity> teacher = teacherRepository.findByTeacherId(id);
-        if (teacher.isPresent()) {
-            List<CourseEntity> courses = courseRepository.findByTeacherId(id);
-            Map<String, Object> response = new HashMap<>();
-            response.put("teacher", teacher.get());
-            response.put("courses", courses);
-            return ResponseEntity.ok(response);
-        }
-        return ResponseEntity.notFound().build();
+    // @GetMapping("/email/{email}")
+    // public ResponseEntity<Map<String, Object>> getTeacherByEmail(@PathVariable String email) {
+    //     Optional<TeacherEntity> teacher = teacherRepository.findByEmail(email);
+    //     if (teacher.isPresent()) {
+    //         return ResponseEntity.ok(Collections.singletonMap("teacher", teacher.get()));
+    //     }
+    //     return ResponseEntity.status(HttpStatus.NOT_FOUND)
+    //     .body(Collections.singletonMap("message", "Teacher not found with this email."));
+    // }
+
+    @GetMapping("/email/{email}")//course is empty
+    public ResponseEntity<?> getTeacherByEmail(@PathVariable String email) {
+        TeacherEntity teacher = teacherRepository.findByEmail(email)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Teacher not found"));
+
+        List<CourseEntity> courses = courseRepository.findByTeacherId(teacher.getTeacherId());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("teacher", teacher);
+        response.put("courses", courses);
+
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{id}/courses")
-    public ResponseEntity<?> getTeacherCourses(@PathVariable String id) {
-        List<CourseEntity> courses = courseRepository.findByTeacherId(id);
-        if (courses.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No courses found for this teacher.");
+    @GetMapping("/courses/{teacherId}")//empty
+    public ResponseEntity<?> getAllCoursesForTeacher(@PathVariable String teacherId) {
+        // البحث عن الأستاذ، ورمي استثناء إن لم يكن موجودًا
+        TeacherEntity teacher = teacherRepository.findByTeacherId(teacherId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Teacher not found"));
+    
+        // جلب جميع الكورسات التي يدرسها الأستاذ
+        List<CourseEntity> courses = courseRepository.findByTeacherId(teacherId);
+    
+        // تسجيل عدد الكورسات المسترجعة
+        System.out.println("Teacher ID: " + teacherId);
+        System.out.println("Number of courses found: " + courses.size());
+    
+        // تسجيل تفاصيل الكورسات
+        for (CourseEntity course : courses) {
+            System.out.println("Course ID: " + course.getCourseId() + ", Teacher ID: " + course.getTeacherId());
         }
+    
+        // التحقق من وجود كورسات
+        if (courses.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No courses found for this teacher.");
+        }
+    
         return ResponseEntity.ok(courses);
     }
 
-    // @PostMapping
-    // public TeacherEntity createTeacher(@RequestBody TeacherEntity teacher) {
-    //     return teacherRepository.save(teacher);
-    // }
+    @GetMapping("/{id}/courses") //empty 204
+    public ResponseEntity<?> getTeacherWithCourses(@PathVariable String id) {
+        // البحث عن الأستاذ، ورمي استثناء إن لم يكن موجودًا
+        TeacherEntity teacher = teacherRepository.findByTeacherId(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Teacher not found"));
 
-    @PostMapping("/{id}/courses")
-    public ResponseEntity<?> createCourseForTeacher(@PathVariable String id, 
-    @RequestBody CourseEntity course, @AuthenticationPrincipal UserDetailsImpl currentUser) {
-        if (!currentUser.getId().equals(id)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error: You are not allowed to create a course for this teacher.");
-        }
+        // جلب جميع الكورسات التي يدرسها الأستاذ
+        List<CourseEntity> courses = courseRepository.findByTeacherId(id);
 
-        Optional<TeacherEntity> teacher = teacherRepository.findByTeacherId(id);
-        if (teacher.isPresent()) {
-            course.setTeacherId(id);
-            CourseEntity savedCourse = courseRepository.save(course);
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedCourse);
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: Teacher not found.");
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateTeacher(@PathVariable String id, @RequestBody TeacherEntity updatedTeacher,
-    @AuthenticationPrincipal UserDetailsImpl currentUser) {
-        if (!currentUser.getId().equals(id)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error: You are not allowed to update this profile.");
-        }
-
-        Optional<TeacherEntity> existingTeacher = teacherRepository.findByTeacherId(id);
-        if (existingTeacher.isPresent()) {
-            TeacherEntity teacher = existingTeacher.get();
-            teacher.setName(updatedTeacher.getName());
-            teacher.setEmail(updatedTeacher.getEmail());
-            teacher.setPassword(encoder.encode(updatedTeacher.getPassword()));
-            teacherRepository.save(teacher);
-            return ResponseEntity.ok(teacher);
-        }
-        return ResponseEntity.notFound().build();
+        // إنشاء استجابة تحتوي على الأستاذ والكورسات
+        return ResponseEntity.ok(Map.of("teacher", teacher, "courses", courses));
     }
 
     @PutMapping("/{id}/password")
-    public ResponseEntity<?> updateTeacherPassword(@PathVariable String id, @RequestBody String newPassword, 
+    public ResponseEntity<?> updateTeacherPassword(@PathVariable String id, 
+    @RequestBody Map<String, String> passwords, 
     @AuthenticationPrincipal UserDetailsImpl currentUser) {
         if (!currentUser.getId().equals(id)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error: You are not allowed to update this password.");
@@ -167,23 +146,18 @@ public class TeacherController {
         Optional<TeacherEntity> teacher = teacherRepository.findByTeacherId(id);
         if (teacher.isPresent()) {
             TeacherEntity updatedTeacher = teacher.get();
+
+            String oldPassword = passwords.get("oldPassword");
+            String newPassword = passwords.get("newPassword");
+
+            // التحقق من الباسوورد القديم قبل التحديث
+            if (!encoder.matches(oldPassword, updatedTeacher.getPassword())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: Incorrect old password.");
+            }
+
             updatedTeacher.setPassword(encoder.encode(newPassword));
             teacherRepository.save(updatedTeacher);
             return ResponseEntity.ok("Password updated successfully.");
-        }
-        return ResponseEntity.notFound().build();
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteTeacher(@PathVariable String id, 
-    @AuthenticationPrincipal UserDetailsImpl currentUser) {
-        if (!currentUser.getId().equals(id)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error: You are not allowed to delete this account.");
-        }
-
-        if (teacherRepository.existsById(id)) {
-            teacherRepository.deleteById(id);
-            return ResponseEntity.ok(new MessageResponse("Teacher deleted successfully!"));
         }
         return ResponseEntity.notFound().build();
     }

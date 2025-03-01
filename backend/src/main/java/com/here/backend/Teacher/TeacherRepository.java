@@ -4,9 +4,12 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface TeacherRepository extends MongoRepository<TeacherEntity, String> {
+
+
     Optional<TeacherEntity> findByName(String username);
     Optional<TeacherEntity> findByTeacherId(String id);
     boolean existsByName(String username);
@@ -14,5 +17,5 @@ public interface TeacherRepository extends MongoRepository<TeacherEntity, String
     Optional<TeacherEntity> findByEmail(String email);
     Optional<TeacherEntity> findByEmailAndPassword(String email, String password);
     List<TeacherEntity> findByNameContainingIgnoreCase(String name);
-    List<TeacherEntity> findByCourseId(String courseId);
+    Set<TeacherEntity> findByCourseId(String courseId);
 }

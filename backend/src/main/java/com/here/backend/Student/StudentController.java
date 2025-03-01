@@ -4,11 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.here.backend.Emails.EmailService;
+import com.here.backend.Course.CourseEntity;
+import com.here.backend.Course.CourseRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.Optional;
-import java.util.List;
+
+import java.util.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -19,30 +20,47 @@ public class StudentController {
     @Autowired
     private StudentRepository studentRepository;
     @Autowired
-    private EmailService emailService;
+    private CourseRepository courseRepository;
+    
+    public StudentController(StudentRepository studentRepository, CourseRepository courseRepository) {
+        this.studentRepository = studentRepository;
+        this.courseRepository = courseRepository; 
+    }
 
-    // get student by id ✅
-    // get all students ✅
-    // get all students in a specific course ✅
-    // get all courses for a student ✅
-    // get all students with advisors ✅
-    // get all students with advisors and courses ✅
-    // Create a new student ✅
-    // add new course for student by id //401
-    // add new advisor for student by id --- update advisor name
-    // add new student in course
-    // update student by id
-    // update student photo by id
-    // delete student by id
-    // send email to student by id
-    // send email to all students
-    // get the number of abcense
+        // get student by id ✅ getStudentById()  
+        // get student by name ✅ getStudentByName()
+        // get student by email ✅ getStudentByEmail()
+        // get all students ✅ getAllStudents()
+        // get all students in a specific course ✅ getStudentsByCourse()
 
-    @GetMapping("/{id}")
+        // get all courses for a student ✅ getAllCoursesForStudent()//empty array
+
+        // get all students with advisorID ✅ getStudentsByAdvisor()
+
+        // get all students with advisors and courses ✅ getStudentsByAdvisorAndCourse()//empty array
+
+
+        // Create a new student ✅ createStudent()
+        // Add a student to a course addStudentInCourse()
+
+    @GetMapping("/id/{id}")
     public ResponseEntity<StudentEntity> getStudentById(@PathVariable String id) {
         return studentRepository.findByStudentId(id)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/name/{name}")
+    public ResponseEntity<List<StudentEntity>> getStudentByName(@PathVariable String name) {
+        List<StudentEntity> students = studentRepository.findByName(name);
+        return students.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(students);
+    }
+
+    @GetMapping("/email/{email}")
+    public ResponseEntity<StudentEntity> getStudentByEmail(@PathVariable String email) {
+        Optional<StudentEntity> student = studentRepository.findByEmail(email).stream().findFirst();
+        return student.map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping
@@ -55,17 +73,29 @@ public class StudentController {
         return studentRepository.findByCourseId(courseId);
     }
 
-    @GetMapping("/{id}/courses")
-    public ResponseEntity<?> getAllCoursesForStudent(@PathVariable String id) {
-        Optional<StudentEntity> student = studentRepository.findByStudentId(id);
+    // @GetMapping("/{id}/courses")
+    // public ResponseEntity<?> getAllCoursesForStudent(@PathVariable String id) {
+    //     Optional<StudentEntity> studentOpt = studentRepository.findByStudentId(id);
+    
+    //     if (studentOpt.isPresent()) {
+    //         StudentEntity student = studentOpt.get();
+    //         List<CourseEntity> courses = courseRepository.findByCourseId(student.getCourseId());
+    //         return ResponseEntity.ok(courses);
+    //     }
+    
+    //     return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found.");
+    // }
 
-        if (student.isPresent()) {
-            List<String> courseIds = student.get().getCourseId();
-            return ResponseEntity.ok(courseIds);
+    @GetMapping("/{id}/courses")
+    public List<CourseEntity> getAllCoursesForStudent(@PathVariable String id) {
+        Optional<StudentEntity> studentOpt = studentRepository.findByStudentId(id);
+
+        if (studentOpt.isPresent()) {
+            StudentEntity student = studentOpt.get();
+            return courseRepository.findByCourseId(student.getCourseId());
         }
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-        .body("Student not found with ID: " + id);
+        return Collections.emptyList(); // إرجاع قائمة فارغة بدلًا من HTTP status
     }
 
     @GetMapping("/advisor/{advisorName}")
@@ -83,37 +113,8 @@ public class StudentController {
         return studentRepository.save(studentEntity);
     }
 
-    @PostMapping("/{id}/courses")
-    public ResponseEntity<?> addCourseToStudent(@PathVariable String id, @RequestBody String courseId) {
-        Optional<StudentEntity> student = studentRepository.findByStudentId(id);
-        if (student.isPresent()) {
-            StudentEntity updatedStudent = student.get();
-            List<String> courses = updatedStudent.getCourseId();
-            if (!courses.contains(courseId)) {
-                courses.add(courseId);
-                updatedStudent.setCourseId(courses);
-                studentRepository.save(updatedStudent);
-                return ResponseEntity.ok("Course added successfully to student.");
-            }
-            return ResponseEntity.badRequest().body("Student is already enrolled in this course.");
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found.");
-    }
-
-    @PutMapping("/{id}/advisor")
-    public ResponseEntity<?> updateStudentAdvisor(@PathVariable String id, @RequestBody String advisorName) {
-        Optional<StudentEntity> student = studentRepository.findByStudentId(id);
-        if (student.isPresent()) {
-            StudentEntity updatedStudent = student.get();
-            updatedStudent.setAdvisor(advisorName);
-            studentRepository.save(updatedStudent);
-            return ResponseEntity.ok("Advisor updated successfully.");
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found.");
-    }
-
     @PostMapping("/course/{courseId}/students/{studentId}")
-    public ResponseEntity<?> enrollStudentInCourse(@PathVariable String courseId, @PathVariable String studentId) {
+    public ResponseEntity<?> addStudentInCourse(@PathVariable String courseId, @PathVariable String studentId) {
         Optional<StudentEntity> student = studentRepository.findByStudentId(studentId);
         if (student.isPresent()) {
             StudentEntity updatedStudent = student.get();
@@ -127,61 +128,5 @@ public class StudentController {
             return ResponseEntity.badRequest().body("Student is already enrolled in this course.");
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found.");
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<StudentEntity> updateStudent(@PathVariable String id, @RequestBody StudentEntity studentDetails) {
-        return studentRepository.findByStudentId(id)
-        .map(student -> {
-            student.setName(studentDetails.getName());
-            student.setEmail(studentDetails.getEmail());
-            student.setAdvisor(studentDetails.getAdvisor());
-            student.setCourseId(studentDetails.getCourseId());
-            return ResponseEntity.ok(studentRepository.save(student));
-        })
-        .orElse(ResponseEntity.notFound().build());
-    }
-
-    // @PutMapping("/{id}/photo")
-    // public ResponseEntity<?> updateStudentPhoto(@PathVariable String id, @RequestBody String photoUrl) {
-    //     Optional<StudentEntity> student = studentRepository.findByStudentId(id);
-    //     if (student.isPresent()) {
-    //         StudentEntity updatedStudent = student.get();
-    //         updatedStudent.setPhoto(photoUrl);
-    //         studentRepository.save(updatedStudent);
-    //         return ResponseEntity.ok("Student photo updated successfully");
-    //     }
-    //     return ResponseEntity.notFound().build();
-    // }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteStudent(@PathVariable String id) {
-        return studentRepository.findByStudentId(id)
-        .map(student -> {
-            studentRepository.delete(student);
-            return ResponseEntity.ok().<Void>build();
-        })
-        .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PostMapping("/{id}/email")
-    public ResponseEntity<?> sendEmailToStudent(@PathVariable String id, @RequestBody String emailContent) {
-        Optional<StudentEntity> student = studentRepository.findByStudentId(id);
-        if (student.isPresent()) {
-            String subject = "Important Update"; // Customize the subject as needed
-            emailService.sendEmail(student.get().getEmail(), subject, emailContent);
-            return ResponseEntity.ok("Email sent successfully to " + student.get().getName());
-        }
-        return ResponseEntity.notFound().build();
-    }
-
-    @PostMapping("/email")
-    public ResponseEntity<?> sendEmailToAllStudents(@RequestBody String emailContent) {
-        List<StudentEntity> students = studentRepository.findAll();
-        for (StudentEntity student : students) {
-            String subject = "Important Update"; // Customize the subject as needed
-            emailService.sendEmail(student.getEmail(), subject, emailContent);
-        }
-        return ResponseEntity.ok("Email sent successfully to all students");
     }
 }
