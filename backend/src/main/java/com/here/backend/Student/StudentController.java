@@ -8,7 +8,6 @@ import com.here.backend.Course.CourseEntity;
 import com.here.backend.Course.CourseRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -69,7 +68,7 @@ public class StudentController {
     }
 
     @GetMapping("/course/{courseId}")
-    public List<StudentEntity> getStudentsByCourse(@PathVariable String courseId) {
+    public List<StudentEntity> getStudentsByCourse(@PathVariable String  courseId) {
         return studentRepository.findByCourseId(courseId);
     }
 
@@ -86,16 +85,34 @@ public class StudentController {
     //     return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found.");
     // }
 
-    @GetMapping("/{id}/courses")
+    // @GetMapping("/{id}/courses")
+    // public List<CourseEntity> getAllCoursesForStudent(@PathVariable String id) {
+    //     Optional<StudentEntity> studentOpt = studentRepository.findByStudentId(id);
+
+    //     if (studentOpt.isPresent()) {
+    //         StudentEntity student = studentOpt.get();
+    //         return courseRepository.findByCourseId(student.getCourseId());
+    //     }
+
+    //     return Collections.emptyList();
+    // }
+
+    @GetMapping("/{id}/courses")//empty array
     public List<CourseEntity> getAllCoursesForStudent(@PathVariable String id) {
         Optional<StudentEntity> studentOpt = studentRepository.findByStudentId(id);
 
         if (studentOpt.isPresent()) {
             StudentEntity student = studentOpt.get();
-            return courseRepository.findByCourseId(student.getCourseId());
+            List<String> courseIds = student.getCourseId();
+
+            if (courseIds == null || courseIds.isEmpty()) {
+                return Collections.emptyList();
+            }
+
+            return courseRepository.findByCourseId(courseIds); 
         }
 
-        return Collections.emptyList(); // إرجاع قائمة فارغة بدلًا من HTTP status
+        return Collections.emptyList();
     }
 
     @GetMapping("/advisor/{advisorName}")
@@ -103,9 +120,14 @@ public class StudentController {
         return studentRepository.findByAdvisor(advisorName);
     }
 
-    @GetMapping("/advisor/{advisorName}/course/{courseId}")
+    // @GetMapping("/advisor/{advisorName}/course/{courseId}")
+    // public List<StudentEntity> getStudentsByAdvisorAndCourse(@PathVariable String advisorName, @PathVariable String courseId) {
+    //     return studentRepository.findByAdvisorAndCourseId(advisorName, courseId);
+    // }
+
+    @GetMapping("/advisor/{advisorName}/course/{courseId}")//empty array
     public List<StudentEntity> getStudentsByAdvisorAndCourse(@PathVariable String advisorName, @PathVariable String courseId) {
-        return studentRepository.findByAdvisorAndCourseId(advisorName, courseId);
+        return studentRepository.findByCourseIdAndAdvisor(courseId, advisorName);
     }
 
     @PostMapping

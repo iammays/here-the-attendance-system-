@@ -14,7 +14,6 @@ public class StudentEntity {
     private String advisor;
     private List<String> courseId;
 
-    // Constructors
     public StudentEntity() {}
 
     public StudentEntity(String studentId, String name, String email, String advisorName, List<String> courseId) {

@@ -10,6 +10,7 @@ public class CourseEntity {
     private String name;
     private String roomId;
     private String teacherId;
+    private String studentId;
     private String startTime;
     private String endTime;
     private String day;
@@ -58,6 +59,14 @@ public class CourseEntity {
 
     public void setTeacherId(String teacherid) {
         teacherId = teacherid;
+    }
+
+    public String getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(String studentid) {
+        studentId = studentid;
     }
 
     public String getStartTime() {
