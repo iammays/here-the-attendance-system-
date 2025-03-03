@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import com.here.backend.Course.CourseEntity;
 import com.here.backend.Course.CourseRepository;
-import com.here.backend.Security.payload.response.MessageResponse;
 import com.here.backend.Security.security.services.UserDetailsImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +81,7 @@ public class TeacherController {
     //     .body(Collections.singletonMap("message", "Teacher not found with this email."));
     // }
 
-    @GetMapping("/email/{email}")//course is empty
+    @GetMapping("/email/{email}")
     public ResponseEntity<?> getTeacherByEmail(@PathVariable String email) {
         TeacherEntity teacher = teacherRepository.findByEmail(email)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Teacher not found"));
@@ -96,7 +95,7 @@ public class TeacherController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/courses/{teacherId}")//empty
+    @GetMapping("/courses/{teacherId}")
     public ResponseEntity<?> getAllCoursesForTeacher(@PathVariable String teacherId) {
         // البحث عن الأستاذ، ورمي استثناء إن لم يكن موجودًا
         TeacherEntity teacher = teacherRepository.findByTeacherId(teacherId)
@@ -122,7 +121,7 @@ public class TeacherController {
         return ResponseEntity.ok(courses);
     }
 
-    @GetMapping("/{id}/courses") //empty 204
+    @GetMapping("/{id}/courses")
     public ResponseEntity<?> getTeacherWithCourses(@PathVariable String id) {
         // البحث عن الأستاذ، ورمي استثناء إن لم يكن موجودًا
         TeacherEntity teacher = teacherRepository.findByTeacherId(id)

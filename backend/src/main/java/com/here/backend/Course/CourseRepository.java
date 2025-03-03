@@ -14,7 +14,8 @@ public interface CourseRepository extends MongoRepository<CourseEntity, String> 
 
     Optional<CourseEntity> findByCourseId(String courseId);
 
-    List<CourseEntity> findByCourseId(List<String> courseId);
+    // List<CourseEntity> findByCourseId(List<String> courseId);
+    List<CourseEntity> findByCourseIdIn(List<String> courseIds);
 
     List<CourseEntity> findByName(String courseName);
 

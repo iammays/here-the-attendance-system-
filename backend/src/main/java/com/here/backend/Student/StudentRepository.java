@@ -15,8 +15,4 @@ public interface StudentRepository extends MongoRepository<StudentEntity, String
     List<StudentEntity> findByEmail(String email);
 
     Optional<StudentEntity> findByStudentId(String id);
-
-    List<StudentEntity> findByAdvisorAndCourseId(String advisorName, String courseId);
-
-    List<StudentEntity> findByCourseIdAndAdvisor(String courseId, String advisorName);
 }

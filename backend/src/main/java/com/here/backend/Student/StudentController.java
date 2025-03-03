@@ -29,14 +29,11 @@ public class StudentController {
         // get student by id ✅ getStudentById()  
         // get student by name ✅ getStudentByName()
         // get student by email ✅ getStudentByEmail()
+        // get all students by teacher  getStudentsByTeacher()
         // get all students ✅ getAllStudents()
         // get all students in a specific course ✅ getStudentsByCourse()
-
-        // get all courses for a student ✅ getAllCoursesForStudent()//empty array
-
+        // get all courses for a student ✅ getAllCoursesForStudent()
         // get all students with advisorID ✅ getStudentsByAdvisor()
-
-        // get all students with advisors and courses ✅ getStudentsByAdvisorAndCourse()//empty array
 
 
         // Create a new student ✅ createStudent()
@@ -72,62 +69,31 @@ public class StudentController {
         return studentRepository.findByCourseId(courseId);
     }
 
-    // @GetMapping("/{id}/courses")
-    // public ResponseEntity<?> getAllCoursesForStudent(@PathVariable String id) {
-    //     Optional<StudentEntity> studentOpt = studentRepository.findByStudentId(id);
-    
-    //     if (studentOpt.isPresent()) {
-    //         StudentEntity student = studentOpt.get();
-    //         List<CourseEntity> courses = courseRepository.findByCourseId(student.getCourseId());
-    //         return ResponseEntity.ok(courses);
-    //     }
-    
-    //     return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found.");
-    // }
-
-    // @GetMapping("/{id}/courses")
-    // public List<CourseEntity> getAllCoursesForStudent(@PathVariable String id) {
-    //     Optional<StudentEntity> studentOpt = studentRepository.findByStudentId(id);
-
-    //     if (studentOpt.isPresent()) {
-    //         StudentEntity student = studentOpt.get();
-    //         return courseRepository.findByCourseId(student.getCourseId());
-    //     }
-
-    //     return Collections.emptyList();
-    // }
-
-    @GetMapping("/{id}/courses")//empty array
+    @GetMapping("/{id}/courses")
     public List<CourseEntity> getAllCoursesForStudent(@PathVariable String id) {
-        Optional<StudentEntity> studentOpt = studentRepository.findByStudentId(id);
-
-        if (studentOpt.isPresent()) {
-            StudentEntity student = studentOpt.get();
-            List<String> courseIds = student.getCourseId();
-
+        Optional<StudentEntity> student = studentRepository.findByStudentId(id);
+    
+        if (student.isPresent()) {
+            List<String> courseIds = student.get().getCourseId();
+    
+            // System.out.println("Course IDs: " + courseIds); 
+    
             if (courseIds == null || courseIds.isEmpty()) {
                 return Collections.emptyList();
             }
-
-            return courseRepository.findByCourseId(courseIds); 
+    
+            List<CourseEntity> courses = courseRepository.findByCourseIdIn(courseIds); 
+            // System.out.println("Courses found: " + courses); 
+    
+            return courses;
         }
-
+    
         return Collections.emptyList();
     }
 
     @GetMapping("/advisor/{advisorName}")
     public List<StudentEntity> getStudentsByAdvisor(@PathVariable String advisorName) {
         return studentRepository.findByAdvisor(advisorName);
-    }
-
-    // @GetMapping("/advisor/{advisorName}/course/{courseId}")
-    // public List<StudentEntity> getStudentsByAdvisorAndCourse(@PathVariable String advisorName, @PathVariable String courseId) {
-    //     return studentRepository.findByAdvisorAndCourseId(advisorName, courseId);
-    // }
-
-    @GetMapping("/advisor/{advisorName}/course/{courseId}")//empty array
-    public List<StudentEntity> getStudentsByAdvisorAndCourse(@PathVariable String advisorName, @PathVariable String courseId) {
-        return studentRepository.findByCourseIdAndAdvisor(courseId, advisorName);
     }
 
     @PostMapping
