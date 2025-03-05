@@ -9,7 +9,6 @@ import java.util.Set;
 @Repository
 public interface TeacherRepository extends MongoRepository<TeacherEntity, String> {
 
-
     Optional<TeacherEntity> findByName(String username);
     Optional<TeacherEntity> findByTeacherId(String id);
     boolean existsByName(String username);

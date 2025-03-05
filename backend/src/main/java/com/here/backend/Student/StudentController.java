@@ -29,7 +29,6 @@ public class StudentController {
         // get student by id ✅ getStudentById()  
         // get student by name ✅ getStudentByName()
         // get student by email ✅ getStudentByEmail()
-        // get all students by teacher  getStudentsByTeacher()
         // get all students ✅ getAllStudents()
         // get all students in a specific course ✅ getStudentsByCourse()
         // get all courses for a student ✅ getAllCoursesForStudent()

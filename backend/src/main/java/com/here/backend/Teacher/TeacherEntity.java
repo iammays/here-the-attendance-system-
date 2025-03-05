@@ -18,7 +18,6 @@ public class TeacherEntity {
     private String password;
     private List<String> courseId;
 
-    // Constructors
     public TeacherEntity() {}
 
     public TeacherEntity(String name, String email, String password) {
@@ -34,7 +33,6 @@ public class TeacherEntity {
         this.courseId = courseId;
     }
 
-    // Getters and Setters
     public String getTeacherId() {
         return teacherId;
     }

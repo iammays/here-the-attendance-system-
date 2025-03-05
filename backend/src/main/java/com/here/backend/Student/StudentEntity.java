@@ -10,6 +10,7 @@ public class StudentEntity {
     @Id
     private String studentId;
     private String name;
+    private String teacherId;
     private String email;
     private String advisor;
     private List<String> courseId;
@@ -38,6 +39,14 @@ public class StudentEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getTeacherId() {
+        return teacherId;
+    }
+
+    public void setTeacherId(String teacher_id) {
+        teacherId = teacher_id;
     }
 
     public String getEmail() {

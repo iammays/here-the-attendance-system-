@@ -3,7 +3,6 @@ package com.here.backend.Course;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.here.backend.Student.StudentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.*;
@@ -16,12 +15,9 @@ public class CourseController {
     private static final Logger logger = LoggerFactory.getLogger(CourseController.class);
     @Autowired
     private CourseRepository courseRepository;
-    @Autowired
-    private StudentRepository studentRepository;
     
-        public CourseController(CourseRepository courseRepository, StudentRepository studentRepository) {
+        public CourseController(CourseRepository courseRepository) {
             this.courseRepository = courseRepository;
-            this.studentRepository = studentRepository;
         }
 
         // get all courses ✅ getAllCourses()
@@ -95,7 +91,6 @@ public class CourseController {
         return (ResponseEntity<Integer>) courseRepository.findByCourseId(id)
             .map(course -> {
                 try {
-                    // تحويل startTime و endTime إلى دقائق
                     int startMinutes = convertTimeToMinutes(course.getStartTime());
                     int endMinutes = convertTimeToMinutes(course.getEndTime());
                     int duration = endMinutes - startMinutes;

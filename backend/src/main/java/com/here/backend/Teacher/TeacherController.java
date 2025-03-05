@@ -97,23 +97,18 @@ public class TeacherController {
 
     @GetMapping("/courses/{teacherId}")
     public ResponseEntity<?> getAllCoursesForTeacher(@PathVariable String teacherId) {
-        // البحث عن الأستاذ، ورمي استثناء إن لم يكن موجودًا
         TeacherEntity teacher = teacherRepository.findByTeacherId(teacherId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Teacher not found"));
-    
-        // جلب جميع الكورسات التي يدرسها الأستاذ
+
         List<CourseEntity> courses = courseRepository.findByTeacherId(teacherId);
-    
-        // تسجيل عدد الكورسات المسترجعة
+
         System.out.println("Teacher ID: " + teacherId);
         System.out.println("Number of courses found: " + courses.size());
-    
-        // تسجيل تفاصيل الكورسات
+
         for (CourseEntity course : courses) {
             System.out.println("Course ID: " + course.getCourseId() + ", Teacher ID: " + course.getTeacherId());
         }
     
-        // التحقق من وجود كورسات
         if (courses.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No courses found for this teacher.");
         }
@@ -123,14 +118,11 @@ public class TeacherController {
 
     @GetMapping("/{id}/courses")
     public ResponseEntity<?> getTeacherWithCourses(@PathVariable String id) {
-        // البحث عن الأستاذ، ورمي استثناء إن لم يكن موجودًا
         TeacherEntity teacher = teacherRepository.findByTeacherId(id)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Teacher not found"));
 
-        // جلب جميع الكورسات التي يدرسها الأستاذ
         List<CourseEntity> courses = courseRepository.findByTeacherId(id);
 
-        // إنشاء استجابة تحتوي على الأستاذ والكورسات
         return ResponseEntity.ok(Map.of("teacher", teacher, "courses", courses));
     }
 
@@ -149,7 +141,6 @@ public class TeacherController {
             String oldPassword = passwords.get("oldPassword");
             String newPassword = passwords.get("newPassword");
 
-            // التحقق من الباسوورد القديم قبل التحديث
             if (!encoder.matches(oldPassword, updatedTeacher.getPassword())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: Incorrect old password.");
             }
