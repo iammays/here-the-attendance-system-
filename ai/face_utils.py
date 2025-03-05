@@ -1,0 +1,32 @@
+# face_utils.py
+import numpy as np
+from scipy.spatial.distance import cosine
+import os
+
+def load_student_embeddings(students_collection):
+    """تحميل تضمينات الطلاب من قاعدة البيانات"""
+    students_embeddings = {}
+    students = students_collection.find({}, {"name": 1, "embedding": 1})
+    for student in students:
+        if "embedding" in student:
+            students_embeddings[student["name"]] = np.array(student["embedding"], dtype=np.float32)
+    print(f"✅ Loaded {len(students_embeddings)} student embeddings.")
+    return students_embeddings
+
+def recognize_face(face_embedding, students_embeddings, threshold=0.5):
+    """التعرف على الوجه بناءً على التضمينات المخزنة"""
+    best_match = None
+    best_score = 1.0
+    for student_name, stored_embedding in students_embeddings.items():
+        score = cosine(face_embedding, stored_embedding)
+        if score < best_score:
+            best_score = score
+            best_match = student_name
+    if best_match and best_score < threshold:
+        return best_match, 1 - best_score
+    return "Unknown", 0
+
+def ensure_dir(directory):
+    """التأكد من وجود المجلد أو إنشاؤه إذا لم يكن موجودًا"""
+    if not os.path.exists(directory):
+        os.makedirs(directory)
