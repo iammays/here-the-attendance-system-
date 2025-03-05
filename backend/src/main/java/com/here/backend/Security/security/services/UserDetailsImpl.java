@@ -55,7 +55,6 @@ public class UserDetailsImpl implements UserDetails {
     return password;
   }
 
-  // @Override
   public String getName() {
     return name;
   }

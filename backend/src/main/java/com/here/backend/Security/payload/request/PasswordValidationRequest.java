@@ -5,8 +5,6 @@ public class PasswordValidationRequest {
     private String name;
     private String password;
 
-    // Getters and setters
-
     public String getName() {
         return name;
     }

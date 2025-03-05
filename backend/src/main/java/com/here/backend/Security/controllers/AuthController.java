@@ -20,7 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import com.here.backend.Security.jwt.AuthEntryPointJwt;
 import com.here.backend.Security.jwt.JwtUtils;
 import com.here.backend.Security.payload.request.LoginRequest;
 import com.here.backend.Security.payload.request.SignupRequest;
@@ -76,7 +75,6 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
         }
 
-        // Create new user's account
         TeacherEntity user = new TeacherEntity(
             signUpRequest.getName(),
             signUpRequest.getEmail(),
@@ -85,7 +83,6 @@ public class AuthController {
 
         TeacherRepository.save(user);
 
-        // Authenticate the user
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(signUpRequest.getName(), signUpRequest.getPassword())
         );
@@ -95,34 +92,10 @@ public class AuthController {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        // Create response with token
         JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getName(), userDetails.getEmail());
 
         return ResponseEntity.ok(jwtResponse);
     }
-
-    // @PostMapping("/signup")
-    // public ResponseEntity<?> registerUserByEmail(@Valid @RequestBody SignupRequest signUpRequest) {
-    //     if (TeacherRepository.existsByEmail(signUpRequest.getEmail())) {
-    //         return ResponseEntity.badRequest().body("Error: Email is already in use!");
-    //     }
-
-    //     TeacherEntity user = new TeacherEntity(
-    //         signUpRequest.getUsername(),
-    //         signUpRequest.getEmail(),
-    //         encoder.encode(signUpRequest.getPassword())
-    //     );
-
-    //     TeacherRepository.save(user);
-    //     Authentication authentication = authenticationManager.authenticate(
-    //         new UsernamePasswordAuthenticationToken(signUpRequest.getUsername(), signUpRequest.getPassword())
-    //     );
-    //     SecurityContextHolder.getContext().setAuthentication(authentication);
-    //     String jwt = jwtUtils.generateJwtToken(authentication);
-    //     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-
-    //     return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail()));
-    // }
 
     @GetMapping("/Teacher")
     public Map<String, Object> Teacher(@AuthenticationPrincipal OAuth2User principal) {
