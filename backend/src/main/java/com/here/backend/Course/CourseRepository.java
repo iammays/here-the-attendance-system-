@@ -25,4 +25,6 @@ public interface CourseRepository extends MongoRepository<CourseEntity, String> 
     List<CourseEntity> findByNameAndTeacherId(String courseName, String teacherId);
 
     List<CourseEntity> findByDay(String day);
+    List<CourseEntity> findByRoomId(String roomId);
+
 }
