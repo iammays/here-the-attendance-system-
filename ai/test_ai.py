@@ -1,7 +1,6 @@
 
 
-video_path = "8.mp4" 
-#process_video_stream(video_path)
+
 
 
 
@@ -9,6 +8,6 @@ video_path = "8.mp4"
 from main import recognize_faces_from_video 
 
 
-# video_path = "2.mp4"  
+video_path = "2"  
 
 recognize_faces_from_video(video_path)
