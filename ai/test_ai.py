@@ -1,10 +1,13 @@
-#C:\Users\MaysM.M\face-attendance-system\ai\test_ai.py
 
-from recognition import recognize_faces
 
-image_path = "8.jpg"  
-results = recognize_faces(image_path)
 
-for name in results:
-    print(f"Detected: {name}")
 
+
+
+
+from main import recognize_faces_from_video 
+
+
+video_path = "2"  
+
+recognize_faces_from_video(video_path)
