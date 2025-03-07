@@ -39,78 +39,6 @@ public class ExcelImportController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // @PostMapping("/students")
-    // public String importExcelData(@RequestParam("file") MultipartFile file) {
-    //     if (file.isEmpty()) {
-    //         return "Please upload a valid Excel file.";
-    //     }
-
-    //     if (!file.getOriginalFilename().endsWith(".xlsx")) {
-    //         return "Invalid file format. Please upload an Excel (.xlsx) file.";
-    //     }
-
-    //     System.out.println("Processing file: " + file.getOriginalFilename());
-
-    //     try (InputStream inputStream = file.getInputStream();
-    //         Workbook workbook = new XSSFWorkbook(inputStream)) {
-
-    //         Sheet sheet = workbook.getSheetAt(0);
-    //         List<StudentEntity> studentsToSave = new ArrayList<>();
-    //         Set<String> importedStudentIds = new HashSet<>();
-
-    //         for (Row row : sheet) {
-    //             if (row.getRowNum() == 0) continue; // Skip header row
-
-    //             Cell idCell = row.getCell(0);
-    //             if (idCell == null) {
-    //                 System.out.println("Skipping row: missing student ID");
-    //                 continue;
-    //             }
-
-    //             String studentId = getStringValue(idCell);
-    //             if (studentId.isEmpty()) {
-    //                 System.out.println("Skipping row: invalid student ID");
-    //                 continue;
-    //             }
-
-    //             importedStudentIds.add(studentId);
-    //             Optional<StudentEntity> existingStudent = studentRepository.findById(studentId);
-    //             StudentEntity student = existingStudent.orElseGet(StudentEntity::new);
-    //             student.setStudentId(studentId);
-
-    //             student.setName(getStringValue(row.getCell(1)));
-    //             student.setEmail(getStringValue(row.getCell(2)));
-    //             student.setAdvisor(getStringValue(row.getCell(3)));
-
-    //             if (row.getCell(4) != null) {
-    //             String courseIdsString = getStringValue(row.getCell(4));
-    //             List<String> courseIds = List.of(courseIdsString.split(","));
-    //             student.setCourseId(courseIds);
-    //             }
-
-    //             studentsToSave.add(student);
-    //         }
-
-    //         List<String> existingStudentIds = studentRepository.findAll()
-    //         .stream()
-    //         .map(StudentEntity::getStudentId)
-    //         .collect(Collectors.toList());
-
-    //         List<String> studentsToDelete = existingStudentIds.stream()
-    //         .filter(id -> !importedStudentIds.contains(id))
-    //         .collect(Collectors.toList());
-
-    //         studentRepository.deleteAllById(studentsToDelete);
-    //         studentRepository.saveAll(studentsToSave);
-    //         return "Student data imported and updated successfully!";
-
-    //     } catch (Exception e) {
-    //         System.err.println("Error processing Excel file: " + e.getMessage());
-    //         e.printStackTrace();
-    //         return "Error: " + e.getMessage();
-    //     }
-    // }
-
     @PostMapping("/students")
     public ResponseEntity<?> importExcelData(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty() || !file.getOriginalFilename().endsWith(".xlsx")) {
@@ -276,77 +204,7 @@ public class ExcelImportController {
         }
     }
 
-    // @PostMapping("/teachers")
-    // public String importteachers(@RequestParam("file") MultipartFile file) {
-    //     if (file.isEmpty()) {
-    //         return "Please upload a valid Excel file.";
-    //     }
 
-    //     if (!file.getOriginalFilename().endsWith(".xlsx")) {
-    //         return "Invalid file format. Please upload an Excel (.xlsx) file.";
-    //     }
-
-    //     System.out.println("Processing file: " + file.getOriginalFilename());
-
-    //     try (InputStream inputStream = file.getInputStream();
-    //         Workbook workbook = new XSSFWorkbook(inputStream)) {
-
-    //         Sheet sheet = workbook.getSheetAt(0);
-    //         List<TeacherEntity> teachersToSave = new ArrayList<>();
-    //         Set<String> importedTeachersIds = new HashSet<>();
-
-    //         for (Row row : sheet) {
-    //             if (row.getRowNum() == 0) continue; // Skip header row
-
-    //             Cell idCell = row.getCell(0);
-    //             if (idCell == null) {
-    //                 System.out.println("Skipping row: missing student ID");
-    //                 continue;
-    //             }
-
-    //             String teacherid = getStringValue(idCell);
-    //             if (teacherid.isEmpty()) {
-    //                 System.out.println("Skipping row: invalid student ID");
-    //                 continue;
-    //             }
-
-    //             importedTeachersIds.add(teacherid);
-    //             Optional<TeacherEntity> existeacher = TeacherRepository.findById(teacherid);
-    //             TeacherEntity teacher = existeacher.orElseGet(TeacherEntity::new);
-    //             teacher.setTeacherId(teacherid);
-
-    //             teacher.setName(getStringValue(row.getCell(1)));
-    //             teacher.setEmail(getStringValue(row.getCell(2)));
-    //             teacher.setPassword(getStringValue(row.getCell(3)));
-
-    //             if (row.getCell(4) != null) {
-    //                 String courseIdsString = getStringValue(row.getCell(4));
-    //                 List<String> courseIds = List.of(courseIdsString.split(","));
-    //                 teacher.setCourseId(courseIds);
-    //             }
-    //             teachersToSave.add(teacher);
-    //         }
-
-    //         // Delete students from the database if their ID is not in the imported file
-    //         List<String> existingStudentIds = studentRepository.findAll()
-    //         .stream()
-    //         .map(StudentEntity::getStudentId)
-    //         .collect(Collectors.toList());
-
-    //         List<String> studentsToDelete = existingStudentIds.stream()
-    //         .filter(id -> !importedTeachersIds.contains(id))
-    //         .collect(Collectors.toList());
-
-    //         TeacherRepository.deleteAllById(studentsToDelete);
-    //         TeacherRepository.saveAll(teachersToSave);
-    //         return "Student data imported and updated successfully!";
-
-    //     } catch (Exception e) {
-    //         System.err.println("Error processing Excel file: " + e.getMessage());
-    //         e.printStackTrace();
-    //         return "Error: " + e.getMessage();
-    //     }
-    // }
 
     @PostMapping("/teachers")
     public ResponseEntity<?> importTeachers(@RequestParam("file") MultipartFile file) {
@@ -476,19 +334,6 @@ public class ExcelImportController {
         }
     }
 
-    // private String getStringValue(Cell cell) {
-    //     if (cell == null) return "";
-    //     switch (cell.getCellType()) {
-    //         case STRING:
-    //         return cell.getStringCellValue();
-    //         case NUMERIC:
-    //         return String.valueOf((long) cell.getNumericCellValue());
-    //         case BOOLEAN:
-    //         return String.valueOf(cell.getBooleanCellValue());
-    //         default:
-    //         return "";
-    //     }
-    // }
 
     private String getStringValue(Cell cell) {
         if (cell == null) return "";

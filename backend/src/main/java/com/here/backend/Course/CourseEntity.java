@@ -6,22 +6,23 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "courses")
 public class CourseEntity {
     @Id
-    private String CourseId;
+    private String courseId;
     private String name;
-    private String RoomId;
-    private String TeacherId;
+    private String roomId;
+    private String teacherId;
+    private String studentId;
     private String startTime;
     private String endTime;
     private String day;
     private String category;
-    
+
     public CourseEntity() {}
 
     public CourseEntity(String courseId, String name, String roomId, String teacherId, String startTime, String endTime, String day, String category) {
-        this.CourseId = courseId;
+        this.courseId = courseId;
         this.name = name;
-        this.RoomId = roomId;
-        this.TeacherId = teacherId;
+        this.roomId = roomId;
+        this.teacherId = teacherId;
         this.startTime = startTime;
         this.endTime = endTime;
         this.day = day;
@@ -29,11 +30,11 @@ public class CourseEntity {
     }
 
     public String getCourseId() {
-        return CourseId;
+        return courseId;
     }
 
     public void setCourseId(String courseid) {
-        CourseId = courseid;
+        courseId = courseid;
     }
 
     public String getName() {
@@ -45,19 +46,27 @@ public class CourseEntity {
     }
 
     public String getRoomId() {
-        return RoomId;
+        return roomId;
     }
 
     public void setRoomId(String roomid) {
-        RoomId = roomid;
+        roomId = roomid;
     }
 
     public String getTeacherId() {
-        return TeacherId;
+        return teacherId;
     }
 
     public void setTeacherId(String teacherid) {
-        TeacherId = teacherid;
+        teacherId = teacherid;
+    }
+
+    public String getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(String studentid) {
+        studentId = studentid;
     }
 
     public String getStartTime() {

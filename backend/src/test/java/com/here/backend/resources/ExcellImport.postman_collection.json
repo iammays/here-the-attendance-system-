@@ -1,0 +1,203 @@
+{
+	"info": {
+		"_postman_id": "f912b3a4-5966-4b75-bcea-96ad76d2111b",
+		"name": "ExcellImport",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "33053975"
+	},
+	"item": [
+		{
+			"name": "students",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "filePath",
+						"value": "C:/Users/HP-G9/Desktop/capstone/Book1.xlsx",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "postman-cloud:///1eff1d0d-d1a8-48d0-9351-d5c8b0c69e38"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/excel/students",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"excel",
+						"students"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "courses",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "postman-cloud:///1eff1d0d-4994-4200-870a-383fc42a4d7d"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/excel/courses",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"excel",
+						"courses"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "sessions",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "postman-cloud:///1eff1d11-619c-4060-824b-15442462fe37"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/excel/sessions",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"excel",
+						"sessions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Teachers",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "postman-cloud:///1eff2ea1-f1ce-40b0-b294-054cefcc0bcc"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/excel/teachers",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"excel",
+						"teachers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Rooms",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "postman-cloud:///1eff2ee0-fdbd-4c60-9bf4-bc54752c2917"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/excel/rooms",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"excel",
+						"rooms"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Cameras",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "postman-cloud:///1eff2f29-59f5-47b0-b91f-f817baa32095"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/excel/cameras",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"excel",
+						"cameras"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

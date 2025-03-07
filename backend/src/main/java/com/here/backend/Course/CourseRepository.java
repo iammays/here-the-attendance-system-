@@ -7,13 +7,24 @@ import java.util.Optional;
 
 @Repository
 public interface CourseRepository extends MongoRepository<CourseEntity, String> {
+
     List<CourseEntity> findByTeacherId(String teacherId);
+
+    List<CourseEntity> findByStudentId(String studentId);
+
     Optional<CourseEntity> findByCourseId(String courseId);
+
+    List<CourseEntity> findByCourseIdIn(List<String> courseIds);
+
     List<CourseEntity> findByName(String courseName);
+
     List<CourseEntity> findByCategory(String category);
+
     List<CourseEntity> findByNameAndCategory(String courseName, String category);
+
     List<CourseEntity> findByNameAndTeacherId(String courseName, String teacherId);
-    // List<CourseEntity> findByStudentIds(String studentId);
-    // List<CourseEntity> findByDepartment(String departmentId);
-    // List<CourseEntity> findBySemester(String semester);
+
+    List<CourseEntity> findByDay(String day);
+    List<CourseEntity> findByRoomId(String roomId);
+
 }
