@@ -102,7 +102,7 @@ public class WebSecurityConfig {
       .requestMatchers("/swagger-ui.html").permitAll()
       .requestMatchers("/swagger-ui/**").permitAll()
       .requestMatchers("/api-docs/**").permitAll()
-      .anyRequest().denyAll()); 
+      .anyRequest().permitAll()); 
 
     http.authenticationProvider(authenticationProvider());
     http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
