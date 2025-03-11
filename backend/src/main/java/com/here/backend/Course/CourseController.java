@@ -119,15 +119,15 @@ private CourseService courseService;
 @Autowired
 private RestTemplate restTemplate;
 
-@PostMapping("/startCamera/{courseId}")
-public ResponseEntity<String> startCamera(@PathVariable String courseId, @RequestParam int lateThreshold) {
-    CameraSchedule schedule = courseService.calculateCameraSchedule(courseId, lateThreshold);
-    Map<String, Object> params = new HashMap<>();
-    params.put("lecture_id", courseId);
-    params.put("lecture_duration", courseRepository.getCourseTimeById(courseId).getBody());
-    params.put("late_threshold", schedule.getLateThreshold());
-    params.put("interval", schedule.getInterval());
-    restTemplate.postForObject("http://localhost:5000/start", params, String.class);
-    return ResponseEntity.ok("Camera started");
-}
-}
+// @PostMapping("/startCamera/{courseId}")
+// public ResponseEntity<String> startCamera(@PathVariable String courseId, @RequestParam int lateThreshold) {
+//     CameraSchedule schedule = courseService.calculateCameraSchedule(courseId, lateThreshold);
+//     Map<String, Object> params = new HashMap<>();
+//     params.put("lecture_id", courseId);
+//     params.put("lecture_duration", courseRepository.getCourseTimeById(courseId).getBody());
+//     params.put("late_threshold", schedule.getLateThreshold());
+//     params.put("interval", schedule.getInterval());
+//     restTemplate.postForObject("http://localhost:5000/start", params, String.class);
+//     return ResponseEntity.ok("Camera started");
+// }
+// }
