@@ -1,6 +1,9 @@
+//backend\src\main\java\com\here\backend\Course\CourseRepository.java
+
 package com.here.backend.Course;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
@@ -26,5 +29,9 @@ public interface CourseRepository extends MongoRepository<CourseEntity, String> 
 
     List<CourseEntity> findByDay(String day);
     List<CourseEntity> findByRoomId(String roomId);
+
+    List<CourseEntity> getCourseTimeById(String courseId);
+
+
 
 }

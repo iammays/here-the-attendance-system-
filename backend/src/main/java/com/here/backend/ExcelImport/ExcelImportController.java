@@ -1,3 +1,6 @@
+//backend\src\main\java\com\here\backend\ExcelImport\ExcelImportController.java
+
+
 package com.here.backend.ExcelImport;
 
 import java.io.InputStream;
@@ -138,73 +141,7 @@ public class ExcelImportController {
         }
     }
 
-    @PostMapping("/cameras")
-    public String importCameras(@RequestParam("file") MultipartFile file) {
-        if (file.isEmpty()) {
-            return "Please upload a valid Excel file.";
-        }
-
-        if (!file.getOriginalFilename().endsWith(".xlsx")) {
-            return "Invalid file format. Please upload an Excel (.xlsx) file.";
-        }
-
-        System.out.println("Processing file: " + file.getOriginalFilename());
-
-        try (InputStream inputStream = file.getInputStream();
-            Workbook workbook = new XSSFWorkbook(inputStream)) {
-
-            Sheet sheet = workbook.getSheetAt(0);
-            List<CameraEntity> camerasToSave = new ArrayList<>();
-            Set<String> importedCameraIds = new HashSet<>();
-
-            for (Row row : sheet) {
-                if (row.getRowNum() == 0) continue; // Skip header row
-
-                Cell idCell = row.getCell(0);
-                Cell roomCell = row.getCell(1);
-
-                if (idCell == null || roomCell == null) {
-                    System.out.println("Skipping row: missing camera ID or room ID");
-                    continue;
-                }
-
-                String cameraId = getStringValue(idCell);
-                String roomId = getStringValue(roomCell);
-
-                if (cameraId.isEmpty() || roomId.isEmpty()) {
-                    System.out.println("Skipping row: invalid camera ID or room ID");
-                    continue;
-                }
-
-                importedCameraIds.add(cameraId);
-                Optional<CameraEntity> existingCamera = cameraRepository.findById(cameraId);
-                CameraEntity camera = existingCamera.orElseGet(() -> new CameraEntity(cameraId, roomId));
-                camera.setRoomId(roomId); // Ensure roomId is updated if needed
-                camerasToSave.add(camera);
-            }
-
-            // Remove cameras from the database if they are not in the imported file
-            List<String> existingCameraIds = cameraRepository.findAll()
-            .stream()
-            .map(CameraEntity::getCameraId)
-            .collect(Collectors.toList());
-
-            List<String> camerasToDelete = existingCameraIds.stream()
-            .filter(id -> !importedCameraIds.contains(id))
-            .collect(Collectors.toList());
-
-            cameraRepository.deleteAllById(camerasToDelete);
-            cameraRepository.saveAll(camerasToSave);
-            return "Camera data imported and updated successfully!";
-
-        } catch (Exception e) {
-            System.err.println("Error processing Excel file: " + e.getMessage());
-            e.printStackTrace();
-            return "Error: " + e.getMessage();
-        }
-    }
-
-
+    
 
     @PostMapping("/teachers")
     public ResponseEntity<?> importTeachers(@RequestParam("file") MultipartFile file) {

@@ -1,8 +1,11 @@
+
+//backend\src\main\java\com\here\backend\Course\CourseController.java
 package com.here.backend.Course;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.*;
@@ -108,4 +111,23 @@ public class CourseController {
         int minutes = Integer.parseInt(parts[1]);
         return (hours * 60) + minutes;
     }
+
+
+//for mays dont delete this
+    @Autowired
+private CourseService courseService;
+@Autowired
+private RestTemplate restTemplate;
+
+@PostMapping("/startCamera/{courseId}")
+public ResponseEntity<String> startCamera(@PathVariable String courseId, @RequestParam int lateThreshold) {
+    CameraSchedule schedule = courseService.calculateCameraSchedule(courseId, lateThreshold);
+    Map<String, Object> params = new HashMap<>();
+    params.put("lecture_id", courseId);
+    params.put("lecture_duration", courseRepository.getCourseTimeById(courseId).getBody());
+    params.put("late_threshold", schedule.getLateThreshold());
+    params.put("interval", schedule.getInterval());
+    restTemplate.postForObject("http://localhost:5000/start", params, String.class);
+    return ResponseEntity.ok("Camera started");
+}
 }

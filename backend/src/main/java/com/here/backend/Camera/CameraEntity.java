@@ -1,3 +1,5 @@
+//backend\src\main\java\com\here\backend\Camera\CameraEntity.java
+
 package com.here.backend.Camera;
 
 import org.springframework.data.mongodb.core.mapping.Document;
