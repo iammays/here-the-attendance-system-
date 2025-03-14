@@ -15,7 +15,7 @@ public class AttendanceController {
     @Autowired
     private AttendanceService attendanceService;
 
-    // استقبال بيانات الحضور من الـ AI
+    // استقبال بيانات الحضور من Python
     @PostMapping
     public ResponseEntity<String> saveAttendance(@RequestBody AttendanceRecord record) {
         AttendanceEntity attendance = attendanceRepository.findByLectureIdAndStudentId(record.getLectureId(), record.getStudentId());
@@ -40,7 +40,6 @@ public class AttendanceController {
     }
 }
 
-// كائن مؤقت لاستقبال البيانات من الـ AI
 class AttendanceRecord {
     private String lectureId;
     private int sessionId;
@@ -48,7 +47,6 @@ class AttendanceRecord {
     private String detectionTime;
     private String screenshotPath;
 
-    // Getters and Setters
     public String getLectureId() { return lectureId; }
     public void setLectureId(String lectureId) { this.lectureId = lectureId; }
     public int getSessionId() { return sessionId; }
@@ -61,7 +59,6 @@ class AttendanceRecord {
     public void setScreenshotPath(String screenshotPath) { this.screenshotPath = screenshotPath; }
 }
 
-// كائن لعرض التقرير
 class AttendanceReport {
     private String status;
     private int detectionCount;
@@ -73,7 +70,6 @@ class AttendanceReport {
         this.sessions = sessions;
     }
 
-    // Getters
     public String getStatus() { return status; }
     public int getDetectionCount() { return detectionCount; }
     public List<AttendanceEntity.SessionAttendance> getSessions() { return sessions; }

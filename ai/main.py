@@ -1,6 +1,3 @@
-
-#ai\main.py 
-
 import cv2
 import torch
 import numpy as np
@@ -11,8 +8,9 @@ import pathlib
 import sys
 import time
 from datetime import datetime
+import requests
 
-# إعداد المسار المحلي لـ YOLOv5 واستيراد الدوال المساعدة
+# إعداد المسار المحلي لـ YOLOv5
 sys.path.append("C:\\Users\\MaysM.M\\yolov5")
 from utils.general import scale_boxes
 from face_utils import load_student_embeddings, recognize_face, ensure_dir
@@ -21,23 +19,26 @@ from face_utils import load_student_embeddings, recognize_face, ensure_dir
 temp = pathlib.PosixPath
 pathlib.PosixPath = pathlib.WindowsPath
 
-# تحميل نموذج YOLOv5 من المسار المحلي وضبط إعداداته
+# تحميل نموذج YOLOv5
 model = torch.hub.load("C:/Users/MaysM.M/yolov5", "custom", path="C:\\Users\\MaysM.M\\yolov5\\best.pt", source="local", force_reload=True)
 model.conf = 0.6  
-model.iou = 0.1  # للتداخل 
+model.iou = 0.1
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.to(device)
+print(f"Using device: {device}")
 
-# تحميل نموذج ArcFace وضبطه
+# تحميل نموذج ArcFace
 app = FaceAnalysis(allowed_modules=['detection', 'recognition'])
-app.prepare(ctx_id=0, det_size=(320, 320))  # تقليل det_size للصور المقصوصة
+app.prepare(ctx_id=0 if torch.cuda.is_available() else -1, det_size=(320, 320))
 
-# الاتصال بقاعدة بيانات MongoDB وتحميل بيانات الطلاب
+# الاتصال بـ MongoDB
 mongo_client = MongoClient("mongodb://localhost:27017")
 db = mongo_client["face_attendance"]
 students_collection = db["students_embeddings"]
-attendance_collection = db["attendance"]  # مجموعة جديدة للحضور
+attendance_collection = db["attendance"]
 students_embeddings = load_student_embeddings(students_collection)
 
-# إعداد المجلدات لتخزين الصور
+# إعداد المجلدات
 output_dir = "output"
 screenshots_dir = f"{output_dir}/screenshots"
 known_faces_dir = f"{output_dir}/known_faces"
@@ -49,7 +50,6 @@ ensure_dir(unknown_faces_dir)
 ensure_dir(yolo_cropped_dir)
 
 def detect_faces_from_frame(frame):
-    """Detect faces from a frame using YOLOv5 with manual scaling"""
     original_shape = frame.shape
     frame_resized = cv2.resize(frame, (640, 480))
     results = model(frame_resized)
@@ -66,102 +66,60 @@ def detect_faces_from_frame(frame):
         x2, y2 = min(original_shape[1], x2), min(original_shape[0], y2)
         
         if x2 - x1 > 0 and y2 - y1 > 0:
-            face_location = {
-                "bbox": (x1, y1, x2, y2),
-                "confidence": float(conf),
-                "center": (int((x1 + x2) / 2), int((y1 + y2) / 2)),
-                "width": x2 - x1,
-                "height": y2 - y1
-            }
+            face_location = {"bbox": (x1, y1, x2, y2), "confidence": float(conf)}
             faces.append(face_location)
-            print(f"[DEBUG] Face detected: bbox=({x1},{y1},{x2},{y2}), "
-                  f"center=({face_location['center']}), confidence={conf:.2f}")
-    
     return faces
 
-def recognize_faces_from_video():
-    rtsp_url = "rtsp://admin:maysjoelleshouq@192.168.0.116:554/live"
-    cap = cv2.VideoCapture(rtsp_url)
-    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-    cap.set(cv2.CAP_PROP_FPS, 15)
-    
+def recognize_faces_session(lecture_id, session_id, duration, video_path):
+    cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
-        print("❌ Failed to connect to IP camera. Check RTSP URL or network.")
+        print(f"❌ Failed to open video: {video_path}")
         return
     
+    start_time = time.time()
     frame_count = 0
-    face_count = 0
-    recognized_persons = {}
-    total_faces_detected = 0
-    process_interval = 1
-
-    while cap.isOpened():
+    first_detection = {}
+    last_screenshot_time = 0
+    screenshot_interval = 5
+    
+    while cap.isOpened() and (time.time() - start_time) < duration:
         ret, frame = cap.read()
-        if not ret or frame is None or frame.size == 0:
-            print("❌ Failed to retrieve frame or empty frame. Reconnecting...")
-            cap.release()
-            cap = cv2.VideoCapture(rtsp_url)
-            cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-            cap.set(cv2.CAP_PROP_FPS, 15)
-            continue
+        if not ret or frame is None:
+            print("❌ End of video or error reading frame.")
+            break
         
         frame = cv2.resize(frame, (640, 480))
         frame_count += 1
-        start_time = time.time()
+        current_time = time.time()
 
-        screenshot_path = f"{screenshots_dir}/frame_{frame_count}.jpg"
-        cv2.imwrite(screenshot_path, frame)
-        print(f"📸 Saved screenshot: {screenshot_path}")
+        if current_time - last_screenshot_time >= screenshot_interval:
+            screenshot_path = f"{screenshots_dir}/frame_{session_id}_{frame_count}.jpg"
+            cv2.imwrite(screenshot_path, frame)
+            last_screenshot_time = current_time
+            print(f"📸 Screenshot saved: {screenshot_path}")
 
         faces = detect_faces_from_frame(frame)
-        if not faces:
-            print("[DEBUG] No faces detected in this frame.")
-
         for face in faces:
             x1, y1, x2, y2 = face["bbox"]
             face_img = frame[y1:y2, x1:x2]
             if face_img.shape[0] == 0 or face_img.shape[1] == 0:
                 continue
 
-            yolo_face_path = f"{yolo_cropped_dir}/yolo_face_{frame_count}_{face_count}.jpg"
-            cv2.imwrite(yolo_face_path, face_img)
-
             face_img_rgb = cv2.cvtColor(face_img, cv2.COLOR_BGR2RGB)
             detected_faces = app.get(face_img_rgb)
             if not detected_faces:
-                total_faces_detected += 1
                 continue
 
-            total_faces_detected += 1
             face_embedding = detected_faces[0].embedding.flatten()
             label, similarity = recognize_face(face_embedding, students_embeddings)
-            face_count += 1
             
-            # تسجيل الوقت
-            detection_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            if label != "Unknown":
-                if label not in recognized_persons:
-                    recognized_persons[label] = []
-                recognized_persons[label].append(detection_time)
-                face_path = f"{known_faces_dir}/face_{frame_count}_{label}_{similarity:.2f}.jpg"
-                print(f"✅ Recognized {label} at {detection_time}, saved to: {face_path}")
-                
-                # حفظ في MongoDB
-                attendance_record = {
-                    "student_name": label,
-                    "detection_time": detection_time,
-                    "similarity": float(similarity),
-                    "status": "Present",  # حالة مؤقتة، بتتعدل في Spring Boot
-                    "frame_count": frame_count,
-                    "screenshot_path": screenshot_path
-                }
-                attendance_collection.insert_one(attendance_record)
-            else:
-                face_path = f"{unknown_faces_dir}/face_{frame_count}_unknown.jpg"
-                print(f"❌ Unknown face at {detection_time}, saved to: {face_path}")
-
-            cv2.imwrite(face_path, cv2.cvtColor(face_img_rgb, cv2.COLOR_RGB2BGR))
-
+            if label != "Unknown" and label not in first_detection:
+                detection_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                first_detection[label] = detection_time
+                face_path = f"{known_faces_dir}/face_{session_id}_{label}_{similarity:.2f}.jpg"
+                cv2.imwrite(face_path, cv2.cvtColor(face_img_rgb, cv2.COLOR_RGB2BGR))
+                print(f"✅ First detection of {label} at {detection_time}")
+            
             color = (0, 255, 0) if label != "Unknown" else (0, 0, 255)
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
             cv2.putText(frame, f"{label} ({similarity:.2f})", (x1, y1 - 10),
@@ -171,19 +129,48 @@ def recognize_faces_from_video():
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-        elapsed_time = time.time() - start_time
-        if elapsed_time < process_interval:
-            time.sleep(process_interval - elapsed_time)
-
-    print("\n=== Summary ===")
-    print(f"Total faces detected: {total_faces_detected}")
-    print("Recognized persons and times:")
-    for person, times in recognized_persons.items():
-        print(f" - {person}: detected {len(times)} time(s) at {', '.join(times)}")
-    print(f"Unknown faces: {total_faces_detected - sum(len(times) for times in recognized_persons.values())}")
+    # حفظ النتائج في MongoDB وإرسالها للـ Backend
+    for student_id in students_embeddings.keys():
+        detection_time = first_detection.get(student_id, "undetected")
+        attendance_record = {
+            "lecture_id": lecture_id,
+            "session_id": session_id,
+            "student_id": student_id,
+            "detection_time": detection_time,
+            "screenshot_path": screenshot_path if detection_time != "undetected" else None
+        }
+        # حفظ في MongoDB
+        result = attendance_collection.insert_one(attendance_record)
+        
+        # تحويل ObjectId لـ String قبل الإرسال للـ Backend
+        attendance_record_for_backend = attendance_record.copy()
+        attendance_record_for_backend["_id"] = str(result.inserted_id)  # تحويل ObjectId لـ String
+        try:
+            requests.post("http://localhost:8080/api/attendances", json=attendance_record_for_backend)
+            print(f"✅ Sent attendance for {student_id} to backend")
+        except Exception as e:
+            print(f"⚠️ Failed to send to backend: {e}")
 
     cap.release()
     cv2.destroyAllWindows()
 
+def run_camera_for_lecture(lecture_id, lecture_duration, late_threshold, interval, video_path):
+    print(f"Starting Present session for {late_threshold} seconds...")
+    recognize_faces_session(lecture_id, 0, late_threshold, video_path)
+    
+    remaining_time = lecture_duration - late_threshold
+    num_sessions = remaining_time // interval  # عدد الجلسات بناءً على الـ interval
+    print(f"Number of Late sessions: {num_sessions}")
+    
+    elapsed_time = late_threshold
+    for session_id in range(1, num_sessions + 1):
+        print(f"Waiting {interval} seconds before session {session_id}...")
+        time.sleep(interval)
+        elapsed_time += interval
+        if elapsed_time < lecture_duration:
+            print(f"Starting Late session {session_id}...")
+            recognize_faces_session(lecture_id, session_id, interval, video_path)
+
 if __name__ == "__main__":
-    recognize_faces_from_video()
+    video_path = "8.mp4"  # مسار الفيديو
+      

@@ -18,22 +18,33 @@ public class AttendanceService {
     @Autowired
     private CourseRepository courseRepository;
 
-    // تحديد حالة الطالب بناءً على وقت الظهور
+    // تحديد حالة الطالب
     public String determineStatus(String lectureId, String studentId, int lateThreshold) {
         AttendanceEntity attendance = attendanceRepository.findByLectureIdAndStudentId(lectureId, studentId);
         if (attendance == null || attendance.getSessions().isEmpty()) return "Absent";
 
         CourseEntity course = courseRepository.findByCourseId(lectureId).orElseThrow();
         LocalDateTime startTime = LocalDateTime.parse(course.getStartTime(), DateTimeFormatter.ofPattern("HH:mm"));
-        String firstDetection = attendance.getSessions().get(0).getDetectionTime();
-
-        if (firstDetection.equals("undetected")) return "Absent";
         
+        // التحقق من كل الجلسات
+        boolean detectedInAnySession = attendance.getSessions().stream()
+                .anyMatch(session -> !session.getDetectionTime().equals("undetected"));
+        
+        if (!detectedInAnySession) {
+            return "Absent"; // غايب لو ما اتلاقاش في أي جلسة
+        }
+
+        // تحديد Present أو Late بناءً على أول ظهور
+        String firstDetection = attendance.getSessions().get(0).getDetectionTime();
+        if (firstDetection.equals("undetected")) {
+            // لو أول جلسة undetected بس فيه جلسات تانية فيها اكتشاف، يبقى Late
+            return "Late";
+        }
+
         LocalDateTime detectionTime = LocalDateTime.parse(firstDetection, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         long minutesLate = java.time.Duration.between(startTime, detectionTime).toMinutes();
         
-        if (minutesLate <= lateThreshold) return "Present";
-        return "Late";
+        return minutesLate <= lateThreshold ? "Present" : "Late";
     }
 
     // حساب عدد مرات الظهور

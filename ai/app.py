@@ -6,7 +6,12 @@ app = Flask(__name__)
 @app.route('/start', methods=['POST'])
 def start_camera():
     data = request.json
-    run_camera_for_lecture(data['lecture_id'], data['lecture_duration'], data['late_threshold'], data['interval'])
+    lecture_id = data['lecture_id']
+    lecture_duration = data['lecture_duration']
+    late_threshold = data['late_threshold']
+    interval = data['interval']
+    video_path = data.get('video_path', "C:/Users/SWER.DESKTOP-BCOAIL7/face-attendance-system/test_video.mp4")  # افتراضي
+    run_camera_for_lecture(lecture_id, lecture_duration, late_threshold, interval, video_path)
     return {"status": "Camera started"}
 
 if __name__ == "__main__":

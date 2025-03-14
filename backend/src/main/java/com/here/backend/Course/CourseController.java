@@ -114,20 +114,55 @@ public class CourseController {
 
 
 //for mays dont delete this
-    @Autowired
+@Autowired
 private CourseService courseService;
 @Autowired
 private RestTemplate restTemplate;
 
-// @PostMapping("/startCamera/{courseId}")
-// public ResponseEntity<String> startCamera(@PathVariable String courseId, @RequestParam int lateThreshold) {
-//     CameraSchedule schedule = courseService.calculateCameraSchedule(courseId, lateThreshold);
-//     Map<String, Object> params = new HashMap<>();
-//     params.put("lecture_id", courseId);
-//     params.put("lecture_duration", courseRepository.getCourseTimeById(courseId).getBody());
-//     params.put("late_threshold", schedule.getLateThreshold());
-//     params.put("interval", schedule.getInterval());
-//     restTemplate.postForObject("http://localhost:5000/start", params, String.class);
-//     return ResponseEntity.ok("Camera started");
-// }
-// }
+
+
+
+// دالة مساعدة لحساب المدة من startTime وendTime
+private int calculateDuration(String startTime, String endTime) {
+    String[] startParts = startTime.split(":");
+    String[] endParts = endTime.split(":");
+    int startMinutes = Integer.parseInt(startParts[0]) * 60 + Integer.parseInt(startParts[1]);
+    int endMinutes = Integer.parseInt(endParts[0]) * 60 + Integer.parseInt(endParts[1]);
+    return endMinutes - startMinutes;
+}
+
+
+    // لما تشبكي الداتابيس: جلب البيانات من CourseEntity
+    /*
+    CourseEntity course = courseRepository.findByCourseId(courseId)
+            .orElseThrow(() -> new RuntimeException("Course not found"));
+    int lectureDuration = calculateDuration(course.getStartTime(), course.getEndTime());
+    int lateThresholdSeconds = lateThreshold * 60;
+    CameraSchedule schedule = courseService.calculateCameraSchedule(courseId, lateThreshold);
+    int interval = schedule.getInterval();
+    String videoPath = course.getVideoPath(); // لو أضفتِ حقل videoPath في CourseEntity
+    */
+
+    // إعداد المعطيات لإرسالها إلى Python
+@PostMapping("/startCamera/{courseId}")
+public ResponseEntity<String> startCamera(@PathVariable String courseId, @RequestParam int lateThreshold, @RequestBody Map<String, Object> body) {
+    // جلب القيم من البادي بدل القيم اليدوية
+    String lectureId = (String) body.get("lecture_id");
+    int lectureDuration = (int) body.get("lecture_duration");
+    int lateThresholdSeconds = (int) body.get("late_threshold");
+    int interval = (int) body.get("interval");
+    String videoPath = (String) body.get("video_path");
+
+    // إعداد المعطيات لإرسالها إلى Python
+    Map<String, Object> params = new HashMap<>();
+    params.put("lecture_id", lectureId);
+    params.put("lecture_duration", lectureDuration);
+    params.put("late_threshold", lateThresholdSeconds);
+    params.put("interval", interval);
+    params.put("video_path", videoPath);
+
+    // إرسال الطلب إلى Flask
+    restTemplate.postForObject("http://localhost:5000/start", params, String.class);
+    return ResponseEntity.ok("Camera started");
+}
+}

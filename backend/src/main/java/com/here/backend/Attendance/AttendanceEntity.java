@@ -23,14 +23,12 @@ public class AttendanceEntity {
             this.detectionTime = detectionTime;
         }
 
-        // Getters and Setters
         public int getSessionId() { return sessionId; }
         public void setSessionId(int sessionId) { this.sessionId = sessionId; }
         public String getDetectionTime() { return detectionTime; }
         public void setDetectionTime(String detectionTime) { this.detectionTime = detectionTime; }
     }
 
-    // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
     public String getLectureId() { return lectureId; }

@@ -1,9 +1,6 @@
-//backend\src\main\java\com\here\backend\Course\CourseRepository.java
-
 package com.here.backend.Course;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
@@ -12,26 +9,21 @@ import java.util.Optional;
 public interface CourseRepository extends MongoRepository<CourseEntity, String> {
 
     List<CourseEntity> findByTeacherId(String teacherId);
-
     List<CourseEntity> findByStudentId(String studentId);
-
     Optional<CourseEntity> findByCourseId(String courseId);
-
     List<CourseEntity> findByCourseIdIn(List<String> courseIds);
-
     List<CourseEntity> findByName(String courseName);
-
     List<CourseEntity> findByCategory(String category);
-
     List<CourseEntity> findByNameAndCategory(String courseName, String category);
-
     List<CourseEntity> findByNameAndTeacherId(String courseName, String teacherId);
-
     List<CourseEntity> findByDay(String day);
     List<CourseEntity> findByRoomId(String roomId);
 
-    List<CourseEntity> getCourseTimeById(String courseId);
-
-
-
+   
+   
+   
+    // تعديل الدالة لتكون متوافقة مع courseId
+    default List<CourseEntity> getCourseTimeById(String courseId) {
+        return findByCourseId(courseId).map(List::of).orElse(List.of());
+    }
 }
