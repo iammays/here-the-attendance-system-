@@ -7,6 +7,11 @@ venv/
 # تجاهل مجلد students_faces
 students_faces/
 
+
+students_embeddings/
+
+output/
+
 # تجاهل ملفات الفيديو بصيغة MP4
 *.mp4
 
