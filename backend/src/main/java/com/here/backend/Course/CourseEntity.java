@@ -15,10 +15,11 @@ public class CourseEntity {
     private String endTime;
     private String day;
     private String category;
+    private int Credits;
 
     public CourseEntity() {}
 
-    public CourseEntity(String courseId, String name, String roomId, String teacherId, String startTime, String endTime, String day, String category) {
+    public CourseEntity(String courseId, String name, String roomId, String teacherId, String startTime, String endTime, String day, String category,int Credits) {
         this.courseId = courseId;
         this.name = name;
         this.roomId = roomId;
@@ -27,6 +28,7 @@ public class CourseEntity {
         this.endTime = endTime;
         this.day = day;
         this.category = category;
+        this.Credits=Credits;
     }
 
     public String getCourseId() {
@@ -99,5 +101,12 @@ public class CourseEntity {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+    public int getCredit() {
+        return Credits;
+    }
+
+    public void setCredit(int Credits) {
+        this.Credits = Credits;
     }
 }

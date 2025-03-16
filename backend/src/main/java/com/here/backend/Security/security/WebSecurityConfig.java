@@ -83,7 +83,7 @@ public class WebSecurityConfig {
       .requestMatchers("/api/auth/**").permitAll()
       .requestMatchers("/api/excel/**").permitAll()
 
-      .requestMatchers("/teachers/**").authenticated()
+      // .requestMatchers("/teachers/**").authenticated()
       // .requestMatchers(HttpMethod.GET, "/teachers/**").authenticated() 
       // .requestMatchers(HttpMethod.PUT, "/teachers/**").authenticated()
       // .requestMatchers(HttpMethod.POST, "/teachers/**").authenticated()

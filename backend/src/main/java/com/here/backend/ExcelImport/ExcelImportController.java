@@ -119,13 +119,14 @@ public class ExcelImportController {
                 String endTime = getStringValue(row.getCell(5));
                 String day = getStringValue(row.getCell(6));
                 String category = getStringValue(row.getCell(7));
+                int credits = getIntValue(row.getCell(8));
 
                 // التأكد من أن جميع القيم ليست فارغة
                 if (courseId.isEmpty() || name.isEmpty() || roomId.isEmpty() || teacherId.isEmpty()) {
                     continue;
                 }
 
-                CourseEntity course = new CourseEntity(courseId, name, roomId, teacherId, startTime, endTime, day, category);
+                CourseEntity course = new CourseEntity(courseId, name, roomId, teacherId, startTime, endTime, day, category,credits);
                 courses.add(course);
             }
 
