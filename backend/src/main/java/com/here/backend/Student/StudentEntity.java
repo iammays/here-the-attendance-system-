@@ -2,7 +2,7 @@ package com.here.backend.Student;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.util.List;
+import java.util.*;
 
 @Document(collection = "students")
 public class StudentEntity {
@@ -14,23 +14,36 @@ public class StudentEntity {
     private String email;
     private String advisor;
     private List<String> courseId;
+    private Map<String, Integer> courseAbsences; // Map of course ID to absence count
 
-    public StudentEntity() {}
+    // Default Constructor
+    public StudentEntity() {
+        this.courseAbsences = new HashMap<>(); // Ensure courseAbsences is always initialized
+    }
 
+    // Parameterized Constructor
     public StudentEntity(String studentId, String name, String email, String advisorName, List<String> courseId) {
         this.studentId = studentId;
         this.name = name;
         this.email = email;
         this.advisor = advisorName;
         this.courseId = courseId;
+        this.courseAbsences = new HashMap<>();
+        // Initialize the courseAbsences map with course IDs and default absence count of 0
+        if (courseId != null) {
+            for (String course : courseId) {
+                this.courseAbsences.put(course, 0); // Default absence is 0
+            }
+        }
     }
 
+    // Getters and Setters
     public String getStudentId() {
         return studentId;
     }
 
-    public void setStudentId(String student_id) {
-        studentId = student_id;
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
     }
 
     public String getName() {
@@ -45,8 +58,8 @@ public class StudentEntity {
         return teacherId;
     }
 
-    public void setTeacherId(String teacher_id) {
-        teacherId = teacher_id;
+    public void setTeacherId(String teacherId) {
+        this.teacherId = teacherId;
     }
 
     public String getEmail() {
@@ -69,7 +82,22 @@ public class StudentEntity {
         return courseId;
     }
 
-    public void setCourseId(List<String> courseid) {
-        courseId = courseid;
+    public void setCourseId(List<String> courseId) {
+        this.courseId = courseId;
+        // Re-initialize courseAbsences map with course IDs and default absence count of 0
+        this.courseAbsences.clear();
+        if (courseId != null) {
+            for (String course : courseId) {
+                this.courseAbsences.put(course, 0); // Default absence is 0
+            }
+        }
+    }
+
+    public Map<String, Integer> getCourseAbsences() {
+        return courseAbsences;
+    }
+
+    public void setCourseAbsences(Map<String, Integer> courseAbsences) {
+        this.courseAbsences = (courseAbsences != null) ? courseAbsences : new HashMap<>();
     }
 }

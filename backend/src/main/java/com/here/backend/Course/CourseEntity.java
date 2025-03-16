@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class CourseEntity {
     @Id
     private String courseId;
-    private String name;
+    private String courseName;
     private String roomId;
     private String teacherId;
     private String studentId;
@@ -19,9 +19,9 @@ public class CourseEntity {
 
     public CourseEntity() {}
 
-    public CourseEntity(String courseId, String name, String roomId, String teacherId, String startTime, String endTime, String day, String category,int Credits) {
+    public CourseEntity(String courseId, String courseName, String roomId, String teacherId, String startTime, String endTime, String day, String category,int Credits) {
         this.courseId = courseId;
-        this.name = name;
+        this.courseName = courseName;
         this.roomId = roomId;
         this.teacherId = teacherId;
         this.startTime = startTime;
@@ -40,11 +40,11 @@ public class CourseEntity {
     }
 
     public String getName() {
-        return name;
+        return courseName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setName(String courseName) {
+        this.courseName = courseName;
     }
 
     public String getRoomId() {
