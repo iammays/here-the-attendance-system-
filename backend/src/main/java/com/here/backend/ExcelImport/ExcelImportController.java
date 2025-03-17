@@ -21,10 +21,15 @@ import com.here.backend.Room.RoomEntity;
 import com.here.backend.Room.RoomRepository;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/excel")
 public class ExcelImportController {
+    private static final Logger logger = LoggerFactory.getLogger(ExcelImportController.class);
 
     @Autowired
     private StudentRepository studentRepository;
@@ -119,13 +124,14 @@ public class ExcelImportController {
                 String endTime = getStringValue(row.getCell(5));
                 String day = getStringValue(row.getCell(6));
                 String category = getStringValue(row.getCell(7));
+                int credits = getIntValue(row.getCell(8));
 
                 // التأكد من أن جميع القيم ليست فارغة
                 if (courseId.isEmpty() || name.isEmpty() || roomId.isEmpty() || teacherId.isEmpty()) {
                     continue;
                 }
 
-                CourseEntity course = new CourseEntity(courseId, name, roomId, teacherId, startTime, endTime, day, category);
+                CourseEntity course = new CourseEntity(courseId, name, roomId, teacherId, startTime, endTime, day, category,credits);
                 courses.add(course);
             }
 

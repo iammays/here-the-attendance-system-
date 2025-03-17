@@ -13,6 +13,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.HttpStatus;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -151,4 +155,87 @@ public class TeacherController {
         }
         return ResponseEntity.notFound().build();
     }
+
+
+
+ 
+@GetMapping("/{teacherId}/schedule")
+public ResponseEntity<?> getAllSchedulesForTeacher(@PathVariable String teacherId) {
+    try {
+        // Fetch all courses taught by this teacher
+        List<CourseEntity> courses = courseRepository.findByTeacherId(teacherId);
+        
+        if (courses.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No courses found for this teacher.");
+        }
+
+        // Initialize the schedule map
+        Map<String, List<CourseEntity>> scheduleMap = new LinkedHashMap<>();
+        scheduleMap.put("Monday", new ArrayList<>());
+        scheduleMap.put("Tuesday", new ArrayList<>());
+        scheduleMap.put("Wednesday", new ArrayList<>());
+        scheduleMap.put("Thursday", new ArrayList<>());
+        scheduleMap.put("Friday", new ArrayList<>());
+
+        // Group the courses by day of the week
+        for (CourseEntity course : courses) {
+            String dayOfWeek = course.getDay();
+            if (scheduleMap.containsKey(dayOfWeek)) {
+                scheduleMap.get(dayOfWeek).add(course);
+            }
+        }
+
+        // Return the schedule map
+        return ResponseEntity.ok(scheduleMap);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error fetching schedule.");
+    }
+}
+
+
+
+
+@PutMapping("/update-schedules")
+public ResponseEntity<?> updateAllTeachersSchedules() {
+    try {
+        // Fetch all teachers
+        List<TeacherEntity> teachers = teacherRepository.findAll();
+        if (teachers.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No teachers found.");
+        }
+
+        // Iterate over all teachers and update their schedules
+        for (TeacherEntity teacher : teachers) {
+            List<CourseEntity> courses = courseRepository.findByTeacherId(teacher.getTeacherId());
+
+            // Initialize the schedule map
+            Map<String, List<CourseEntity>> scheduleMap = new LinkedHashMap<>();
+            scheduleMap.put("Monday", new ArrayList<>());
+            scheduleMap.put("Tuesday", new ArrayList<>());
+            scheduleMap.put("Wednesday", new ArrayList<>());
+            scheduleMap.put("Thursday", new ArrayList<>());
+            scheduleMap.put("Friday", new ArrayList<>());
+
+            // Group courses by day and update the schedule
+            for (CourseEntity course : courses) {
+                String dayOfWeek = course.getDay();
+                if (scheduleMap.containsKey(dayOfWeek)) {
+                    scheduleMap.get(dayOfWeek).add(course);
+                }
+            }
+
+            // Update the teacher's schedule list
+            teacher.setSchedulelist(scheduleMap);
+            teacherRepository.save(teacher);
+        }
+
+        return ResponseEntity.ok("Schedules updated for all teachers.");
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating schedules.");
+    }
+}
+
+
 }

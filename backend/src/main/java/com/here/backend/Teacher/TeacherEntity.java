@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.index.Indexed;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.here.backend.Course.CourseEntity;
 
 @Document(collection = "teachers")
 public class TeacherEntity {
@@ -17,6 +18,7 @@ public class TeacherEntity {
     @JsonIgnore
     private String password;
     private List<String> courseId;
+    private Map<String, List<CourseEntity>> schedulelist; // Changed to hold days and courses
 
     public TeacherEntity() {}
 
@@ -37,8 +39,8 @@ public class TeacherEntity {
         return teacherId;
     }
 
-    public void setTeacherId(String id) {
-        this.teacherId = id;
+    public void setTeacherId(String teacherId) {
+        this.teacherId = teacherId;
     }
 
     public String getName() {
@@ -73,13 +75,22 @@ public class TeacherEntity {
         this.courseId = courseId;
     }
 
+    public Map<String, List<CourseEntity>> getSchedulelist() {
+        return schedulelist;
+    }
+
+    public void setSchedulelist(Map<String, List<CourseEntity>> schedulelist) {
+        this.schedulelist = schedulelist;
+    }
+
     @Override
     public String toString() {
         return "TeacherEntity{" +
-                "id='" + teacherId + '\'' +
+                "teacherId='" + teacherId + '\'' +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
-                ", courseIds=" + courseId +
+                ", courseId=" + courseId +
+                ", schedulelist=" + schedulelist +
                 '}';
     }
 }

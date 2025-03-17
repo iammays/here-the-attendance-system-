@@ -29,6 +29,10 @@ import com.here.backend.Security.payload.response.MessageResponse;
 import com.here.backend.Teacher.TeacherEntity;
 import com.here.backend.Teacher.TeacherRepository;
 import com.here.backend.Security.security.services.UserDetailsImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -100,29 +104,6 @@ public class AuthController {
 
         return ResponseEntity.ok(jwtResponse);
     }
-
-    // @PostMapping("/signup")
-    // public ResponseEntity<?> registerUserByEmail(@Valid @RequestBody SignupRequest signUpRequest) {
-    //     if (TeacherRepository.existsByEmail(signUpRequest.getEmail())) {
-    //         return ResponseEntity.badRequest().body("Error: Email is already in use!");
-    //     }
-
-    //     TeacherEntity user = new TeacherEntity(
-    //         signUpRequest.getUsername(),
-    //         signUpRequest.getEmail(),
-    //         encoder.encode(signUpRequest.getPassword())
-    //     );
-
-    //     TeacherRepository.save(user);
-    //     Authentication authentication = authenticationManager.authenticate(
-    //         new UsernamePasswordAuthenticationToken(signUpRequest.getUsername(), signUpRequest.getPassword())
-    //     );
-    //     SecurityContextHolder.getContext().setAuthentication(authentication);
-    //     String jwt = jwtUtils.generateJwtToken(authentication);
-    //     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-
-    //     return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail()));
-    // }
 
     @GetMapping("/Teacher")
     public Map<String, Object> Teacher(@AuthenticationPrincipal OAuth2User principal) {
