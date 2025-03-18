@@ -9,10 +9,6 @@ import com.here.backend.Course.CourseRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -37,6 +33,9 @@ public class StudentController {
         // get all students in a specific course ✅ getStudentsByCourse()
         // get all courses for a student ✅ getAllCoursesForStudent()
         // get all students with advisorID ✅ getStudentsByAdvisor()
+        // search on student name ✅ searchStudentsByName()
+        // get all student with them statuse in a specific course ✅  getStudentsByAttendanceStatus()
+        //  ✅ updateStudentAttendance()
 
 
         // Create a new student ✅ createStudent()
@@ -52,6 +51,12 @@ public class StudentController {
     @GetMapping("/name/{name}")
     public ResponseEntity<List<StudentEntity>> getStudentByName(@PathVariable String name) {
         List<StudentEntity> students = studentRepository.findByName(name);
+        return students.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(students);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<StudentEntity>> searchStudentsByName(@RequestParam String name) {
+        List<StudentEntity> students = studentRepository.findByNameRegex(name);
         return students.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(students);
     }
 
@@ -121,36 +126,83 @@ public class StudentController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found.");
     }
 
+    // API to get absences for a specific student
+    @GetMapping("/{studentId}/absences")
+    public ResponseEntity<Map<String, Integer>> getStudentAbsences(@PathVariable String studentId) {
+        Optional<StudentEntity> student = studentRepository.findByStudentId(studentId);
+            return student.map(s -> ResponseEntity.ok(s.getCourseAbsences()))
+            .orElse(ResponseEntity.notFound().build());
+    }
 
-   // API to get absences for a specific student
-   @GetMapping("/{studentId}/absences")
-   public ResponseEntity<Map<String, Integer>> getStudentAbsences(@PathVariable String studentId) {
-       Optional<StudentEntity> student = studentRepository.findByStudentId(studentId);
-       return student.map(s -> ResponseEntity.ok(s.getCourseAbsences()))
-                     .orElse(ResponseEntity.notFound().build());
-   }
+    @PostMapping("/{studentId}/absences/{courseId}")
+    public ResponseEntity<?> updateStudentAbsences(
+    @PathVariable String studentId,
+    @PathVariable String courseId,
+    @RequestBody Map<String, Integer> requestBody) {
 
-   @PostMapping("/{studentId}/absences/{courseId}")
-   public ResponseEntity<?> updateStudentAbsences(
-           @PathVariable String studentId,
-           @PathVariable String courseId,
-           @RequestBody Map<String, Integer> requestBody) {
-   
-       Optional<StudentEntity> student = studentRepository.findByStudentId(studentId);
-       if (student.isPresent()) {
-           StudentEntity updatedStudent = student.get();
-           Map<String, Integer> absencesMap = updatedStudent.getCourseAbsences();
-           
-           if (requestBody.containsKey("absences")) {
-               absencesMap.put(courseId, requestBody.get("absences"));
-               updatedStudent.setCourseAbsences(absencesMap);
-               studentRepository.save(updatedStudent);
-               return ResponseEntity.ok("Absence record updated successfully.");
-           }
-           return ResponseEntity.badRequest().body("Missing 'absences' field in request body.");
-       }
-       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found.");
-   }
-   
+        Optional<StudentEntity> student = studentRepository.findByStudentId(studentId);
+        if (student.isPresent()) {
+            StudentEntity updatedStudent = student.get();
+            Map<String, Integer> absencesMap = updatedStudent.getCourseAbsences();
+
+            if (requestBody.containsKey("absences")) {
+                absencesMap.put(courseId, requestBody.get("absences"));
+                updatedStudent.setCourseAbsences(absencesMap);
+                studentRepository.save(updatedStudent);
+                return ResponseEntity.ok("Absence record updated successfully.");
+            }
+            return ResponseEntity.badRequest().body("Missing 'absences' field in request body.");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found.");
+    }
+
+    @GetMapping("/course/{courseId}/attendance")
+    public ResponseEntity<List<StudentEntity>> getStudentsByAttendanceStatus(
+    @PathVariable String courseId,
+    @RequestParam(name = "status") String status) {
+
+        List<StudentEntity> students = studentRepository.findAll();
+        List<StudentEntity> filteredStudents = new ArrayList<>();
+
+        for (StudentEntity student : students) {
+            Map<String, String> attendance = student.getCourseAttendanceStatus();
+            if (attendance.containsKey(courseId) && attendance.get(courseId).equalsIgnoreCase(status)) {
+                filteredStudents.add(student);
+            }
+        }
+
+        return filteredStudents.isEmpty() 
+        ? ResponseEntity.notFound().build() 
+        : ResponseEntity.ok(filteredStudents);
+    }
+
+    @PostMapping("/{studentId}/attendance/{courseId}")
+    public ResponseEntity<?> updateStudentAttendance(
+    @PathVariable String studentId,
+    @PathVariable String courseId,
+    @RequestBody Map<String, String> requestBody) {
+
+        Optional<StudentEntity> student = studentRepository.findByStudentId(studentId);
+        if (student.isPresent()) {
+            StudentEntity updatedStudent = student.get();
+            Map<String, String> attendanceMap = updatedStudent.getCourseAttendanceStatus();
+
+            if (requestBody.containsKey("status")) {
+                String status = requestBody.get("status");
+                List<String> validStatuses = Arrays.asList("Present", "Absent", "Excused", "Late");
+
+                if (!validStatuses.contains(status)) {
+                    return ResponseEntity.badRequest().body("Invalid status. Use Present, Absent, Excused, or Late.");
+                }
+
+                attendanceMap.put(courseId, status);
+                updatedStudent.setCourseAttendanceStatus(attendanceMap);
+                studentRepository.save(updatedStudent);
+                return ResponseEntity.ok("Attendance updated successfully.");
+            }
+            return ResponseEntity.badRequest().body("Missing 'status' field in request body.");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found.");
+    }
 
 }

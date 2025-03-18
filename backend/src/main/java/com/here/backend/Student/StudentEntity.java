@@ -14,11 +14,12 @@ public class StudentEntity {
     private String email;
     private String advisor;
     private List<String> courseId;
-    private Map<String, Integer> courseAbsences; // Map of course ID to absence count
+    private Map<String, Integer> courseAbsences; 
+    private Map<String, String> courseAttendanceStatus;
 
-    // Default Constructor
     public StudentEntity() {
-        this.courseAbsences = new HashMap<>(); // Ensure courseAbsences is always initialized
+        this.courseAbsences = new HashMap<>();
+        this.courseAttendanceStatus = new HashMap<>();
     }
 
     // Parameterized Constructor
@@ -99,5 +100,13 @@ public class StudentEntity {
 
     public void setCourseAbsences(Map<String, Integer> courseAbsences) {
         this.courseAbsences = (courseAbsences != null) ? courseAbsences : new HashMap<>();
+    }
+
+    public Map<String, String> getCourseAttendanceStatus() {
+        return courseAttendanceStatus;
+    }
+
+    public void setCourseAttendanceStatus(Map<String, String> courseAttendanceStatus) {
+        this.courseAttendanceStatus = (courseAttendanceStatus != null) ? courseAttendanceStatus : new HashMap<>();
     }
 }
