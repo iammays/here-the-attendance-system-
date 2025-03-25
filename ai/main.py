@@ -20,7 +20,7 @@ pathlib.PosixPath = pathlib.WindowsPath
 
 # تحميل نموذج YOLOv5
 model = torch.hub.load("C:/Users/MaysM.M/yolov5", "custom", path="C:\\Users\\MaysM.M\\yolov5\\best.pt", source="local", force_reload=True)
-model.conf = 0.6  
+model.conf = 0.4  # تقليل الثقة لكشف المزيد
 model.iou = 0.4
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
@@ -28,7 +28,7 @@ print(f"Using device: {device}")
 
 # تحميل نموذج ArcFace
 app = FaceAnalysis(allowed_modules=['detection', 'recognition'])
-app.prepare(ctx_id=0 if torch.cuda.is_available() else -1, det_size=(640, 640))  # زيادة det_size لدقة أعلى
+app.prepare(ctx_id=0 if torch.cuda.is_available() else -1, det_size=(320, 320))
 
 # الاتصال بـ MongoDB
 mongo_client = MongoClient("mongodb://localhost:27017")
@@ -50,17 +50,17 @@ ensure_dir(yolo_cropped_dir)
 
 def detect_faces_from_frame(frame):
     original_shape = frame.shape
-    frame_resized = cv2.resize(frame, (640, 480))
+    frame_resized = cv2.resize(frame, (1280, 720))  # زيادة الدقة
     results = model(frame_resized)
     faces = []
     print(f"[DEBUG] Number of objects detected by YOLO: {len(results.xyxy[0])}")
     
     for *xyxy, conf, cls in results.xyxy[0]:
         x1, y1, x2, y2 = map(int, xyxy)
-        x1 = int(x1 * original_shape[1] / 640)
-        y1 = int(y1 * original_shape[0] / 480)
-        x2 = int(x2 * original_shape[1] / 640)
-        y2 = int(y2 * original_shape[0] / 480)
+        x1 = int(x1 * original_shape[1] / 1280)
+        y1 = int(y1 * original_shape[0] / 720)
+        x2 = int(x2 * original_shape[1] / 1280)
+        y2 = int(y2 * original_shape[0] / 720)
         x1, y1 = max(0, x1), max(0, y1)
         x2, y2 = min(original_shape[1], x2), min(original_shape[0], y2)
         
@@ -86,7 +86,7 @@ def recognize_faces_session(lecture_id, session_id, duration, video_path, detect
             print("❌ End of video or error reading frame.")
             break
         
-        frame = cv2.resize(frame, (640, 480))
+        frame = cv2.resize(frame, (1280, 720))  # زيادة الدقة
         frame_count += 1
         current_time = time.time()
 
@@ -99,21 +99,29 @@ def recognize_faces_session(lecture_id, session_id, duration, video_path, detect
         faces = detect_faces_from_frame(frame)
         for face in faces:
             x1, y1, x2, y2 = face["bbox"]
+            # توسيع الإحداثيات بنسبة 50%
+            padding = int(max(x2 - x1, y2 - y1) * 0.5)
+            x1 = max(0, x1 - padding)
+            y1 = max(0, y1 - padding)
+            x2 = min(frame.shape[1], x2 + padding)
+            y2 = min(frame.shape[0], y2 + padding)
             face_img = frame[y1:y2, x1:x2]
-            if face_img.shape[0] == 0 or face_img.shape[1] == 0:
+            print(f"[DEBUG] Cropped face size: {face_img.shape}")
+            if face_img.shape[0] < 64 or face_img.shape[1] < 64:
+                print(f"⚠️ Face too small at {x1},{y1},{x2},{y2}")
                 continue
 
             face_img_rgb = cv2.cvtColor(face_img, cv2.COLOR_BGR2RGB)
             detected_faces = app.get(face_img_rgb)
             if not detected_faces:
+                print(f"⚠️ ArcFace failed to detect face at {x1},{y1},{x2},{y2}")
                 continue
 
             face_embedding = detected_faces[0].embedding.flatten()
-            label, similarity = recognize_face(face_embedding, students_embeddings, threshold=0.4)  # تقليل الـ threshold
-            
+            label, similarity = recognize_face(face_embedding, students_embeddings, threshold=0.4)
+            print(f"[DEBUG] Face at {x1},{y1},{x2},{y2} - Label: {label}, Similarity: {similarity:.2f}")
             if label != "Unknown":
                 detection_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                # إضافة كل اكتشاف مع الوقت والـ session_id
                 if label not in detections:
                     detections[label] = []
                 detections[label].append({"time": detection_time, "session_id": session_id, "screenshot_path": screenshot_path})
@@ -135,16 +143,14 @@ def recognize_faces_session(lecture_id, session_id, duration, video_path, detect
 
 def save_final_attendance(lecture_id, detections, late_threshold):
     all_students = students_embeddings.keys()
-    
     for student_id in all_students:
         if student_id in detections:
-            # أول اكتشاف للطالب
-            first_detection = detections[student_id][0]  # أول عنصر في القايمة
+            first_detection = detections[student_id][0]
             session_id = first_detection["session_id"]
             status = "Present" if session_id == 0 else "Late"
             detection_time = first_detection["time"]
             screenshot_path = first_detection["screenshot_path"]
-            detection_count = len(detections[student_id])  # عدد مرات الاكتشاف
+            detection_count = len(detections[student_id])
         else:
             status = "Absent"
             detection_time = "undetected"
@@ -157,10 +163,9 @@ def save_final_attendance(lecture_id, detections, late_threshold):
             "status": status,
             "detection_time": detection_time,
             "screenshot_path": screenshot_path,
-            "detection_count": detection_count  # إضافة عدد الاكتشافات
+            "detection_count": detection_count
         }
         
-        # حفظ في MongoDB
         result = attendance_collection.update_one(
             {"lecture_id": lecture_id, "student_id": student_id},
             {"$set": attendance_record},
@@ -168,7 +173,6 @@ def save_final_attendance(lecture_id, detections, late_threshold):
         )
         print(f"✅ Saved final status for {student_id}: {status}, detected {detection_count} times")
         
-        # إرسال للـ Backend
         attendance_record_for_backend = attendance_record.copy()
         attendance_record_for_backend["_id"] = str(result.upserted_id) if result.upserted_id else str(attendance_collection.find_one({"lecture_id": lecture_id, "student_id": student_id})["_id"])
         try:
@@ -178,8 +182,7 @@ def save_final_attendance(lecture_id, detections, late_threshold):
             print(f"⚠️ Failed to send to backend: {e}")
 
 def run_camera_for_lecture(lecture_id, lecture_duration, late_threshold, interval, video_path):
-    detections = {}  # قاموس لتخزين كل الاكتشافات لكل طالب
-    
+    detections = {}
     print(f"Starting Present session for {late_threshold} seconds...")
     recognize_faces_session(lecture_id, 0, late_threshold, video_path, detections)
     
@@ -196,7 +199,6 @@ def run_camera_for_lecture(lecture_id, lecture_duration, late_threshold, interva
             print(f"Starting Late session {session_id}...")
             recognize_faces_session(lecture_id, session_id, interval, video_path, detections)
     
-    # حفظ النتيجة النهائية بناءً على أول اكتشاف
     save_final_attendance(lecture_id, detections, late_threshold)
 
 if __name__ == "__main__":

@@ -1,3 +1,6 @@
+#ai\app.py
+
+
 from flask import Flask, request
 from main import run_camera_for_lecture
 
