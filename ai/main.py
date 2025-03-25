@@ -16,20 +16,19 @@ from utils.general import scale_boxes
 from face_utils import load_student_embeddings, recognize_face, ensure_dir
 
 # حل مشكلة توافق المسارات في Windows
-temp = pathlib.PosixPath
 pathlib.PosixPath = pathlib.WindowsPath
 
 # تحميل نموذج YOLOv5
 model = torch.hub.load("C:/Users/MaysM.M/yolov5", "custom", path="C:\\Users\\MaysM.M\\yolov5\\best.pt", source="local", force_reload=True)
 model.conf = 0.6  
-model.iou = 0.1
+model.iou = 0.4
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 print(f"Using device: {device}")
 
 # تحميل نموذج ArcFace
 app = FaceAnalysis(allowed_modules=['detection', 'recognition'])
-app.prepare(ctx_id=0 if torch.cuda.is_available() else -1, det_size=(320, 320))
+app.prepare(ctx_id=0 if torch.cuda.is_available() else -1, det_size=(640, 640))  # زيادة det_size لدقة أعلى
 
 # الاتصال بـ MongoDB
 mongo_client = MongoClient("mongodb://localhost:27017")
@@ -70,7 +69,7 @@ def detect_faces_from_frame(frame):
             faces.append(face_location)
     return faces
 
-def recognize_faces_session(lecture_id, session_id, duration, video_path):
+def recognize_faces_session(lecture_id, session_id, duration, video_path, detections):
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         print(f"❌ Failed to open video: {video_path}")
@@ -78,9 +77,8 @@ def recognize_faces_session(lecture_id, session_id, duration, video_path):
     
     start_time = time.time()
     frame_count = 0
-    first_detection = {}
     last_screenshot_time = 0
-    screenshot_interval = 5
+    screenshot_interval = 1
     
     while cap.isOpened() and (time.time() - start_time) < duration:
         ret, frame = cap.read()
@@ -111,14 +109,17 @@ def recognize_faces_session(lecture_id, session_id, duration, video_path):
                 continue
 
             face_embedding = detected_faces[0].embedding.flatten()
-            label, similarity = recognize_face(face_embedding, students_embeddings)
+            label, similarity = recognize_face(face_embedding, students_embeddings, threshold=0.4)  # تقليل الـ threshold
             
-            if label != "Unknown" and label not in first_detection:
+            if label != "Unknown":
                 detection_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                first_detection[label] = detection_time
-                face_path = f"{known_faces_dir}/face_{session_id}_{label}_{similarity:.2f}.jpg"
+                # إضافة كل اكتشاف مع الوقت والـ session_id
+                if label not in detections:
+                    detections[label] = []
+                detections[label].append({"time": detection_time, "session_id": session_id, "screenshot_path": screenshot_path})
+                face_path = f"{known_faces_dir}/face_{session_id}_{label}_{similarity:.2f}_{frame_count}.jpg"
                 cv2.imwrite(face_path, cv2.cvtColor(face_img_rgb, cv2.COLOR_RGB2BGR))
-                print(f"✅ First detection of {label} at {detection_time}")
+                print(f"✅ Detected {label} at {detection_time}, similarity: {similarity:.2f}")
             
             color = (0, 255, 0) if label != "Unknown" else (0, 0, 255)
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
@@ -129,37 +130,61 @@ def recognize_faces_session(lecture_id, session_id, duration, video_path):
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-    # حفظ النتائج في MongoDB وإرسالها للـ Backend
-    for student_id in students_embeddings.keys():
-        detection_time = first_detection.get(student_id, "undetected")
-        attendance_record = {
-            "lecture_id": lecture_id,
-            "session_id": session_id,
-            "student_id": student_id,
-            "detection_time": detection_time,
-            "screenshot_path": screenshot_path if detection_time != "undetected" else None
-        }
-        # حفظ في MongoDB
-        result = attendance_collection.insert_one(attendance_record)
-        
-        # تحويل ObjectId لـ String قبل الإرسال للـ Backend
-        attendance_record_for_backend = attendance_record.copy()
-        attendance_record_for_backend["_id"] = str(result.inserted_id)  # تحويل ObjectId لـ String
-        try:
-            requests.post("http://localhost:8080/api/attendances", json=attendance_record_for_backend)
-            print(f"✅ Sent attendance for {student_id} to backend")
-        except Exception as e:
-            print(f"⚠️ Failed to send to backend: {e}")
-
     cap.release()
     cv2.destroyAllWindows()
 
+def save_final_attendance(lecture_id, detections, late_threshold):
+    all_students = students_embeddings.keys()
+    
+    for student_id in all_students:
+        if student_id in detections:
+            # أول اكتشاف للطالب
+            first_detection = detections[student_id][0]  # أول عنصر في القايمة
+            session_id = first_detection["session_id"]
+            status = "Present" if session_id == 0 else "Late"
+            detection_time = first_detection["time"]
+            screenshot_path = first_detection["screenshot_path"]
+            detection_count = len(detections[student_id])  # عدد مرات الاكتشاف
+        else:
+            status = "Absent"
+            detection_time = "undetected"
+            screenshot_path = None
+            detection_count = 0
+        
+        attendance_record = {
+            "lecture_id": lecture_id,
+            "student_id": student_id,
+            "status": status,
+            "detection_time": detection_time,
+            "screenshot_path": screenshot_path,
+            "detection_count": detection_count  # إضافة عدد الاكتشافات
+        }
+        
+        # حفظ في MongoDB
+        result = attendance_collection.update_one(
+            {"lecture_id": lecture_id, "student_id": student_id},
+            {"$set": attendance_record},
+            upsert=True
+        )
+        print(f"✅ Saved final status for {student_id}: {status}, detected {detection_count} times")
+        
+        # إرسال للـ Backend
+        attendance_record_for_backend = attendance_record.copy()
+        attendance_record_for_backend["_id"] = str(result.upserted_id) if result.upserted_id else str(attendance_collection.find_one({"lecture_id": lecture_id, "student_id": student_id})["_id"])
+        try:
+            requests.post("http://localhost:8080/api/attendances", json=attendance_record_for_backend)
+            print(f"✅ Sent final attendance for {student_id} to backend")
+        except Exception as e:
+            print(f"⚠️ Failed to send to backend: {e}")
+
 def run_camera_for_lecture(lecture_id, lecture_duration, late_threshold, interval, video_path):
+    detections = {}  # قاموس لتخزين كل الاكتشافات لكل طالب
+    
     print(f"Starting Present session for {late_threshold} seconds...")
-    recognize_faces_session(lecture_id, 0, late_threshold, video_path)
+    recognize_faces_session(lecture_id, 0, late_threshold, video_path, detections)
     
     remaining_time = lecture_duration - late_threshold
-    num_sessions = remaining_time // interval  # عدد الجلسات بناءً على الـ interval
+    num_sessions = remaining_time // interval
     print(f"Number of Late sessions: {num_sessions}")
     
     elapsed_time = late_threshold
@@ -169,8 +194,11 @@ def run_camera_for_lecture(lecture_id, lecture_duration, late_threshold, interva
         elapsed_time += interval
         if elapsed_time < lecture_duration:
             print(f"Starting Late session {session_id}...")
-            recognize_faces_session(lecture_id, session_id, interval, video_path)
+            recognize_faces_session(lecture_id, session_id, interval, video_path, detections)
+    
+    # حفظ النتيجة النهائية بناءً على أول اكتشاف
+    save_final_attendance(lecture_id, detections, late_threshold)
 
 if __name__ == "__main__":
-    video_path = "8.mp4"  # مسار الفيديو
-      
+    video_path = "C:/Users/MaysM.M/face-attendance-system/8.mp4"
+    run_camera_for_lecture("lecture_1", 300, 60, 30, video_path)

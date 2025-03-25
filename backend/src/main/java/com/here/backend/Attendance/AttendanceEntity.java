@@ -12,11 +12,12 @@ public class AttendanceEntity {
     private String id;
     private String lectureId;
     private String studentId;
-    private List<SessionAttendance> sessions;  // قائمة بكل جلسة ووقت الظهور
+    private String status;  // حقل جديد
+    private List<SessionAttendance> sessions;
 
     public static class SessionAttendance {
         private int sessionId;
-        private String detectionTime;  // "undetected" إذا لم يتم الاكتشاف
+        private String detectionTime;
 
         public SessionAttendance(int sessionId, String detectionTime) {
             this.sessionId = sessionId;
@@ -35,6 +36,8 @@ public class AttendanceEntity {
     public void setLectureId(String lectureId) { this.lectureId = lectureId; }
     public String getStudentId() { return studentId; }
     public void setStudentId(String studentId) { this.studentId = studentId; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
     public List<SessionAttendance> getSessions() { return sessions; }
     public void setSessions(List<SessionAttendance> sessions) { this.sessions = sessions; }
 }

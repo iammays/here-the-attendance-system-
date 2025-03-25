@@ -15,7 +15,6 @@ public class AttendanceController {
     @Autowired
     private AttendanceService attendanceService;
 
-    // استقبال بيانات الحضور من Python
     @PostMapping
     public ResponseEntity<String> saveAttendance(@RequestBody AttendanceRecord record) {
         AttendanceEntity attendance = attendanceRepository.findByLectureIdAndStudentId(record.getLectureId(), record.getStudentId());
@@ -26,11 +25,11 @@ public class AttendanceController {
             attendance.setSessions(new java.util.ArrayList<>());
         }
         attendance.getSessions().add(new AttendanceEntity.SessionAttendance(record.getSessionId(), record.getDetectionTime()));
+        attendance.setStatus(record.getStatus());  // حفظ الـ status الجديد
         attendanceRepository.save(attendance);
         return ResponseEntity.ok("Attendance saved");
     }
 
-    // عرض تقرير الحضور
     @GetMapping("/{lectureId}/{studentId}")
     public ResponseEntity<?> getAttendanceReport(@PathVariable String lectureId, @PathVariable String studentId, @RequestParam int lateThreshold) {
         String status = attendanceService.determineStatus(lectureId, studentId, lateThreshold);
@@ -46,6 +45,7 @@ class AttendanceRecord {
     private String studentId;
     private String detectionTime;
     private String screenshotPath;
+    private String status;  // حقل جديد للـ status
 
     public String getLectureId() { return lectureId; }
     public void setLectureId(String lectureId) { this.lectureId = lectureId; }
@@ -57,6 +57,8 @@ class AttendanceRecord {
     public void setDetectionTime(String detectionTime) { this.detectionTime = detectionTime; }
     public String getScreenshotPath() { return screenshotPath; }
     public void setScreenshotPath(String screenshotPath) { this.screenshotPath = screenshotPath; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }
 
 class AttendanceReport {
