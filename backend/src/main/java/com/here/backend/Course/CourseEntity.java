@@ -2,11 +2,13 @@ package com.here.backend.Course;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "courses")
 public class CourseEntity {
     @Id
     private String courseId;
+    @Field(name = "name")
     private String courseName;
     private String roomId;
     private String teacherId;

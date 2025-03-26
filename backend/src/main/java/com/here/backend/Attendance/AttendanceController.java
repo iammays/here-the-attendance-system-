@@ -4,6 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.here.backend.Course.CourseEntity;
 import com.here.backend.Course.CourseRepository;
 import com.here.backend.Emails.EmailSenderService;
@@ -12,6 +15,8 @@ import com.here.backend.Student.StudentRepository;
 import com.here.backend.Teacher.TeacherEntity;
 import com.here.backend.Teacher.TeacherRepository;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -222,33 +227,40 @@ public class AttendanceController {
                     int currentAbsences = student.getCourseAbsences().getOrDefault(courseId, 0);
                     System.out.println("Current Absences for course " + courseId + ": " + currentAbsences);
     
-                    // Fetch redundant occurrences of this course from the course repository
-                    // int redundantOccurrences = courseRepository.countByCourseId(courseId);
-                    // System.out.println("Redundant Occurrences for course " + courseId + ": " + redundantOccurrences);
-                    // String courseName = courseRepository.findByCourseId(courseId)
-                    // .map(CourseEntity::getName)
-                    // .orElse(null);
-                    
 
-                    Optional<CourseEntity> courss = courseRepository.findByCourseId(courseId);
-                    String courseName =courss.get().getName();
-                    // Loop through the list of courses to find the one with the matching courseId
-                    // CourseEntity matchingCourse = allCourses.stream()
-                    //     .filter(course -> courseId.equals(course.getCourseId()))  // Match the courseId
-                    //     .findFirst()  // Get the first matching course (if any)
-                    //     .orElse(null);  // Return null if no match is found
-                    
-                    // Now check if a course was found and print its name
-                    // if (matchingCourse != null) {
-                    //      courseName = matchingCourse.getName();
-                    //     System.out.println("Course Name: " + courseName);
-                    // } else {
-                    //     System.out.println("Course not found with ID: " + courseId);
-                    // }                    
+
+                    String courseNamee = courseRepository.findNameByCourseId(courseId);
+                   ObjectMapper objectMapper = new ObjectMapper();
+JsonNode jsonNode = null;
+try {
+    jsonNode = objectMapper.readTree(courseNamee);
+} catch (JsonProcessingException e) {
+    // TODO Auto-generated catch block
+    e.printStackTrace();
+}
+String courseName = jsonNode.get("name").asText();
+
+System.out.println(courseName); // Output: Course_7
+
+                   
                     System.out.println("couuursseee naaammeee "+courseName);
-                    int redundantOccurrences = courseRepository.countByCourseName(courseName);
-                    System.out.println("Redundant Occurrences for course " + courseId + ": " + redundantOccurrences);
 
+                    long redundantOccurrences = courseRepository.findAll().stream()
+                    .peek(course -> System.out.println("Course: " + course)) // Print each course before filtering
+                    .filter(course -> {
+                        System.out.println("Checking course name: " + course.getName());
+                        System.out.println("Comparing '" + courseName + "' with '" + course.getName() + "'");
+                        boolean matches = courseName.equals(course.getName());
+                        System.out.println("Match result: " + matches);
+                        return matches;
+                    })
+                    .count();
+                
+                System.out.println("Final count: " + redundantOccurrences);
+
+
+
+                    System.out.println("Redundant Occurrences for " + courseName + ": " + redundantOccurrences);
                     // Increment absence count
                     int newAbsences = currentAbsences + 1;
                     student.getCourseAbsences().put(courseId, newAbsences);
@@ -291,12 +303,13 @@ public class AttendanceController {
     
                     // First Detention Warning
                     if (newAbsences == redundantOccurrences) {
+                      
                         emailSubject = "First Detention Warning: " + courseId;
                         emailBody = "Warning: You have received your first detention due to multiple absences in course " + courseId + ".";
                     }
     
                     // WF Warning
-                    if (newAbsences >= redundantOccurrences * 2) {
+                    if (newAbsences > redundantOccurrences * 2) {
                         emailSubject = "WF Warning: " + courseId;
                         emailBody = "Warning: Your absences have reached a critical level, and you are at risk of being withdrawn from course " + courseId + ".";
     
@@ -309,6 +322,10 @@ public class AttendanceController {
                             System.out.println("Sending WF Warning to Advisor: " + advisorEmail);
                             emailSenderService.sendSimpleEmail(advisorEmail, "WF Advisor Email: " + courseId, emailBody);
                         }
+
+                        student.getCourseWfStatus().put(courseId, true); // Set WF for this course
+                        System.out.println("Student WF status set to true for course " + courseId);  
+                        studentRepository.save(student);
                     }
     
                     // Send email to student

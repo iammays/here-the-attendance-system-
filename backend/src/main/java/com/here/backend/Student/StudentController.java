@@ -149,4 +149,15 @@ public class StudentController {
    }
    
 
+
+   @GetMapping("/{studentId}/courses/{courseId}/wf-status")
+   public ResponseEntity<Boolean> getWfStatusForCourse(
+           @PathVariable String studentId,
+           @PathVariable String courseId) {
+       return studentRepository.findById(studentId)
+               .map(student -> ResponseEntity.ok(student.getCourseWfStatus().getOrDefault(courseId, false)))
+               .orElseGet(() -> ResponseEntity.notFound().build());
+   }
+
+
 }

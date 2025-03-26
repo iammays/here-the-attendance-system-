@@ -12,6 +12,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.HttpStatus;
+
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -230,6 +235,149 @@ public ResponseEntity<?> updateAllTeachersSchedules() {
     } catch (Exception e) {
         e.printStackTrace();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating schedules.");
+    }
+}
+
+
+// @GetMapping("/{teacherId}/upcoming-classes")
+// public ResponseEntity<?> getUpcomingClassesForTeacher(@PathVariable String teacherId) {
+//     try {
+//         // Get current date and time
+//         LocalDateTime now = LocalDateTime.now();
+//         DayOfWeek currentDay = now.getDayOfWeek();
+        
+//         // Fetch teacher
+//         TeacherEntity teacher = teacherRepository.findByTeacherId(teacherId)
+//             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Teacher not found"));
+
+//         // Fetch all courses for the teacher
+//         List<CourseEntity> courses = courseRepository.findByTeacherId(teacherId);
+//         if (courses.isEmpty()) {
+//             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No courses found for this teacher.");
+//         }
+
+//         // Create a list to store upcoming sessions
+//         List<Map<String, Object>> upcomingSessions = new ArrayList<>();
+        
+//         // Calculate upcoming sessions for the next 7 days (to ensure we get at least 3 sessions)
+//         for (int daysAhead = 0; daysAhead < 7 && upcomingSessions.size() < 3; daysAhead++) {
+//             LocalDateTime targetDateTime = now.plusDays(daysAhead);
+//             String targetDay = targetDateTime.getDayOfWeek().toString().substring(0, 1) + 
+//                             targetDateTime.getDayOfWeek().toString().substring(1).toLowerCase();
+
+//             // Check each course for matching day
+//             for (CourseEntity course : courses) {
+//                 if (course.getDay().equals(targetDay)) {
+//                     // Assuming CourseEntity has startTime field of type LocalTime
+//                     LocalTime courseTime = course.getStartTime(); // Add this field to CourseEntity if not present
+//                     LocalDateTime sessionDateTime = targetDateTime.with(courseTime);
+
+//                     // Only include future sessions
+//                     if (sessionDateTime.isAfter(now) && upcomingSessions.size() < 3) {
+//                         Map<String, Object> sessionInfo = new HashMap<>();
+//                         sessionInfo.put("courseId", course.getCourseId());
+//                         sessionInfo.put("courseName", course.getName()); // Assuming name field exists
+//                         sessionInfo.put("day", course.getDay());
+//                         sessionInfo.put("startTime", course.getStartTime());
+//                         sessionInfo.put("dateTime", sessionDateTime);
+//                         upcomingSessions.add(sessionInfo);
+//                     }
+//                 }
+//             }
+//         }
+
+//         // Sort sessions by date/time
+//         upcomingSessions.sort(Comparator.comparing(m -> (LocalDateTime) m.get("dateTime")));
+
+//         // Limit to 3 sessions
+//         if (upcomingSessions.size() > 3) {
+//             upcomingSessions = upcomingSessions.subList(0, 3);
+//         }
+
+//         if (upcomingSessions.isEmpty()) {
+//             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No upcoming classes found for this teacher.");
+//         }
+
+//         return ResponseEntity.ok(upcomingSessions);
+
+//     } catch (Exception e) {
+//         logger.error("Error fetching upcoming classes: ", e);
+//         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//             .body("Error fetching upcoming classes: " + e.getMessage());
+//     }
+// }
+
+
+
+@GetMapping("/{teacherId}/upcoming-classes")
+public ResponseEntity<?> getUpcomingClassesForTeacher(@PathVariable String teacherId) {
+    try {
+        // Get current date and time
+        LocalDateTime now = LocalDateTime.now();
+        DayOfWeek currentDay = now.getDayOfWeek();
+        
+        // Fetch teacher
+        TeacherEntity teacher = teacherRepository.findByTeacherId(teacherId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Teacher not found"));
+
+        // Fetch all courses for the teacher
+        List<CourseEntity> courses = courseRepository.findByTeacherId(teacherId);
+        if (courses.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No courses found for this teacher.");
+        }
+
+        // Create a list to store upcoming sessions
+        List<Map<String, Object>> upcomingSessions = new ArrayList<>();
+        
+        // DateTimeFormatter for parsing string time (assuming format "HH:mm")
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        
+        // Calculate upcoming sessions for the next 7 days (to ensure we get at least 3 sessions)
+        for (int daysAhead = 0; daysAhead < 7 && upcomingSessions.size() < 3; daysAhead++) {
+            LocalDateTime targetDateTime = now.plusDays(daysAhead);
+            String targetDay = targetDateTime.getDayOfWeek().toString().substring(0, 1) + 
+                            targetDateTime.getDayOfWeek().toString().substring(1).toLowerCase();
+
+            // Check each course for matching day
+            for (CourseEntity course : courses) {
+                if (course.getDay().equals(targetDay)) {
+                    // Get time as String and convert to LocalTime for comparison
+                    String courseTimeStr = course.getStartTime(); // Now a String
+                    LocalTime courseTime = LocalTime.parse(courseTimeStr, timeFormatter);
+                    LocalDateTime sessionDateTime = targetDateTime.with(courseTime);
+
+                    // Only include future sessions
+                    if (sessionDateTime.isAfter(now) && upcomingSessions.size() < 3) {
+                        Map<String, Object> sessionInfo = new HashMap<>();
+                        sessionInfo.put("courseId", course.getCourseId());
+                        sessionInfo.put("courseName", course.getName());
+                        sessionInfo.put("day", course.getDay());
+                        sessionInfo.put("startTime", courseTimeStr); // Return original string time
+                        sessionInfo.put("dateTime", sessionDateTime);
+                        upcomingSessions.add(sessionInfo);
+                    }
+                }
+            }
+        }
+
+        // Sort sessions by date/time
+        upcomingSessions.sort(Comparator.comparing(m -> (LocalDateTime) m.get("dateTime")));
+
+        // Limit to 3 sessions
+        if (upcomingSessions.size() > 3) {
+            upcomingSessions = upcomingSessions.subList(0, 3);
+        }
+
+        if (upcomingSessions.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No upcoming classes found for this teacher.");
+        }
+
+        return ResponseEntity.ok(upcomingSessions);
+
+    } catch (Exception e) {
+        logger.error("Error fetching upcoming classes: ", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Error fetching upcoming classes: " + e.getMessage());
     }
 }
 
