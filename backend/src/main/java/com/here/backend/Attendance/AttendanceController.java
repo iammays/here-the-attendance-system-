@@ -1,6 +1,3 @@
-//backend\src\main\java\com\here\backend\Attendance\AttendanceController.java
-
-
 package com.here.backend.Attendance;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/attendances")
@@ -28,7 +26,7 @@ public class AttendanceController {
             attendance.setSessions(new java.util.ArrayList<>());
         }
         attendance.getSessions().add(new AttendanceEntity.SessionAttendance(record.getSessionId(), record.getDetectionTime()));
-        attendance.setStatus(record.getStatus());  // حفظ الـ status الجديد
+        attendance.setStatus(record.getStatus());
         attendanceRepository.save(attendance);
         return ResponseEntity.ok("Attendance saved");
     }
@@ -40,42 +38,28 @@ public class AttendanceController {
         AttendanceEntity attendance = attendanceRepository.findByLectureIdAndStudentId(lectureId, studentId);
         return ResponseEntity.ok(new AttendanceReport(status, detectionCount, attendance.getSessions()));
     }
-}
 
-class AttendanceRecord {
-    private String lectureId;
-    private int sessionId;
-    private String studentId;
-    private String detectionTime;
-    private String screenshotPath;
-    private String status;  // حقل جديد للـ status
-
-    public String getLectureId() { return lectureId; }
-    public void setLectureId(String lectureId) { this.lectureId = lectureId; }
-    public int getSessionId() { return sessionId; }
-    public void setSessionId(int sessionId) { this.sessionId = sessionId; }
-    public String getStudentId() { return studentId; }
-    public void setStudentId(String studentId) { this.studentId = studentId; }
-    public String getDetectionTime() { return detectionTime; }
-    public void setDetectionTime(String detectionTime) { this.detectionTime = detectionTime; }
-    public String getScreenshotPath() { return screenshotPath; }
-    public void setScreenshotPath(String screenshotPath) { this.screenshotPath = screenshotPath; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-}
-
-class AttendanceReport {
-    private String status;
-    private int detectionCount;
-    private List<AttendanceEntity.SessionAttendance> sessions;
-
-    public AttendanceReport(String status, int detectionCount, List<AttendanceEntity.SessionAttendance> sessions) {
-        this.status = status;
-        this.detectionCount = detectionCount;
-        this.sessions = sessions;
+    @PutMapping("/{lectureId}/{studentId}")
+    public ResponseEntity<String> updateAttendanceStatus(
+            @PathVariable String lectureId,
+            @PathVariable String studentId,
+            @RequestBody Map<String, String> body) {
+        AttendanceEntity attendance = attendanceRepository.findByLectureIdAndStudentId(lectureId, studentId);
+        if (attendance == null) {
+            return ResponseEntity.notFound().build();
+        }
+        String newStatus = body.get("status");
+        if (!List.of("Present", "Late", "Absent", "Excuse").contains(newStatus)) {
+            return ResponseEntity.badRequest().body("Invalid status. Use: Present, Late, Absent, Excuse");
+        }
+        attendance.setStatus(newStatus);
+        attendanceRepository.save(attendance);
+        return ResponseEntity.ok("Attendance status updated to " + newStatus);
     }
 
-    public String getStatus() { return status; }
-    public int getDetectionCount() { return detectionCount; }
-    public List<AttendanceEntity.SessionAttendance> getSessions() { return sessions; }
+    @DeleteMapping("/{lectureId}")
+    public ResponseEntity<String> deleteAttendance(@PathVariable String lectureId) {
+        attendanceRepository.deleteByLectureId(lectureId);
+        return ResponseEntity.ok("Attendance records for lecture " + lectureId + " deleted");
+    }
 }

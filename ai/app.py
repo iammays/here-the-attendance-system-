@@ -1,5 +1,3 @@
-#ai\app.py
-
 from flask import Flask, request
 from main import run_camera_for_lecture
 
@@ -12,7 +10,7 @@ def start_camera():
     lecture_duration = data['lecture_duration']
     late_threshold = data['late_threshold']
     interval = data['interval']
-    video_path = data.get('video_path', "C:/Users/MaysM.M/face-attendance-system/8.mp4")  # تحديث المسار
+    video_path = data.get('video_path', "C:/Users/MaysM.M/face-attendance-system/8.mp4")
     run_camera_for_lecture(lecture_id, lecture_duration, late_threshold, interval, video_path)
     return {"status": "Camera started"}
 

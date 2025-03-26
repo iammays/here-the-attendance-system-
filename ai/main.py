@@ -192,9 +192,74 @@ def save_final_attendance(lecture_id, detections, late_threshold):
 
 def run_camera_for_lecture(lecture_id, lecture_duration, late_threshold, interval, video_path):
     detections = {}
-    print(f"Starting Present session for {late_threshold} seconds...")
-    recognize_faces_session(lecture_id, 0, 60, video_path, detections)
+    cap = cv2.VideoCapture(video_path)  # نفتح الفيديو مرة واحدة فقط
+    if not cap.isOpened():
+        print(f"❌ Failed to open video: {video_path}")
+        return
     
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))  # عدد الإطارات الكلي
+    fps = cap.get(cv2.CAP_PROP_FPS)  # معدل الإطارات في الثانية
+    print(f"[DEBUG] Video total frames: {total_frames}, FPS: {fps}")
+
+    def process_session(session_id, duration, start_frame):
+        cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)  # نحدد بداية السيشن
+        start_time = time.time()
+        frame_count = 0
+        last_screenshot_time = 0
+        screenshot_interval = 1
+        
+        while cap.isOpened() and (time.time() - start_time) < duration:
+            ret, frame = cap.read()
+            if not ret or frame is None:
+                print(f"❌ End of video reached in session {session_id}")
+                break
+            
+            frame_count += 1
+            current_time = time.time()
+            if current_time - last_screenshot_time >= screenshot_interval:
+                screenshot_path = f"{screenshots_dir}/frame_{session_id}_{frame_count}.jpg"
+                cv2.imwrite(screenshot_path, frame)
+                last_screenshot_time = current_time
+                print(f"📸 Screenshot saved: {screenshot_path}")
+
+            faces = detect_faces_from_frame(frame)
+            for face in faces:
+                x1, y1, x2, y2 = face["bbox"]
+                padding = int(max(x2 - x1, y2 - y1) * 0.5)
+                x1 = max(0, x1 - padding)
+                y1 = max(0, y1 - padding)
+                x2 = min(frame.shape[1], x2 + padding)
+                y2 = min(frame.shape[0], y2 + padding)
+                face_img = frame[y1:y2, x1:x2]
+                if face_img.shape[0] < 40 or face_img.shape[1] < 40:
+                    continue
+
+                face_img_rgb = cv2.cvtColor(face_img, cv2.COLOR_BGR2RGB)
+                detected_faces = app.get(face_img_rgb)
+                if not detected_faces:
+                    continue
+
+                face_embedding = detected_faces[0].embedding.flatten()
+                label, similarity = recognize_face(face_embedding, students_embeddings, threshold=0.6)
+                if label != "Unknown":
+                    detection_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    if label not in detections:
+                        detections[label] = []
+                    detections[label].append({"time": detection_time, "session_id": session_id, "screenshot_path": screenshot_path})
+                    print(f"✅ Detected {label} at {detection_time}, similarity: {similarity:.2f}")
+
+            cv2.imshow("Face Recognition", frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+        
+        current_frame = int(cap.get(cv2.CAP_PROP_POS_FRAMES))  # نرجع آخر إطار وصلناله
+        return current_frame
+
+    # سيشن Present
+    print(f"Starting Present session for {late_threshold} seconds...")
+    current_frame = process_session(0, late_threshold, 0)
+
+    # سيشنات Late
     remaining_time = lecture_duration - late_threshold
     num_sessions = remaining_time // 60
     print(f"Number of Late sessions: {num_sessions}")
@@ -204,12 +269,17 @@ def run_camera_for_lecture(lecture_id, lecture_duration, late_threshold, interva
         print(f"Waiting 10 seconds before session {session_id}...")
         time.sleep(10)
         elapsed_time += 60
-        if elapsed_time < lecture_duration:
+        if elapsed_time < lecture_duration and current_frame < total_frames:
             print(f"Starting Late session {session_id}...")
-            recognize_faces_session(lecture_id, session_id, 60, video_path, detections)
+            current_frame = process_session(session_id, 60, current_frame)
+        else:
+            print(f"[DEBUG] Lecture duration ({lecture_duration}s) or end of video reached, stopping sessions.")
+            break
     
+    cap.release()
+    cv2.destroyAllWindows()
     save_final_attendance(lecture_id, detections, late_threshold)
-
+    
 if __name__ == "__main__":
     video_path = "C:/Users/MaysM.M/face-attendance-system/8.mp4"
     run_camera_for_lecture("lecture_1", 300, 60, 10, video_path)

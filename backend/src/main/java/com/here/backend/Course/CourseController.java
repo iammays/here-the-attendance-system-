@@ -9,6 +9,7 @@ import org.springframework.web.client.RestTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.*;
+import org.springframework.http.HttpStatus;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -119,7 +120,31 @@ private CourseService courseService;
 @Autowired
 private RestTemplate restTemplate;
 
+// إنشاء محاضرة جديدة يدويًا
+@PostMapping
+public ResponseEntity<CourseEntity> createCourse(@RequestBody CourseEntity course) {
+    CourseEntity savedCourse = courseRepository.save(course);
+    return ResponseEntity.status(HttpStatus.CREATED).body(savedCourse);
+}
 
+@PostMapping("/startCamera/{courseId}")
+public ResponseEntity<String> startCamera(@PathVariable String courseId, @RequestParam int lateThreshold, @RequestBody Map<String, Object> body) {
+    String lectureId = (String) body.get("lecture_id");
+    int lectureDuration = (int) body.get("lecture_duration");
+    int lateThresholdSeconds = (int) body.get("late_threshold");
+    int interval = (int) body.get("interval");
+    String videoPath = (String) body.get("video_path");
+
+    Map<String, Object> params = new HashMap<>();
+    params.put("lecture_id", lectureId);
+    params.put("lecture_duration", lectureDuration);
+    params.put("late_threshold", lateThresholdSeconds);
+    params.put("interval", interval);
+    params.put("video_path", videoPath);
+
+    restTemplate.postForObject("http://localhost:5000/start", params, String.class);
+    return ResponseEntity.ok("Camera started for lecture " + lectureId);
+}
 
 
 // دالة مساعدة لحساب المدة من startTime وendTime
@@ -143,26 +168,5 @@ private int calculateDuration(String startTime, String endTime) {
     String videoPath = course.getVideoPath(); // لو أضفتِ حقل videoPath في CourseEntity
     */
 
-    // إعداد المعطيات لإرسالها إلى Python
-@PostMapping("/startCamera/{courseId}")
-public ResponseEntity<String> startCamera(@PathVariable String courseId, @RequestParam int lateThreshold, @RequestBody Map<String, Object> body) {
-    // جلب القيم من البادي بدل القيم اليدوية
-    String lectureId = (String) body.get("lecture_id");
-    int lectureDuration = (int) body.get("lecture_duration");
-    int lateThresholdSeconds = (int) body.get("late_threshold");
-    int interval = (int) body.get("interval");
-    String videoPath = (String) body.get("video_path");
 
-    // إعداد المعطيات لإرسالها إلى Python
-    Map<String, Object> params = new HashMap<>();
-    params.put("lecture_id", lectureId);
-    params.put("lecture_duration", lectureDuration);
-    params.put("late_threshold", lateThresholdSeconds);
-    params.put("interval", interval);
-    params.put("video_path", videoPath);
-
-    // إرسال الطلب إلى Flask
-    restTemplate.postForObject("http://localhost:5000/start", params, String.class);
-    return ResponseEntity.ok("Camera started");
-}
 }
