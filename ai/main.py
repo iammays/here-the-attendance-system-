@@ -1,6 +1,5 @@
 import cv2
 import torch
-import numpy as np
 import pymongo
 from insightface.app import FaceAnalysis
 from pymongo import MongoClient
@@ -9,18 +8,19 @@ import sys
 import time
 from datetime import datetime
 import requests
+import json
+from face_utils import load_student_embeddings, recognize_face, ensure_dir
 
 # إعداد المسار المحلي لـ YOLOv5
 sys.path.append("C:\\Users\\MaysM.M\\yolov5")
 from utils.general import scale_boxes
-from face_utils import load_student_embeddings, recognize_face, ensure_dir
 
 # حل مشكلة توافق المسارات في Windows
 pathlib.PosixPath = pathlib.WindowsPath
 
 # تحميل نموذج YOLOv5
 model = torch.hub.load("C:/Users/MaysM.M/yolov5", "custom", path="C:\\Users\\MaysM.M\\yolov5\\best.pt", source="local", force_reload=True)
-model.conf = 0.4  # تقليل الثقة لكشف المزيد
+model.conf = 0.25
 model.iou = 0.4
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
@@ -50,7 +50,7 @@ ensure_dir(yolo_cropped_dir)
 
 def detect_faces_from_frame(frame):
     original_shape = frame.shape
-    frame_resized = cv2.resize(frame, (1280, 720))  # زيادة الدقة
+    frame_resized = cv2.resize(frame, (1280, 720))
     results = model(frame_resized)
     faces = []
     print(f"[DEBUG] Number of objects detected by YOLO: {len(results.xyxy[0])}")
@@ -86,7 +86,7 @@ def recognize_faces_session(lecture_id, session_id, duration, video_path, detect
             print("❌ End of video or error reading frame.")
             break
         
-        frame = cv2.resize(frame, (1280, 720))  # زيادة الدقة
+        frame = cv2.resize(frame, (1280, 720))
         frame_count += 1
         current_time = time.time()
 
@@ -99,7 +99,6 @@ def recognize_faces_session(lecture_id, session_id, duration, video_path, detect
         faces = detect_faces_from_frame(frame)
         for face in faces:
             x1, y1, x2, y2 = face["bbox"]
-            # توسيع الإحداثيات بنسبة 50%
             padding = int(max(x2 - x1, y2 - y1) * 0.5)
             x1 = max(0, x1 - padding)
             y1 = max(0, y1 - padding)
@@ -107,7 +106,7 @@ def recognize_faces_session(lecture_id, session_id, duration, video_path, detect
             y2 = min(frame.shape[0], y2 + padding)
             face_img = frame[y1:y2, x1:x2]
             print(f"[DEBUG] Cropped face size: {face_img.shape}")
-            if face_img.shape[0] < 64 or face_img.shape[1] < 64:
+            if face_img.shape[0] < 40 or face_img.shape[1] < 40:
                 print(f"⚠️ Face too small at {x1},{y1},{x2},{y2}")
                 continue
 
@@ -118,7 +117,7 @@ def recognize_faces_session(lecture_id, session_id, duration, video_path, detect
                 continue
 
             face_embedding = detected_faces[0].embedding.flatten()
-            label, similarity = recognize_face(face_embedding, students_embeddings, threshold=0.4)
+            label, similarity = recognize_face(face_embedding, students_embeddings, threshold=0.6)
             print(f"[DEBUG] Face at {x1},{y1},{x2},{y2} - Label: {label}, Similarity: {similarity:.2f}")
             if label != "Unknown":
                 detection_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -156,6 +155,7 @@ def save_final_attendance(lecture_id, detections, late_threshold):
             detection_time = "undetected"
             screenshot_path = None
             detection_count = 0
+            session_id = 0
         
         attendance_record = {
             "lecture_id": lecture_id,
@@ -171,36 +171,45 @@ def save_final_attendance(lecture_id, detections, late_threshold):
             {"$set": attendance_record},
             upsert=True
         )
-        print(f"✅ Saved final status for {student_id}: {status}, detected {detection_count} times")
+        print(f"✅ Saved final status for {student_id}: {status}, detected {detection_count} times in MongoDB")
         
-        attendance_record_for_backend = attendance_record.copy()
-        attendance_record_for_backend["_id"] = str(result.upserted_id) if result.upserted_id else str(attendance_collection.find_one({"lecture_id": lecture_id, "student_id": student_id})["_id"])
+        attendance_record_for_backend = {
+            "lectureId": lecture_id,
+            "sessionId": session_id,
+            "studentId": student_id,
+            "detectionTime": detection_time,
+            "screenshotPath": screenshot_path,
+            "status": status
+        }
+        
+        print(f"[DEBUG] Sending to backend: {json.dumps(attendance_record_for_backend, indent=2)}")
         try:
-            requests.post("http://localhost:8080/api/attendances", json=attendance_record_for_backend)
-            print(f"✅ Sent final attendance for {student_id} to backend")
-        except Exception as e:
-            print(f"⚠️ Failed to send to backend: {e}")
+            response = requests.post("http://localhost:8080/api/attendances", json=attendance_record_for_backend)
+            response.raise_for_status()
+            print(f"✅ Sent final attendance for {student_id} to backend - Response: {response.status_code}")
+        except requests.exceptions.RequestException as e:
+            print(f"⚠️ Failed to send to backend for {student_id}: {e}")
 
 def run_camera_for_lecture(lecture_id, lecture_duration, late_threshold, interval, video_path):
     detections = {}
     print(f"Starting Present session for {late_threshold} seconds...")
-    recognize_faces_session(lecture_id, 0, late_threshold, video_path, detections)
+    recognize_faces_session(lecture_id, 0, 60, video_path, detections)
     
     remaining_time = lecture_duration - late_threshold
-    num_sessions = remaining_time // interval
+    num_sessions = remaining_time // 60
     print(f"Number of Late sessions: {num_sessions}")
     
     elapsed_time = late_threshold
     for session_id in range(1, num_sessions + 1):
-        print(f"Waiting {interval} seconds before session {session_id}...")
-        time.sleep(interval)
-        elapsed_time += interval
+        print(f"Waiting 10 seconds before session {session_id}...")
+        time.sleep(10)
+        elapsed_time += 60
         if elapsed_time < lecture_duration:
             print(f"Starting Late session {session_id}...")
-            recognize_faces_session(lecture_id, session_id, interval, video_path, detections)
+            recognize_faces_session(lecture_id, session_id, 60, video_path, detections)
     
     save_final_attendance(lecture_id, detections, late_threshold)
 
 if __name__ == "__main__":
     video_path = "C:/Users/MaysM.M/face-attendance-system/8.mp4"
-    run_camera_for_lecture("lecture_1", 300, 60, 30, video_path)
+    run_camera_for_lecture("lecture_1", 300, 60, 10, video_path)

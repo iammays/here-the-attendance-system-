@@ -1,6 +1,3 @@
-
-#ai\embeddings.py
-
 import os
 import numpy as np
 import cv2
@@ -8,6 +5,7 @@ import pymongo
 import rawpy
 from insightface.app import FaceAnalysis
 import pathlib
+from face_utils import ensure_dir
 
 # حل مشكلة المسارات في Windows
 pathlib.PosixPath = pathlib.WindowsPath
@@ -17,11 +15,10 @@ mongo_client = pymongo.MongoClient("mongodb://localhost:27017")
 db = mongo_client["face_attendance"]
 students_collection = db["students_embeddings"]
 
-# تحميل ArcFace
-app = FaceAnalysis(providers=['CPUExecutionProvider'])
-app.prepare(ctx_id=0, det_size=(640, 640))
+# تحميل ArcFace بنفس الإعدادات المستخدمة في main.py
+app = FaceAnalysis(allowed_modules=['detection', 'recognition'])
+app.prepare(ctx_id=0 if torch.cuda.is_available() else -1, det_size=(320, 320))
 
-# قراءة الصورة (JPG أو CR2)
 def read_image(image_path):
     if not os.path.isfile(image_path):
         print(f"⚠️ {image_path} is not a file, skipping...")
@@ -40,7 +37,6 @@ def read_image(image_path):
         print(f"⚠️ Unsupported file format: {image_path}")
         return None
 
-# استخراج التضمينات من مجلد عادي مع متوسط الـ Embeddings
 def extract_embeddings_from_folder(base_dir="students_embeddings"):
     if not os.path.exists(base_dir):
         print(f"❌ Folder '{base_dir}' not found")
@@ -52,10 +48,9 @@ def extract_embeddings_from_folder(base_dir="students_embeddings"):
             print(f"⚠️ {student_dir} is not a directory, skipping...")
             continue
         
-        student_id = student_folder  # رقم الطالب من اسم المجلد
-        embeddings = []  # قائمة لتخزين الـ Embeddings من كل الصور
+        student_id = student_folder
+        embeddings = []
         
-        # جلب كل الصور في المجلد
         for student_file in os.listdir(student_dir):
             file_path = os.path.join(student_dir, student_file)
             img = read_image(file_path)
@@ -70,7 +65,6 @@ def extract_embeddings_from_folder(base_dir="students_embeddings"):
             else:
                 print(f"❌ No face detected or multiple faces in {file_path}")
         
-        # إذا تم استخراج أي Embeddings، نحسب المتوسط
         if embeddings:
             avg_embedding = np.mean(embeddings, axis=0).tolist()
             students_collection.update_one(
@@ -82,11 +76,6 @@ def extract_embeddings_from_folder(base_dir="students_embeddings"):
         else:
             print(f"❌ No valid embeddings found for student {student_id}")
 
-# التأكد من وجود المجلد
-def ensure_dir(directory):
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
 if __name__ == "__main__":
-    folder_path = "students_embeddings"  # المجلد اللي فيه بيانات الطلاب
+    folder_path = "students_embeddings"
     extract_embeddings_from_folder(folder_path)
