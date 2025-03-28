@@ -192,17 +192,17 @@ def save_final_attendance(lecture_id, detections, late_threshold):
 
 def run_camera_for_lecture(lecture_id, lecture_duration, late_threshold, interval, video_path):
     detections = {}
-    cap = cv2.VideoCapture(video_path)  # نفتح الفيديو مرة واحدة فقط
+    cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         print(f"❌ Failed to open video: {video_path}")
         return
     
-    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))  # عدد الإطارات الكلي
-    fps = cap.get(cv2.CAP_PROP_FPS)  # معدل الإطارات في الثانية
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    fps = cap.get(cv2.CAP_PROP_FPS)
     print(f"[DEBUG] Video total frames: {total_frames}, FPS: {fps}")
 
     def process_session(session_id, duration, start_frame):
-        cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)  # نحدد بداية السيشن
+        cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
         start_time = time.time()
         frame_count = 0
         last_screenshot_time = 0
@@ -248,11 +248,17 @@ def run_camera_for_lecture(lecture_id, lecture_duration, late_threshold, interva
                     detections[label].append({"time": detection_time, "session_id": session_id, "screenshot_path": screenshot_path})
                     print(f"✅ Detected {label} at {detection_time}, similarity: {similarity:.2f}")
 
+                # رسم المربع ورقم الطالب على الإطار
+                color = (0, 255, 0) if label != "Unknown" else (0, 0, 255)  # أخضر للمعروف، أحمر للغير معروف
+                cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+                cv2.putText(frame, f"{label} ({similarity:.2f})", (x1, y1 - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
             cv2.imshow("Face Recognition", frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
         
-        current_frame = int(cap.get(cv2.CAP_PROP_POS_FRAMES))  # نرجع آخر إطار وصلناله
+        current_frame = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
         return current_frame
 
     # سيشن Present
@@ -266,8 +272,8 @@ def run_camera_for_lecture(lecture_id, lecture_duration, late_threshold, interva
     
     elapsed_time = late_threshold
     for session_id in range(1, num_sessions + 1):
-        print(f"Waiting 10 seconds before session {session_id}...")
-        time.sleep(10)
+        print(f"Waiting {interval} seconds before session {session_id}...")
+        time.sleep(interval)
         elapsed_time += 60
         if elapsed_time < lecture_duration and current_frame < total_frames:
             print(f"Starting Late session {session_id}...")

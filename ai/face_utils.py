@@ -21,7 +21,7 @@ def recognize_face(face_embedding, students_embeddings, threshold=0.6):  # غي�
         if score < best_score:
             best_score = score
             best_match = student_id
-    print(f"[DEBUG] Best match: {best_match}, Best score: {best_score:.2f}")
+    print(f"[DEBUG] Best match: {best_match}, distance: {best_score:.2f}")
     if best_match and best_score < threshold:  # هنا التغيير بيسمح بقيم أعلى
         return best_match, 1 - best_score
     return "Unknown", 0
