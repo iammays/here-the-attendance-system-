@@ -16,8 +16,6 @@ import com.here.backend.Student.StudentEntity;
 import com.here.backend.Student.StudentRepository;
 import com.here.backend.Teacher.TeacherEntity;
 import com.here.backend.Teacher.TeacherRepository;
-import com.here.backend.Camera.CameraEntity;
-import com.here.backend.Camera.CameraRepository;
 import com.here.backend.Course.CourseEntity;
 import com.here.backend.Course.CourseRepository;
 import com.here.backend.Room.RoomEntity;
@@ -31,8 +29,6 @@ public class ExcelImportController {
 
     @Autowired
     private StudentRepository studentRepository;
-    @Autowired
-    private CameraRepository cameraRepository;
     @Autowired
     private TeacherRepository teacherRepository;
     @Autowired
