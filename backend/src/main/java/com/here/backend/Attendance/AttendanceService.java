@@ -1,7 +1,3 @@
-//backend\src\main\java\com\here\backend\Attendance\AttendanceService.java
-
-
-
 package com.here.backend.Attendance;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +18,7 @@ public class AttendanceService {
     @Autowired
     private CourseRepository courseRepository;
 
-    // تحديد حالة الطالب
+    // معرفة إذا كان الطالب Present أو Late أو Absent بناءً على وقت الاكتشاف
     public String determineStatus(String lectureId, String studentId, int lateThreshold) {
         AttendanceEntity attendance = attendanceRepository.findByLectureIdAndStudentId(lectureId, studentId);
         if (attendance == null || attendance.getSessions().isEmpty()) return "Absent";
@@ -30,18 +26,15 @@ public class AttendanceService {
         CourseEntity course = courseRepository.findByCourseId(lectureId).orElseThrow();
         LocalDateTime startTime = LocalDateTime.parse(course.getStartTime(), DateTimeFormatter.ofPattern("HH:mm"));
         
-        // التحقق من كل الجلسات
         boolean detectedInAnySession = attendance.getSessions().stream()
                 .anyMatch(session -> !session.getDetectionTime().equals("undetected"));
         
         if (!detectedInAnySession) {
-            return "Absent"; // غايب لو ما اتلاقاش في أي جلسة
+            return "Absent";
         }
 
-        // تحديد Present أو Late بناءً على أول ظهور
         String firstDetection = attendance.getSessions().get(0).getDetectionTime();
         if (firstDetection.equals("undetected")) {
-            // لو أول جلسة undetected بس فيه جلسات تانية فيها اكتشاف، يبقى Late
             return "Late";
         }
 
@@ -51,7 +44,7 @@ public class AttendanceService {
         return minutesLate <= lateThreshold ? "Present" : "Late";
     }
 
-    // حساب عدد مرات الظهور
+    // عد عدد مرات ظهور الطالب في المحاضرة
     public int countDetections(String lectureId, String studentId) {
         AttendanceEntity attendance = attendanceRepository.findByLectureIdAndStudentId(lectureId, studentId);
         if (attendance == null) return 0;

@@ -9,21 +9,20 @@ public class CourseService {
     @Autowired
     private CourseRepository courseRepository;
 
-    // حساب فترات تشغيل الكاميرا
+    // حساب جدول الكاميرا لمحاضرة معينة
     public CameraSchedule calculateCameraSchedule(String courseId, int lateThreshold) {
         CourseEntity course = courseRepository.findByCourseId(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found"));
 
-        // حساب المدة من startTime وendTime
         int duration = calculateDuration(course.getStartTime(), course.getEndTime());
-        int remainingTime = duration - 10 - lateThreshold;  // نطرح آخر 10 دقايق ومدة التأخير
+        int remainingTime = duration - 10 - lateThreshold;
         int numSessions = duration <= 75 ? 4 : (duration < 120 ? 6 : 8);
         int interval = remainingTime / numSessions;
 
         return new CameraSchedule(lateThreshold, interval, numSessions);
     }
 
-    // دالة مساعدة لحساب المدة
+    // حساب مدة المحاضرة بالدقائق
     private int calculateDuration(String startTime, String endTime) {
         String[] startParts = startTime.split(":");
         String[] endParts = endTime.split(":");
@@ -38,6 +37,7 @@ class CameraSchedule {
     private int interval;
     private int numSessions;
 
+    // مُنشئ لجدول الكاميرا
     public CameraSchedule(int lateThreshold, int interval, int numSessions) {
         this.lateThreshold = lateThreshold;
         this.interval = interval;

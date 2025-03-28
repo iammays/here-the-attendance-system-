@@ -1,5 +1,3 @@
-//backend\src\main\java\com\here\backend\Teacher\TeacherController.java
-
 package com.here.backend.Teacher;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,36 +23,27 @@ public class TeacherController {
     @Autowired
     private TeacherRepository teacherRepository;
     @Autowired
-    private final CourseRepository courseRepository;
+    private  CourseRepository courseRepository;
     @Autowired
     private PasswordEncoder encoder;
 
-    public TeacherController(TeacherRepository teacherRepository, CourseRepository courseRepository) {
-        this.teacherRepository = teacherRepository;
-        this.courseRepository = courseRepository;
-    }
-
-    // get all teachers ✅  getAllTeachers()
-    // get teacher by id ✅  getTeacherById()
-    // get teacher by name ✅ getTeacherByName()
-    // get all teachers for a course ✅ getTeachersByCourseId()
-    // get teacher by email ✅ getTeacherByEmail()
-    // get teacher with courses ✅ getTeacherWithCourses()
-    // get all courses for a teacher ✅ getAllCoursesForTeacher()
-    // update teacher password by id ✅ updateTeacherPassword()
-
-
+    // جلب كل المعلمين
+    // get all teachers ✅ getAllTeachers()
     @GetMapping
     public List<TeacherEntity> getAllTeachers() {
         return teacherRepository.findAll();
     }
 
+    // جلب معلم باستخدام المعرف
+    // get teacher by id ✅ getTeacherById()
     @GetMapping("/Teacherid/{id}")
     public ResponseEntity<?> getTeacherById(@PathVariable String id) {
         Optional<TeacherEntity> teacher = teacherRepository.findByTeacherId(id);
         return teacher.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    // جلب معلم باستخدام الاسم
+    // get teacher by name ✅ getTeacherByName()
     @GetMapping("/name/{name}")
     public ResponseEntity<?> getTeacherByName(@PathVariable String name) {
         List<TeacherEntity> teachers = teacherRepository.findByNameContainingIgnoreCase(name);
@@ -64,6 +53,8 @@ public class TeacherController {
         return ResponseEntity.ok(teachers);
     }
 
+    // جلب معلمين لمقرر معين
+    // get all teachers for a course ✅ getTeachersByCourseId()
     @GetMapping("/course/{courseId}/all")
     public ResponseEntity<?> getTeachersByCourseId(@PathVariable String courseId) {
         Set<TeacherEntity> teachers = teacherRepository.findByCourseId(courseId);
@@ -73,16 +64,8 @@ public class TeacherController {
         return ResponseEntity.ok(teachers);
     }
 
-    // @GetMapping("/email/{email}")
-    // public ResponseEntity<Map<String, Object>> getTeacherByEmail(@PathVariable String email) {
-    //     Optional<TeacherEntity> teacher = teacherRepository.findByEmail(email);
-    //     if (teacher.isPresent()) {
-    //         return ResponseEntity.ok(Collections.singletonMap("teacher", teacher.get()));
-    //     }
-    //     return ResponseEntity.status(HttpStatus.NOT_FOUND)
-    //     .body(Collections.singletonMap("message", "Teacher not found with this email."));
-    // }
-
+    // جلب معلم باستخدام البريد الإلكتروني مع المقررات
+    // get teacher by email ✅ getTeacherByEmail()
     @GetMapping("/email/{email}")
     public ResponseEntity<?> getTeacherByEmail(@PathVariable String email) {
         TeacherEntity teacher = teacherRepository.findByEmail(email)
@@ -97,6 +80,8 @@ public class TeacherController {
         return ResponseEntity.ok(response);
     }
 
+    // جلب كل المقررات لمعلم معين
+    // get all courses for a teacher ✅ getAllCoursesForTeacher()
     @GetMapping("/courses/{teacherId}")
     public ResponseEntity<?> getAllCoursesForTeacher(@PathVariable String teacherId) {
         TeacherEntity teacher = teacherRepository.findByTeacherId(teacherId)
@@ -104,13 +89,6 @@ public class TeacherController {
 
         List<CourseEntity> courses = courseRepository.findByTeacherId(teacherId);
 
-        System.out.println("Teacher ID: " + teacherId);
-        System.out.println("Number of courses found: " + courses.size());
-
-        for (CourseEntity course : courses) {
-            System.out.println("Course ID: " + course.getCourseId() + ", Teacher ID: " + course.getTeacherId());
-        }
-    
         if (courses.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No courses found for this teacher.");
         }
@@ -118,6 +96,8 @@ public class TeacherController {
         return ResponseEntity.ok(courses);
     }
 
+    // جلب معلم مع المقررات الخاصة به
+    // get teacher with courses ✅ getTeacherWithCourses()
     @GetMapping("/{id}/courses")
     public ResponseEntity<?> getTeacherWithCourses(@PathVariable String id) {
         TeacherEntity teacher = teacherRepository.findByTeacherId(id)
@@ -128,6 +108,8 @@ public class TeacherController {
         return ResponseEntity.ok(Map.of("teacher", teacher, "courses", courses));
     }
 
+    // تغيير كلمة مرور المعلم
+    // update teacher password by id ✅ updateTeacherPassword()
     @PutMapping("/{id}/password")
     public ResponseEntity<?> updateTeacherPassword(@PathVariable String id, 
     @RequestBody Map<String, String> passwords, 

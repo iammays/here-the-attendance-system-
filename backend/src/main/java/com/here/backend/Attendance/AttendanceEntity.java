@@ -1,5 +1,3 @@
-//backend\src\main\java\com\here\backend\Attendance\AttendanceEntity.java
-
 package com.here.backend.Attendance;
 
 import org.springframework.data.annotation.Id;
@@ -17,6 +15,7 @@ public class AttendanceEntity {
     private String status;  // حقل جديد
     private List<SessionAttendance> sessions;
 
+    // كلاس صغير لتخزين رقم الجلسة ووقت الاكتشاف
     public static class SessionAttendance {
         private int sessionId;
         private String detectionTime;

@@ -16,6 +16,7 @@ public class AttendanceController {
     @Autowired
     private AttendanceService attendanceService;
 
+    // تسجيل حضور طالب جديد
     @PostMapping
     public ResponseEntity<String> saveAttendance(@RequestBody AttendanceRecord record) {
         AttendanceEntity attendance = attendanceRepository.findByLectureIdAndStudentId(record.getLectureId(), record.getStudentId());
@@ -31,6 +32,7 @@ public class AttendanceController {
         return ResponseEntity.ok("Attendance saved");
     }
 
+    // جلب تقرير حضور طالب لمحاضرة معينة
     @GetMapping("/{lectureId}/{studentId}")
     public ResponseEntity<?> getAttendanceReport(@PathVariable String lectureId, @PathVariable String studentId, @RequestParam int lateThreshold) {
         String status = attendanceService.determineStatus(lectureId, studentId, lateThreshold);
@@ -39,6 +41,7 @@ public class AttendanceController {
         return ResponseEntity.ok(new AttendanceReport(status, detectionCount, attendance.getSessions()));
     }
 
+    // تغيير حالة حضور طالب (مثل Present أو Late)
     @PutMapping("/{lectureId}/{studentId}")
     public ResponseEntity<String> updateAttendanceStatus(
             @PathVariable String lectureId,
@@ -57,6 +60,7 @@ public class AttendanceController {
         return ResponseEntity.ok("Attendance status updated to " + newStatus);
     }
 
+    // حذف كل سجلات الحضور لمحاضرة معينة
     @DeleteMapping("/{lectureId}")
     public ResponseEntity<String> deleteAttendance(@PathVariable String lectureId) {
         attendanceRepository.deleteByLectureId(lectureId);

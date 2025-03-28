@@ -1,4 +1,3 @@
-// backend/src/main/java/com/here/backend/Attendance/AttendanceRecord.java
 package com.here.backend.Attendance;
 
 public class AttendanceRecord {
@@ -9,10 +8,10 @@ public class AttendanceRecord {
     private String screenshotPath;
     private String status;
 
-
+    // مُنشئ فارغ لإنشاء كائن بدون بيانات
     public AttendanceRecord() {}
 
-  
+    // مُنشئ كامل لإنشاء سجل حضور بكل البيانات
     public AttendanceRecord(String lectureId, int sessionId, String studentId, String detectionTime, String screenshotPath, String status) {
         this.lectureId = lectureId;
         this.sessionId = sessionId;
@@ -21,7 +20,6 @@ public class AttendanceRecord {
         this.screenshotPath = screenshotPath;
         this.status = status;
     }
-
 
     public String getLectureId() { return lectureId; }
     public void setLectureId(String lectureId) { this.lectureId = lectureId; }
