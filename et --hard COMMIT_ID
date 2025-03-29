@@ -1,0 +1,268 @@
+[33mcommit d847abe49c5b0ddb56e25cae29ef5d945bf93350[m[33m ([m[1;36mHEAD -> [m[1;32mjoelle[m[33m, [m[1;31morigin/joelle[m[33m)[m
+Author: iammays <maysalbutmah311@gmail.com>
+Date:   Sat Mar 29 21:32:25 2025 +0300
+
+     for mays
+
+[33mcommit d24ee5fe4bc592ed98869389de169aaa16a6df37[m
+Author: iammays <maysalbutmah311@gmail.com>
+Date:   Sat Mar 29 21:24:28 2025 +0300
+
+     for mays
+
+[33mcommit 21c778db16a9e0a2d3daa6c08ef2468c48b93bc1[m
+Author: Joelle <joellematar14@gmail.com>
+Date:   Wed Mar 26 18:47:00 2025 +0200
+
+    finilaizing backend
+
+[33mcommit ab232cf1fe5095cc3a8562617a5b0315b2a9400c[m
+Author: Joelle <joellematar14@gmail.com>
+Date:   Sun Mar 16 21:32:39 2025 +0200
+
+    email added to the attendance also added new thing to the student (there still error in getting the name of the course by it's id)
+
+[33mcommit 09f5210afc3fda498dd86fe082750ce4f4b8b710[m
+Merge: 38cd4f7 119fc41
+Author: Joelle <joellematar14@gmail.com>
+Date:   Sun Mar 16 17:59:02 2025 +0200
+
+    Merge remote-tracking branch 'origin/mays' into joelle
+
+[33mcommit 38cd4f708f8b25b43a056c180f22e4789272e0c0[m
+Author: Joelle <joellematar14@gmail.com>
+Date:   Wed Mar 12 09:24:38 2025 +0200
+
+    merged mays branch to joelle branch
+
+[33mcommit 93a1cd20a9d4980c94b6cfeb7d239a9e6b323ad3[m
+Author: Joelle <joellematar14@gmail.com>
+Date:   Fri Mar 7 13:44:32 2025 +0200
+
+    worked on schedual and excellimport testing
+
+[33mcommit 0be6696da960f586507b75a900a2c12ee8ed5c04[m
+Author: shouq <shouqalmaharbah@gmail.com>
+Date:   Wed Mar 5 11:20:59 2025 +0200
+
+    final controllers
+
+[33mcommit b14961ff74f9bc407798ef9ac92396f31dd37f2b[m
+Author: shouq <shouqalmaharbah@gmail.com>
+Date:   Mon Mar 3 11:35:05 2025 +0200
+
+    the controllers are done Alhamduleleah
+
+[33mcommit 6c7e4c17c70a11a4c1ef3d3fe4722608112caea8[m
+Author: shouq <shouqalmaharbah@gmail.com>
+Date:   Sun Mar 2 14:26:26 2025 +0200
+
+    some of changes
+
+[33mcommit b1c4f98e77f8287871038a90d34bdc58312355ad[m
+Author: shouq <shouqalmaharbah@gmail.com>
+Date:   Sat Mar 1 22:35:03 2025 +0200
+
+    the controllers are donee
+
+[33mcommit 215ad2b9b98209d2d987f9280a810dfc3a9e1225[m
+Merge: 02eda76 263fa16
+Author: shouq <shouqalmaharbah@gmail.com>
+Date:   Wed Feb 26 14:24:03 2025 +0200
+
+    last Auth in our project
+
+[33mcommit 119fc41440fc3ce3fab12dd5517776ba26384565[m
+Author: iammays <maysalbutmah311@gmail.com>
+Date:   Wed Feb 26 14:15:42 2025 +0200
+
+    all AI done work 95%
+
+[33mcommit 02eda76042b3606fb43f2d625675bdd4604fa31e[m
+Author: shouq <shouqalmaharbah@gmail.com>
+Date:   Tue Feb 25 18:24:25 2025 +0200
+
+    Controller after Joelle work
+
+[33mcommit 263fa1637c5ab20ead9bb4a43c674a115949dfd6[m
+Author: Joelle <joellematar14@gmail.com>
+Date:   Mon Feb 24 21:12:24 2025 +0200
+
+    done with all the excellimport api's (there is some handllings must be added)
+
+[33mcommit f65f559569bcb3893a106240553f11aa925c3716[m
+Author: Joelle <joellematar14@gmail.com>
+Date:   Mon Feb 24 09:38:49 2025 +0200
+
+    new api for camera in the excell import
+
+[33mcommit 7796d98db624e150fe573128d92621100bde8936[m
+Merge: c83dde7 ae2a7e6
+Author: iammays <maysalbutmah311@gmail.com>
+Date:   Sat Feb 22 16:42:57 2025 +0200
+
+    try to improve the AI more , try ARCFace alone without Yolo on videos
+
+[33mcommit c83dde73675bf2f0536600e712c3209d018effdb[m
+Merge: c6fa8cb 4dc3bc9
+Author: iammays <maysalbutmah311@gmail.com>
+Date:   Sat Feb 22 16:35:54 2025 +0200
+
+    try to improve the AI more , try ARCFace alone without Yolo on videos
+
+[33mcommit c6fa8cbe5f3c3d06d63d4477a678bc0af72432d7[m
+Author: iammays <maysalbutmah311@gmail.com>
+Date:   Sat Feb 22 16:17:28 2025 +0200
+
+    try to improve the AI more , try ARCFace alone without Yolo on videos
+
+[33mcommit 4dc3bc925fe3213392ddf36825594dc57e0ef831[m
+Author: shouq <shouqalmaharbah@gmail.com>
+Date:   Sat Feb 22 14:27:24 2025 +0200
+
+    Teacher
+
+[33mcommit 22e1f57c62b60a225fab92fd5e846b412a79436c[m
+Merge: 1e07353 b73a943
+Author: shouq <shouqalmaharbah@gmail.com>
+Date:   Sat Feb 22 12:55:07 2025 +0200
+
+    Auth is done
+
+[33mcommit b73a9433a7ccc38b74027e10349f699b06764949[m
+Author: Joelle <joellematar14@gmail.com>
+Date:   Wed Feb 19 16:24:54 2025 +0200
+
+    done with all the ready variables from mays's notebook
+
+[33mcommit fda44f5af16bb81ce1db63b55722feb00d6dc26a[m
+Author: Joelle <joellematar14@gmail.com>
+Date:   Wed Feb 19 14:10:52 2025 +0200
+
+    connected mongdb and create the databaseinitilazer and tested the api's
+
+[33mcommit e6329d3c78c5df799e7ce3737e184ff1da010eb3[m
+Author: Joelle <joellematar14@gmail.com>
+Date:   Wed Feb 19 13:02:39 2025 +0200
+
+    making structure of the backend
+
+[33mcommit 53329ea381757359d03641bc277d65c3da0acb87[m
+Author: Joelle <joellematar14@gmail.com>
+Date:   Wed Feb 19 12:22:49 2025 +0200
+
+    working on workflow actions ci/cd
+
+[33mcommit 3f82ca8b4120d840b52c54a090ac14bf224f0682[m
+Author: Joelle <joellematar14@gmail.com>
+Date:   Wed Feb 19 12:21:57 2025 +0200
+
+    working on workflow actions ci/cd
+
+[33mcommit 8bc7106a1773343ed131c4260b4274c55ca8d987[m
+Author: Joelle <joellematar14@gmail.com>
+Date:   Wed Feb 19 12:12:57 2025 +0200
+
+    working on workflow actions ci/cd
+
+[33mcommit 1e07353dc8853179136a58186e02e5b230ba2f07[m
+Author: shouq <shouqalmaharbah@gmail.com>
+Date:   Wed Feb 19 12:04:47 2025 +0200
+
+    shouq branch
+
+[33mcommit c4d1da5f8fc482d0541aa3942c31b1a9bfa23f5c[m
+Author: Joelle <joellematar14@gmail.com>
+Date:   Wed Feb 19 12:02:09 2025 +0200
+
+    making structure of the backend
+
+[33mcommit 544678064a159e53f33c9c27fe4cd87804cb4cfa[m
+Author: Joelle <joellematar14@gmail.com>
+Date:   Wed Feb 19 11:55:44 2025 +0200
+
+    making structure of the backend
+
+[33mcommit 475c040fca6caa044996f0c6e947aa822d04c874[m
+Author: shouq <shouqalmaharbah@gmail.com>
+Date:   Wed Feb 19 11:44:44 2025 +0200
+
+    shouq
+
+[33mcommit d7792e3615ba84a3e6a34a4723f7bff0792a466f[m
+Author: shouq <shouqalmaharbah@gmail.com>
+Date:   Wed Feb 19 11:40:31 2025 +0200
+
+    shouq
+
+[33mcommit ae2a7e6e0e5b75b4362972e2ad1b841647228bea[m
+Author: Mays <96591460+iammays@users.noreply.github.com>
+Date:   Wed Feb 19 10:44:17 2025 +0200
+
+    Update README.md
+
+[33mcommit bb7e17846b7fb73aa36e8f4f7bce5e270fff74d2[m
+Merge: 4fd64b7 6f00a54
+Author: shouq <shouqalmaharbah@gmail.com>
+Date:   Sun Feb 16 13:09:04 2025 +0200
+
+    Merge branches 'main' and 'mays' of https://github.com/iammays/here-the-attendance-system- into shouq
+
+[33mcommit 6f00a547cdb5c11700bc8fc148060188ea8d690f[m
+Author: iammays <maysalbutmah311@gmail.com>
+Date:   Sun Feb 16 11:53:29 2025 +0200
+
+    try detect and recognition on vedios
+
+[33mcommit 4fd64b733b86edeaa51f6764b84efae0e5a759fd[m
+Merge: 2c5d024 bc0e7e9
+Author: iammays <maysalbutmah311@gmail.com>
+Date:   Sat Feb 15 09:55:01 2025 +0200
+
+    Merge branch 'main' of https://github.com/iammays/here-the-attendance-system-
+
+[33mcommit 2c5d02496c08909aae2eaff8099640a606d262af[m
+Merge: 4a6cf2d 72e43ce
+Author: iammays <maysalbutmah311@gmail.com>
+Date:   Sat Feb 15 09:47:54 2025 +0200
+
+    Merge branch 'mays' of https://github.com/iammays/here-the-attendance-system-
+
+[33mcommit 4a6cf2d3f3f25fa44a00116b5e720b3cbfb527db[m
+Author: iammays <maysalbutmah311@gmail.com>
+Date:   Sat Feb 15 09:44:49 2025 +0200
+
+    Completely remove backend submodule
+
+[33mcommit 72e43ceb3f0b847a6d9edf795cfe23ee6951e549[m
+Author: iammays <maysalbutmah311@gmail.com>
+Date:   Sat Feb 15 09:37:24 2025 +0200
+
+    fix the backend file
+
+[33mcommit 39676bc92a3b19930a60be8b5d32f3d9b4a5ef64[m
+Author: iammays <maysalbutmah311@gmail.com>
+Date:   Sat Feb 15 09:33:01 2025 +0200
+
+    try the ignore file
+
+[33mcommit bc0e7e9bdc3cdbd438611171d6f6ca3808bc823c[m
+Author: Mays <96591460+iammays@users.noreply.github.com>
+Date:   Sat Feb 15 09:29:55 2025 +0200
+
+    Delete ai/students_faces directory
+
+[33mcommit 2998c0d36b1da116d5d6169cb80963912caca04f[m
+Author: Mays <96591460+iammays@users.noreply.github.com>
+Date:   Sat Feb 15 09:29:38 2025 +0200
+
+    Delete ai/__pycache__ directory
+
+[33mcommit 034b7a0becbc716c656c88a22348825e36545e7f[m
+Author: iammays <maysalbutmah311@gmail.com>
+Date:   Sat Feb 15 09:01:41 2025 +0200
+
+    first commit
+
+[33mcommit e3fa967616899bd10d32a987fb81f406bbd79f74[m
+Author: iammays <m
