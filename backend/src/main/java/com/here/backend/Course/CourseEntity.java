@@ -1,3 +1,5 @@
+//backend\src\main\java\com\here\backend\Course\CourseEntity.java
+
 package com.here.backend.Course;
 
 import org.springframework.data.annotation.Id;
