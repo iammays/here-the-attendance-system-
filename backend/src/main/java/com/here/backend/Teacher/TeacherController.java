@@ -1,3 +1,5 @@
+//backend\src\main\java\com\here\backend\Teacher\TeacherController.java
+
 package com.here.backend.Teacher;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.HttpStatus;
+
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -23,36 +30,27 @@ public class TeacherController {
     @Autowired
     private TeacherRepository teacherRepository;
     @Autowired
-    private final CourseRepository courseRepository;
+    private  CourseRepository courseRepository;
     @Autowired
     private PasswordEncoder encoder;
 
-    public TeacherController(TeacherRepository teacherRepository, CourseRepository courseRepository) {
-        this.teacherRepository = teacherRepository;
-        this.courseRepository = courseRepository;
-    }
-
-    // get all teachers ✅  getAllTeachers()
-    // get teacher by id ✅  getTeacherById()
-    // get teacher by name ✅ getTeacherByName()
-    // get all teachers for a course ✅ getTeachersByCourseId()
-    // get teacher by email ✅ getTeacherByEmail()
-    // get teacher with courses ✅ getTeacherWithCourses()
-    // get all courses for a teacher ✅ getAllCoursesForTeacher()
-    // update teacher password by id ✅ updateTeacherPassword()
-
-
+    // جلب كل المعلمين
+    // get all teachers ✅ getAllTeachers()
     @GetMapping
     public List<TeacherEntity> getAllTeachers() {
         return teacherRepository.findAll();
     }
 
+    // جلب معلم باستخدام المعرف
+    // get teacher by id ✅ getTeacherById()
     @GetMapping("/Teacherid/{id}")
     public ResponseEntity<?> getTeacherById(@PathVariable String id) {
         Optional<TeacherEntity> teacher = teacherRepository.findByTeacherId(id);
         return teacher.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    // جلب معلم باستخدام الاسم
+    // get teacher by name ✅ getTeacherByName()
     @GetMapping("/name/{name}")
     public ResponseEntity<?> getTeacherByName(@PathVariable String name) {
         List<TeacherEntity> teachers = teacherRepository.findByNameContainingIgnoreCase(name);
@@ -62,6 +60,8 @@ public class TeacherController {
         return ResponseEntity.ok(teachers);
     }
 
+    // جلب معلمين لمقرر معين
+    // get all teachers for a course ✅ getTeachersByCourseId()
     @GetMapping("/course/{courseId}/all")
     public ResponseEntity<?> getTeachersByCourseId(@PathVariable String courseId) {
         Set<TeacherEntity> teachers = teacherRepository.findByCourseId(courseId);
@@ -71,16 +71,8 @@ public class TeacherController {
         return ResponseEntity.ok(teachers);
     }
 
-    // @GetMapping("/email/{email}")
-    // public ResponseEntity<Map<String, Object>> getTeacherByEmail(@PathVariable String email) {
-    //     Optional<TeacherEntity> teacher = teacherRepository.findByEmail(email);
-    //     if (teacher.isPresent()) {
-    //         return ResponseEntity.ok(Collections.singletonMap("teacher", teacher.get()));
-    //     }
-    //     return ResponseEntity.status(HttpStatus.NOT_FOUND)
-    //     .body(Collections.singletonMap("message", "Teacher not found with this email."));
-    // }
-
+    // جلب معلم باستخدام البريد الإلكتروني مع المقررات
+    // get teacher by email ✅ getTeacherByEmail()
     @GetMapping("/email/{email}")
     public ResponseEntity<?> getTeacherByEmail(@PathVariable String email) {
         TeacherEntity teacher = teacherRepository.findByEmail(email)
@@ -95,6 +87,8 @@ public class TeacherController {
         return ResponseEntity.ok(response);
     }
 
+    // جلب كل المقررات لمعلم معين
+    // get all courses for a teacher ✅ getAllCoursesForTeacher()
     @GetMapping("/courses/{teacherId}")
     public ResponseEntity<?> getAllCoursesForTeacher(@PathVariable String teacherId) {
         TeacherEntity teacher = teacherRepository.findByTeacherId(teacherId)
@@ -102,13 +96,6 @@ public class TeacherController {
 
         List<CourseEntity> courses = courseRepository.findByTeacherId(teacherId);
 
-        System.out.println("Teacher ID: " + teacherId);
-        System.out.println("Number of courses found: " + courses.size());
-
-        for (CourseEntity course : courses) {
-            System.out.println("Course ID: " + course.getCourseId() + ", Teacher ID: " + course.getTeacherId());
-        }
-    
         if (courses.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No courses found for this teacher.");
         }
@@ -116,6 +103,8 @@ public class TeacherController {
         return ResponseEntity.ok(courses);
     }
 
+    // جلب معلم مع المقررات الخاصة به
+    // get teacher with courses ✅ getTeacherWithCourses()
     @GetMapping("/{id}/courses")
     public ResponseEntity<?> getTeacherWithCourses(@PathVariable String id) {
         TeacherEntity teacher = teacherRepository.findByTeacherId(id)
@@ -126,6 +115,8 @@ public class TeacherController {
         return ResponseEntity.ok(Map.of("teacher", teacher, "courses", courses));
     }
 
+    // تغيير كلمة مرور المعلم
+    // update teacher password by id ✅ updateTeacherPassword()
     @PutMapping("/{id}/password")
     public ResponseEntity<?> updateTeacherPassword(@PathVariable String id, 
     @RequestBody Map<String, String> passwords, 
@@ -151,4 +142,230 @@ public class TeacherController {
         }
         return ResponseEntity.notFound().build();
     }
+
+
+
+ 
+@GetMapping("/{teacherId}/schedule")
+public ResponseEntity<?> getAllSchedulesForTeacher(@PathVariable String teacherId) {
+    try {
+        // Fetch all courses taught by this teacher
+        List<CourseEntity> courses = courseRepository.findByTeacherId(teacherId);
+        
+        if (courses.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No courses found for this teacher.");
+        }
+
+        // Initialize the schedule map
+        Map<String, List<CourseEntity>> scheduleMap = new LinkedHashMap<>();
+        scheduleMap.put("Monday", new ArrayList<>());
+        scheduleMap.put("Tuesday", new ArrayList<>());
+        scheduleMap.put("Wednesday", new ArrayList<>());
+        scheduleMap.put("Thursday", new ArrayList<>());
+        scheduleMap.put("Friday", new ArrayList<>());
+
+        // Group the courses by day of the week
+        for (CourseEntity course : courses) {
+            String dayOfWeek = course.getDay();
+            if (scheduleMap.containsKey(dayOfWeek)) {
+                scheduleMap.get(dayOfWeek).add(course);
+            }
+        }
+
+        // Return the schedule map
+        return ResponseEntity.ok(scheduleMap);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error fetching schedule.");
+    }
+}
+
+
+
+
+@PutMapping("/update-schedules")
+public ResponseEntity<?> updateAllTeachersSchedules() {
+    try {
+        // Fetch all teachers
+        List<TeacherEntity> teachers = teacherRepository.findAll();
+        if (teachers.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No teachers found.");
+        }
+
+        // Iterate over all teachers and update their schedules
+        for (TeacherEntity teacher : teachers) {
+            List<CourseEntity> courses = courseRepository.findByTeacherId(teacher.getTeacherId());
+
+            // Initialize the schedule map
+            Map<String, List<CourseEntity>> scheduleMap = new LinkedHashMap<>();
+            scheduleMap.put("Monday", new ArrayList<>());
+            scheduleMap.put("Tuesday", new ArrayList<>());
+            scheduleMap.put("Wednesday", new ArrayList<>());
+            scheduleMap.put("Thursday", new ArrayList<>());
+            scheduleMap.put("Friday", new ArrayList<>());
+
+            // Group courses by day and update the schedule
+            for (CourseEntity course : courses) {
+                String dayOfWeek = course.getDay();
+                if (scheduleMap.containsKey(dayOfWeek)) {
+                    scheduleMap.get(dayOfWeek).add(course);
+                }
+            }
+
+            // Update the teacher's schedule list
+            teacher.setSchedulelist(scheduleMap);
+            teacherRepository.save(teacher);
+        }
+
+        return ResponseEntity.ok("Schedules updated for all teachers.");
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating schedules.");
+    }
+}
+
+
+// @GetMapping("/{teacherId}/upcoming-classes")
+// public ResponseEntity<?> getUpcomingClassesForTeacher(@PathVariable String teacherId) {
+//     try {
+//         // Get current date and time
+//         LocalDateTime now = LocalDateTime.now();
+//         DayOfWeek currentDay = now.getDayOfWeek();
+        
+//         // Fetch teacher
+//         TeacherEntity teacher = teacherRepository.findByTeacherId(teacherId)
+//             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Teacher not found"));
+
+//         // Fetch all courses for the teacher
+//         List<CourseEntity> courses = courseRepository.findByTeacherId(teacherId);
+//         if (courses.isEmpty()) {
+//             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No courses found for this teacher.");
+//         }
+
+//         // Create a list to store upcoming sessions
+//         List<Map<String, Object>> upcomingSessions = new ArrayList<>();
+        
+//         // Calculate upcoming sessions for the next 7 days (to ensure we get at least 3 sessions)
+//         for (int daysAhead = 0; daysAhead < 7 && upcomingSessions.size() < 3; daysAhead++) {
+//             LocalDateTime targetDateTime = now.plusDays(daysAhead);
+//             String targetDay = targetDateTime.getDayOfWeek().toString().substring(0, 1) + 
+//                             targetDateTime.getDayOfWeek().toString().substring(1).toLowerCase();
+
+//             // Check each course for matching day
+//             for (CourseEntity course : courses) {
+//                 if (course.getDay().equals(targetDay)) {
+//                     // Assuming CourseEntity has startTime field of type LocalTime
+//                     LocalTime courseTime = course.getStartTime(); // Add this field to CourseEntity if not present
+//                     LocalDateTime sessionDateTime = targetDateTime.with(courseTime);
+
+//                     // Only include future sessions
+//                     if (sessionDateTime.isAfter(now) && upcomingSessions.size() < 3) {
+//                         Map<String, Object> sessionInfo = new HashMap<>();
+//                         sessionInfo.put("courseId", course.getCourseId());
+//                         sessionInfo.put("courseName", course.getName()); // Assuming name field exists
+//                         sessionInfo.put("day", course.getDay());
+//                         sessionInfo.put("startTime", course.getStartTime());
+//                         sessionInfo.put("dateTime", sessionDateTime);
+//                         upcomingSessions.add(sessionInfo);
+//                     }
+//                 }
+//             }
+//         }
+
+//         // Sort sessions by date/time
+//         upcomingSessions.sort(Comparator.comparing(m -> (LocalDateTime) m.get("dateTime")));
+
+//         // Limit to 3 sessions
+//         if (upcomingSessions.size() > 3) {
+//             upcomingSessions = upcomingSessions.subList(0, 3);
+//         }
+
+//         if (upcomingSessions.isEmpty()) {
+//             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No upcoming classes found for this teacher.");
+//         }
+
+//         return ResponseEntity.ok(upcomingSessions);
+
+//     } catch (Exception e) {
+//         logger.error("Error fetching upcoming classes: ", e);
+//         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//             .body("Error fetching upcoming classes: " + e.getMessage());
+//     }
+// }
+
+
+
+@GetMapping("/{teacherId}/upcoming-classes")
+public ResponseEntity<?> getUpcomingClassesForTeacher(@PathVariable String teacherId) {
+    try {
+        // Get current date and time
+        LocalDateTime now = LocalDateTime.now();
+        DayOfWeek currentDay = now.getDayOfWeek();
+        
+        // Fetch teacher
+        TeacherEntity teacher = teacherRepository.findByTeacherId(teacherId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Teacher not found"));
+
+        // Fetch all courses for the teacher
+        List<CourseEntity> courses = courseRepository.findByTeacherId(teacherId);
+        if (courses.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No courses found for this teacher.");
+        }
+
+        // Create a list to store upcoming sessions
+        List<Map<String, Object>> upcomingSessions = new ArrayList<>();
+        
+        // DateTimeFormatter for parsing string time (assuming format "HH:mm")
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        
+        // Calculate upcoming sessions for the next 7 days (to ensure we get at least 3 sessions)
+        for (int daysAhead = 0; daysAhead < 7 && upcomingSessions.size() < 3; daysAhead++) {
+            LocalDateTime targetDateTime = now.plusDays(daysAhead);
+            String targetDay = targetDateTime.getDayOfWeek().toString().substring(0, 1) + 
+                            targetDateTime.getDayOfWeek().toString().substring(1).toLowerCase();
+
+            // Check each course for matching day
+            for (CourseEntity course : courses) {
+                if (course.getDay().equals(targetDay)) {
+                    // Get time as String and convert to LocalTime for comparison
+                    String courseTimeStr = course.getStartTime(); // Now a String
+                    LocalTime courseTime = LocalTime.parse(courseTimeStr, timeFormatter);
+                    LocalDateTime sessionDateTime = targetDateTime.with(courseTime);
+
+                    // Only include future sessions
+                    if (sessionDateTime.isAfter(now) && upcomingSessions.size() < 3) {
+                        Map<String, Object> sessionInfo = new HashMap<>();
+                        sessionInfo.put("courseId", course.getCourseId());
+                        sessionInfo.put("courseName", course.getName());
+                        sessionInfo.put("day", course.getDay());
+                        sessionInfo.put("startTime", courseTimeStr); // Return original string time
+                        sessionInfo.put("dateTime", sessionDateTime);
+                        upcomingSessions.add(sessionInfo);
+                    }
+                }
+            }
+        }
+
+        // Sort sessions by date/time
+        upcomingSessions.sort(Comparator.comparing(m -> (LocalDateTime) m.get("dateTime")));
+
+        // Limit to 3 sessions
+        if (upcomingSessions.size() > 3) {
+            upcomingSessions = upcomingSessions.subList(0, 3);
+        }
+
+        if (upcomingSessions.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No upcoming classes found for this teacher.");
+        }
+
+        return ResponseEntity.ok(upcomingSessions);
+
+    } catch (Exception e) {
+        logger.error("Error fetching upcoming classes: ", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Error fetching upcoming classes: " + e.getMessage());
+    }
+}
+
+
 }

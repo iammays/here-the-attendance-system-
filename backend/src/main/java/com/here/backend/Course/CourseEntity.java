@@ -1,13 +1,16 @@
+
 package com.here.backend.Course;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "courses")
 public class CourseEntity {
     @Id
     private String courseId;
-    private String name;
+    @Field(name = "name")
+    private String courseName;
     private String roomId;
     private String teacherId;
     private String studentId;
@@ -15,18 +18,30 @@ public class CourseEntity {
     private String endTime;
     private String day;
     private String category;
+    private int Credits;
+
+
+    // مُنشئ فارغ لإنشاء كائن بدون بيانات
+
+
+   
+    // مُنشئ كامل لإنشاء مقرر بكل البيانات
+    public CourseEntity(String courseId, String name, String roomId, String teacherId, String startTime, String endTime, String day, String category) {
+    }
 
     public CourseEntity() {}
 
-    public CourseEntity(String courseId, String name, String roomId, String teacherId, String startTime, String endTime, String day, String category) {
+    public CourseEntity(String courseId, String courseName, String roomId, String teacherId, String startTime, String endTime, String day, String category,int Credits) {
+
         this.courseId = courseId;
-        this.name = name;
+        this.courseName = courseName;
         this.roomId = roomId;
         this.teacherId = teacherId;
         this.startTime = startTime;
         this.endTime = endTime;
         this.day = day;
         this.category = category;
+        this.Credits=Credits;
     }
 
     public String getCourseId() {
@@ -38,11 +53,11 @@ public class CourseEntity {
     }
 
     public String getName() {
-        return name;
+        return courseName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setName(String courseName) {
+        this.courseName = courseName;
     }
 
     public String getRoomId() {
@@ -100,4 +115,35 @@ public class CourseEntity {
     public void setCategory(String category) {
         this.category = category;
     }
+    public int getCredit() {
+        return Credits;
+    }
+
+    public void setCredit(int Credits) {
+        this.Credits = Credits;
+    }
+
+
+    public String getCourseName() {
+        return courseName;
+    }
+
+
+    public void setCourseName(String courseName) {
+        this.courseName = courseName;
+    }
+
+
+    public int getCredits() {
+        return Credits;
+    }
+
+
+    public void setCredits(int credits) {
+        Credits = credits;
+    }
+
+ 
+
+
 }

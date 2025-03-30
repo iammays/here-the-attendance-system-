@@ -1,3 +1,5 @@
+//backend\src\main\java\com\here\backend\Teacher\TeacherRepository.java
+
 package com.here.backend.Teacher;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -17,4 +19,5 @@ public interface TeacherRepository extends MongoRepository<TeacherEntity, String
     Optional<TeacherEntity> findByEmailAndPassword(String email, String password);
     List<TeacherEntity> findByNameContainingIgnoreCase(String name);
     Set<TeacherEntity> findByCourseId(String courseId);
+
 }

@@ -1,6 +1,13 @@
+
+//backend\src\main\java\com\here\backend\ExcelImport\ExcelImportController.java
+
+
 package com.here.backend.ExcelImport;
 
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -13,8 +20,6 @@ import com.here.backend.Student.StudentEntity;
 import com.here.backend.Student.StudentRepository;
 import com.here.backend.Teacher.TeacherEntity;
 import com.here.backend.Teacher.TeacherRepository;
-import com.here.backend.Camera.CameraEntity;
-import com.here.backend.Camera.CameraRepository;
 import com.here.backend.Course.CourseEntity;
 import com.here.backend.Course.CourseRepository;
 import com.here.backend.Room.RoomEntity;
@@ -28,8 +33,6 @@ public class ExcelImportController {
 
     @Autowired
     private StudentRepository studentRepository;
-    @Autowired
-    private CameraRepository cameraRepository;
     @Autowired
     private TeacherRepository teacherRepository;
     @Autowired
@@ -119,13 +122,14 @@ public class ExcelImportController {
                 String endTime = getStringValue(row.getCell(5));
                 String day = getStringValue(row.getCell(6));
                 String category = getStringValue(row.getCell(7));
+                int credits = getIntValue(row.getCell(8));
 
                 // التأكد من أن جميع القيم ليست فارغة
                 if (courseId.isEmpty() || name.isEmpty() || roomId.isEmpty() || teacherId.isEmpty()) {
                     continue;
                 }
 
-                CourseEntity course = new CourseEntity(courseId, name, roomId, teacherId, startTime, endTime, day, category);
+                CourseEntity course = new CourseEntity(courseId, name, roomId, teacherId, startTime, endTime, day, category,credits);
                 courses.add(course);
             }
 
@@ -138,73 +142,7 @@ public class ExcelImportController {
         }
     }
 
-    @PostMapping("/cameras")
-    public String importCameras(@RequestParam("file") MultipartFile file) {
-        if (file.isEmpty()) {
-            return "Please upload a valid Excel file.";
-        }
-
-        if (!file.getOriginalFilename().endsWith(".xlsx")) {
-            return "Invalid file format. Please upload an Excel (.xlsx) file.";
-        }
-
-        System.out.println("Processing file: " + file.getOriginalFilename());
-
-        try (InputStream inputStream = file.getInputStream();
-            Workbook workbook = new XSSFWorkbook(inputStream)) {
-
-            Sheet sheet = workbook.getSheetAt(0);
-            List<CameraEntity> camerasToSave = new ArrayList<>();
-            Set<String> importedCameraIds = new HashSet<>();
-
-            for (Row row : sheet) {
-                if (row.getRowNum() == 0) continue; // Skip header row
-
-                Cell idCell = row.getCell(0);
-                Cell roomCell = row.getCell(1);
-
-                if (idCell == null || roomCell == null) {
-                    System.out.println("Skipping row: missing camera ID or room ID");
-                    continue;
-                }
-
-                String cameraId = getStringValue(idCell);
-                String roomId = getStringValue(roomCell);
-
-                if (cameraId.isEmpty() || roomId.isEmpty()) {
-                    System.out.println("Skipping row: invalid camera ID or room ID");
-                    continue;
-                }
-
-                importedCameraIds.add(cameraId);
-                Optional<CameraEntity> existingCamera = cameraRepository.findById(cameraId);
-                CameraEntity camera = existingCamera.orElseGet(() -> new CameraEntity(cameraId, roomId));
-                camera.setRoomId(roomId); // Ensure roomId is updated if needed
-                camerasToSave.add(camera);
-            }
-
-            // Remove cameras from the database if they are not in the imported file
-            List<String> existingCameraIds = cameraRepository.findAll()
-            .stream()
-            .map(CameraEntity::getCameraId)
-            .collect(Collectors.toList());
-
-            List<String> camerasToDelete = existingCameraIds.stream()
-            .filter(id -> !importedCameraIds.contains(id))
-            .collect(Collectors.toList());
-
-            cameraRepository.deleteAllById(camerasToDelete);
-            cameraRepository.saveAll(camerasToSave);
-            return "Camera data imported and updated successfully!";
-
-        } catch (Exception e) {
-            System.err.println("Error processing Excel file: " + e.getMessage());
-            e.printStackTrace();
-            return "Error: " + e.getMessage();
-        }
-    }
-
-
+    
 
     @PostMapping("/teachers")
     public ResponseEntity<?> importTeachers(@RequestParam("file") MultipartFile file) {
@@ -362,4 +300,52 @@ public class ExcelImportController {
             return 0;
         }
     }
+
+
+
+@PostMapping("/export-attendance")
+public ResponseEntity<?> exportAttendanceToExcel(@RequestBody List<Map<String, String>> attendanceData) {
+    try {
+        // Create a new workbook and sheet
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Attendance Report");
+
+        // Create header row
+        Row headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue("Student Name");
+        headerRow.createCell(1).setCellValue("Status");
+
+        // Fill data rows
+        int rowNum = 1;
+        for (Map<String, String> entry : attendanceData) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(entry.getOrDefault("name", ""));
+            row.createCell(1).setCellValue(entry.getOrDefault("status", ""));
+        }
+
+        // Auto-size columns
+        sheet.autoSizeColumn(0);
+        sheet.autoSizeColumn(1);
+
+        // Define the output path
+        String filePath = "C:\\Users\\HP-G9\\Desktop\\capstone\\Attendance_Report_" + 
+                         LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + 
+                         ".xlsx";
+        
+        // Write the workbook to the file system
+        try (FileOutputStream outputStream = new FileOutputStream(filePath)) {
+            workbook.write(outputStream);
+        }
+
+        // Close the workbook
+        workbook.close();
+
+        return ResponseEntity.ok(Collections.singletonMap("message", 
+            "Attendance data exported successfully to " + filePath));
+
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(Collections.singletonMap("error", "Error exporting attendance data: " + e.getMessage()));
+    }
+}
 }

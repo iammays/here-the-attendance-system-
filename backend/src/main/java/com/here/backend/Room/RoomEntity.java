@@ -1,21 +1,23 @@
+//backend\src\main\java\com\here\backend\Room\RoomEntity.java
+
 package com.here.backend.Room;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "rooms")
 public class RoomEntity {
 
-    @Id
+    @Field("room_id")
     private String Room_id;
-    private String Course_id;
+    private String scheduleId;
 
     public RoomEntity() {
     }
 
     public RoomEntity(String roomId, String courseId) {
         this.Room_id = roomId;
-        this.Course_id = courseId;
+        this.scheduleId = courseId;
     }
 
     public String getRoom_id() {
@@ -27,10 +29,17 @@ public class RoomEntity {
     }
 
     public String getCourse_id() {
-        return Course_id;
+        return scheduleId;
     }
 
     public void setCourse_id(String course_id) {
-        Course_id = course_id;
+        scheduleId = course_id;
     }
-}
+
+    public String getScheduleId() {
+        return scheduleId;
+    }
+
+    public void setScheduleId(String scheduleId) {
+        this.scheduleId = scheduleId;
+    }}
