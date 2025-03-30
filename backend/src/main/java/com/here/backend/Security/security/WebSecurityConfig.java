@@ -1,3 +1,4 @@
+
 package com.here.backend.Security.security;
 
 import java.util.Arrays;
@@ -83,21 +84,9 @@ public class WebSecurityConfig {
       .requestMatchers("/api/auth/**").permitAll()
       .requestMatchers("/api/excel/**").permitAll()
 
-      // .requestMatchers("/teachers/**").authenticated()
-      // .requestMatchers(HttpMethod.GET, "/teachers/**").authenticated() 
-      // .requestMatchers(HttpMethod.PUT, "/teachers/**").authenticated()
-      // .requestMatchers(HttpMethod.POST, "/teachers/**").authenticated()
-      // .requestMatchers(HttpMethod.DELETE, "/teachers/**").authenticated()
-      // .requestMatchers("/students/**").authenticated()
-      // .requestMatchers(HttpMethod.GET, "/courses/**").authenticated()
-      // .requestMatchers(HttpMethod.PUT, "/courses/**").authenticated()
-      // .requestMatchers(HttpMethod.POST, "/courses/**").authenticated()
-      // .requestMatchers(HttpMethod.DELETE, "/courses/**").authenticated()
-      // .requestMatchers("/courses/**").authenticated()
-      // .requestMatchers(HttpMethod.GET, "/students/**").authenticated()
-      // .requestMatchers(HttpMethod.PUT, "/students/**").authenticated()
-      // .requestMatchers(HttpMethod.POST, "/students/**").authenticated()
-      // .requestMatchers(HttpMethod.DELETE, "/students/**").authenticated()
+      .requestMatchers("/teachers/**").authenticated()
+      .requestMatchers("/students/**").authenticated()
+      .requestMatchers("/courses/**").authenticated()
 
       .requestMatchers("/swagger-ui.html").permitAll()
       .requestMatchers("/swagger-ui/**").permitAll()

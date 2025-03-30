@@ -13,7 +13,6 @@ public class AttendanceEntity {
 
     @Id
     private String id;
-
     private String attendanceId;    // Unique attendance identifier
     private String studentId;        // Student ID
     private String sessionId; 
@@ -82,4 +81,3 @@ public class AttendanceEntity {
     public List<SessionAttendance> getSessions() { return sessions; }
     public void setSessions(List<SessionAttendance> sessions) { this.sessions = sessions; }
 }
-

@@ -19,4 +19,5 @@ public interface TeacherRepository extends MongoRepository<TeacherEntity, String
     Optional<TeacherEntity> findByEmailAndPassword(String email, String password);
     List<TeacherEntity> findByNameContainingIgnoreCase(String name);
     Set<TeacherEntity> findByCourseId(String courseId);
+
 }

@@ -42,5 +42,4 @@ public class RoomEntity {
 
     public void setScheduleId(String scheduleId) {
         this.scheduleId = scheduleId;
-    }
-}
+    }}

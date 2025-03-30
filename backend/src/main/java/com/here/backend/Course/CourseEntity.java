@@ -1,4 +1,3 @@
-//backend\src\main\java\com\here\backend\Course\CourseEntity.java
 
 package com.here.backend.Course;
 
@@ -21,14 +20,18 @@ public class CourseEntity {
     private String category;
     private int Credits;
 
+
     // مُنشئ فارغ لإنشاء كائن بدون بيانات
-    public CourseEntity() {}
 
 
-    public CourseEntity(String courseId, String courseName, String roomId, String teacherId, String startTime, String endTime, String day, String category,int Credits) {
-    }
+   
     // مُنشئ كامل لإنشاء مقرر بكل البيانات
     public CourseEntity(String courseId, String name, String roomId, String teacherId, String startTime, String endTime, String day, String category) {
+    }
+
+    public CourseEntity() {}
+
+    public CourseEntity(String courseId, String courseName, String roomId, String teacherId, String startTime, String endTime, String day, String category,int Credits) {
 
         this.courseId = courseId;
         this.courseName = courseName;
@@ -40,7 +43,6 @@ public class CourseEntity {
         this.category = category;
         this.Credits=Credits;
     }
-
 
     public String getCourseId() {
         return courseId;
@@ -142,5 +144,6 @@ public class CourseEntity {
     }
 
  
+
 
 }

@@ -1,3 +1,4 @@
+
 package com.here.backend.Session;
 
 import org.springframework.data.annotation.Id;
@@ -86,3 +87,5 @@ public class SessionEntity {
         this.scheduleId = scheduleId;
     }
 }
+
+
