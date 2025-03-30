@@ -12,7 +12,7 @@ public class AttendanceEntity {
 
     @Id
     private String id;
-    private String lectureId;
+    private String sessionId;
     private String studentId;
     private String status;  // حقل جديد
     private List<SessionAttendance> sessions;
@@ -35,8 +35,8 @@ public class AttendanceEntity {
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
-    public String getLectureId() { return lectureId; }
-    public void setLectureId(String lectureId) { this.lectureId = lectureId; }
+    public String getsessionId() { return sessionId; }
+    public void setsessionId(String sessionId) { this.sessionId = sessionId; }
     public String getStudentId() { return studentId; }
     public void setStudentId(String studentId) { this.studentId = studentId; }
     public String getStatus() { return status; }
