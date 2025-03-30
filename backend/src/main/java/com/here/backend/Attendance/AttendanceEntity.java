@@ -13,7 +13,6 @@ public class AttendanceEntity {
 
     @Id
     private String id;
-
     private String attendanceId;    // Unique attendance identifier
     private String studentId;        // Student ID
     private String sessionId; 
