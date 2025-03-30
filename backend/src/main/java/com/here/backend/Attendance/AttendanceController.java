@@ -57,20 +57,20 @@ public class AttendanceController {
     //     return attendanceRepository.save(attendanceEntity);
     // }
     
-    @PostMapping
-    public ResponseEntity<String> saveAttendance(@RequestBody AttendanceRecord record) {
-        AttendanceEntity attendance = attendanceRepository.findByLectureIdAndStudentId(record.getLectureId(), record.getStudentId());
-        if (attendance == null) {
-            attendance = new AttendanceEntity();
-            attendance.setLectureId(record.getLectureId());
-            attendance.setStudentId(record.getStudentId());
-            attendance.setSessions(new java.util.ArrayList<>());
-        }
-        attendance.getSessions().add(new AttendanceEntity.SessionAttendance(record.getSessionId(), record.getDetectionTime()));
-        attendance.setStatus(record.getStatus());
-        attendanceRepository.save(attendance);
-        return ResponseEntity.ok("Attendance saved");
-    }
+    // @PostMapping
+    // public ResponseEntity<String> saveAttendance(@RequestBody AttendanceRecord record) {
+    //     AttendanceEntity attendance = attendanceRepository.findByLectureIdAndStudentId(record.getLectureId(), record.getStudentId());
+    //     if (attendance == null) {
+    //         attendance = new AttendanceEntity();
+    //         attendance.setLectureId(record.getLectureId());
+    //         attendance.setStudentId(record.getStudentId());
+    //         attendance.setSessions(new java.util.ArrayList<>());
+    //     }
+    //     attendance.getSessions().add(new AttendanceEntity.SessionAttendance(record.getSessionId(), record.getDetectionTime()));
+    //     attendance.setStatus(record.getStatus());
+    //     attendanceRepository.save(attendance);
+    //     return ResponseEntity.ok("Attendance saved");
+    // }
 
 
     // جلب تقرير حضور طالب لمحاضرة معينة
