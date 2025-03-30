@@ -23,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.here.backend.Student.StudentEntity;
 import com.here.backend.Student.StudentRepository;
 import com.here.backend.Course.CourseRepository;
-import com.here.backend.Camera.CameraRepository;
 import com.here.backend.ExcelImport.ExcelImportController;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,8 +39,7 @@ public class ExcelImportControllerTest {
     @Mock
     private CourseRepository courseRepository;
 
-    @Mock
-    private CameraRepository cameraRepository;
+ 
 
     @Mock
     private MultipartFile file;

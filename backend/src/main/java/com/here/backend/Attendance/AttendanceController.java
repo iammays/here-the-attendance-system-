@@ -1,8 +1,11 @@
+//backend\src\main\java\com\here\backend\Attendance\AttendanceController.java
+
 package com.here.backend.Attendance;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -28,6 +31,8 @@ public class AttendanceController {
 
     @Autowired
     private AttendanceRepository attendanceRepository;
+    @Autowired
+    private AttendanceService attendanceService;
 
 
     @Autowired
@@ -50,34 +55,53 @@ public class AttendanceController {
     // public AttendanceEntity createAttendance(@RequestBody AttendanceEntity attendanceEntity) {
     //     return attendanceRepository.save(attendanceEntity);
     // }
-
-    // Get all attendance records
-    @GetMapping
-    public List<AttendanceEntity> getAllAttendances() {
-        return attendanceRepository.findAll();
+    
+    @PostMapping
+    public ResponseEntity<String> saveAttendance(@RequestBody AttendanceRecord record) {
+        AttendanceEntity attendance = attendanceRepository.findByLectureIdAndStudentId(record.getLectureId(), record.getStudentId());
+        if (attendance == null) {
+            attendance = new AttendanceEntity();
+            attendance.setLectureId(record.getLectureId());
+            attendance.setStudentId(record.getStudentId());
+            attendance.setSessions(new java.util.ArrayList<>());
+        }
+        attendance.getSessions().add(new AttendanceEntity.SessionAttendance(record.getSessionId(), record.getDetectionTime()));
+        attendance.setStatus(record.getStatus());
+        attendanceRepository.save(attendance);
+        return ResponseEntity.ok("Attendance saved");
     }
 
-    // Get an attendance record by ID
-    @GetMapping("/{attendanceId}")
-    public ResponseEntity<AttendanceEntity> getAttendanceById(@PathVariable String attendanceId) {
-        return attendanceRepository.findById(attendanceId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+
+    // جلب تقرير حضور طالب لمحاضرة معينة
+    @GetMapping("/{lectureId}/{studentId}")
+    public ResponseEntity<?> getAttendanceReport(@PathVariable String lectureId, @PathVariable String studentId, @RequestParam int lateThreshold) {
+        String status = attendanceService.determineStatus(lectureId, studentId, lateThreshold);
+        int detectionCount = attendanceService.countDetections(lectureId, studentId);
+        AttendanceEntity attendance = attendanceRepository.findByLectureIdAndStudentId(lectureId, studentId);
+        return ResponseEntity.ok(new AttendanceReport(status, detectionCount, attendance.getSessions()));
     }
 
-    // Update an attendance record
-    @PutMapping("/{attendanceId}")
-    public ResponseEntity<AttendanceEntity> updateAttendance(@PathVariable String attendanceId, @RequestBody AttendanceEntity attendanceDetails) {
-        return attendanceRepository.findById(attendanceId)
-                .map(attendance -> {
-                    attendance.setStudentId(attendanceDetails.getStudentId());
-                    attendance.setSessionId(attendanceDetails.getSessionId());
-                    attendance.setStatus(attendanceDetails.getStatus());
-                    attendance.setDetectedTime(attendanceDetails.getDetectedTime());
-                    return ResponseEntity.ok(attendanceRepository.save(attendance));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    // تغيير حالة حضور طالب (مثل Present أو Late)
+    @PutMapping("/{lectureId}/{studentId}")
+    public ResponseEntity<String> updateAttendanceStatus(
+            @PathVariable String lectureId,
+            @PathVariable String studentId,
+            @RequestBody Map<String, String> body) {
+        AttendanceEntity attendance = attendanceRepository.findByLectureIdAndStudentId(lectureId, studentId);
+        if (attendance == null) {
+            return ResponseEntity.notFound().build();
+        }
+        String newStatus = body.get("status");
+        if (!List.of("Present", "Late", "Absent", "Excuse").contains(newStatus)) {
+            return ResponseEntity.badRequest().body("Invalid status. Use: Present, Late, Absent, Excuse");
+        }
+        attendance.setStatus(newStatus);
+        attendanceRepository.save(attendance);
+        return ResponseEntity.ok("Attendance status updated to " + newStatus);
     }
+
+
+
 
     // Delete an attendance record
     @DeleteMapping("/{attendanceId}")
@@ -102,7 +126,7 @@ public ResponseEntity<AttendanceEntity> createAttendance(@RequestBody Attendance
     // Process only if the student is marked absent
     if ("absent".equalsIgnoreCase(attendanceEntity.getStatus())) {
         String studentId = attendanceEntity.getStudentId();
-        String courseId = attendanceEntity.getSessionId();
+        String courseId = attendanceEntity.getLectureId();
 
         // Find student by ID
         studentRepository.findById(studentId).ifPresent(student -> {

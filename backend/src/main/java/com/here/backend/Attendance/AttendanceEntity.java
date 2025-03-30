@@ -1,37 +1,44 @@
+//backend\src\main\java\com\here\backend\Attendance\AttendanceEntity.java
+
 package com.here.backend.Attendance;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Document(collection = "attendances")
 public class AttendanceEntity {
 
     @Id
     private String id;
+
     private String attendanceId;    // Unique attendance identifier
     private String studentId;        // Student ID
-    private String sessionId;        // Session ID
-    private String status;           // Attendance status (present, late, excused, absent)
+    private String sessionId; 
+    private String lectureId;
+        private String status;           // Attendance status (present, late, excused, absent)
     private LocalDateTime detectedTime; // Time of detection
 
-    // Constructors
-    public AttendanceEntity() {}
+    private List<SessionAttendance> sessions;
 
-    public AttendanceEntity(String attendanceId, String studentId, String sessionId, String status, LocalDateTime detectedTime) {
-        this.attendanceId = attendanceId;
-        this.studentId = studentId;
-        this.sessionId = sessionId;
-        this.status = status;
-        this.detectedTime = detectedTime;
-    }
 
-   
-   
-   
-   
-   
-   
+    // كلاس صغير لتخزين رقم الجلسة ووقت الاكتشاف
+    public static class SessionAttendance {
+        private int sessionId;
+        private String detectionTime;
+
+        public SessionAttendance(int sessionId, String detectionTime) {
+            this.sessionId = sessionId;
+            this.detectionTime = detectionTime;
+        }
+
+        public int getSessionId() { return sessionId; }
+        public void setSessionId(int sessionId) { this.sessionId = sessionId; }
+        public String getDetectionTime() { return detectionTime; }
+        public void setDetectionTime(String detectionTime) { this.detectionTime = detectionTime; }
+    } 
    
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -52,14 +59,8 @@ public class AttendanceEntity {
         this.studentId = studentId;
     }
 
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
-    }
-
+    public String getsessionId() { return sessionId; }
+    public void setsessionId(String sessionId) { this.sessionId = sessionId; }
     public String getStatus() {
         return status;
     }
@@ -75,4 +76,10 @@ public class AttendanceEntity {
     public void setDetectedTime(LocalDateTime detectedTime) {
         this.detectedTime = detectedTime;
     }
+
+    public String getLectureId() { return lectureId; }
+    public void setLectureId(String lectureId) { this.lectureId = lectureId; }
+    public List<SessionAttendance> getSessions() { return sessions; }
+    public void setSessions(List<SessionAttendance> sessions) { this.sessions = sessions; }
 }
+

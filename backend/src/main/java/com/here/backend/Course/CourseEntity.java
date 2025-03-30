@@ -1,3 +1,5 @@
+//backend\src\main\java\com\here\backend\Course\CourseEntity.java
+
 package com.here.backend.Course;
 
 import org.springframework.data.annotation.Id;
@@ -19,9 +21,15 @@ public class CourseEntity {
     private String category;
     private int Credits;
 
+    // مُنشئ فارغ لإنشاء كائن بدون بيانات
     public CourseEntity() {}
 
+
     public CourseEntity(String courseId, String courseName, String roomId, String teacherId, String startTime, String endTime, String day, String category,int Credits) {
+    }
+    // مُنشئ كامل لإنشاء مقرر بكل البيانات
+    public CourseEntity(String courseId, String name, String roomId, String teacherId, String startTime, String endTime, String day, String category) {
+
         this.courseId = courseId;
         this.courseName = courseName;
         this.roomId = roomId;
@@ -32,6 +40,7 @@ public class CourseEntity {
         this.category = category;
         this.Credits=Credits;
     }
+
 
     public String getCourseId() {
         return courseId;
@@ -111,4 +120,27 @@ public class CourseEntity {
     public void setCredit(int Credits) {
         this.Credits = Credits;
     }
+
+
+    public String getCourseName() {
+        return courseName;
+    }
+
+
+    public void setCourseName(String courseName) {
+        this.courseName = courseName;
+    }
+
+
+    public int getCredits() {
+        return Credits;
+    }
+
+
+    public void setCredits(int credits) {
+        Credits = credits;
+    }
+
+ 
+
 }
