@@ -1,6 +1,5 @@
 package com.here.backend.Attendance;
 
-import com.here.backend.Student.StudentEntity;
 import com.here.backend.Course.CourseEntity;
 import com.here.backend.Course.CourseRepository;
 import com.here.backend.Emails.EmailSenderService;
