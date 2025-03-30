@@ -6,6 +6,12 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
 public interface AttendanceRepository extends MongoRepository<AttendanceEntity, String> {
+
+
+    long countByStudentIdAndSessionIdAndStatus(String studentId, String courseId, String string);
+    // You can add custom query methods here if needed
+
+
     // البحث عن سجل حضور باستخدام معرف المحاضرة ومعرف الطالب
     AttendanceEntity findByLectureIdAndStudentId(String lectureId, String studentId);
     
@@ -13,3 +19,4 @@ public interface AttendanceRepository extends MongoRepository<AttendanceEntity, 
     @Query(value = "{'lectureId': ?0}", delete = true)
     void deleteByLectureId(String lectureId);
 }
+

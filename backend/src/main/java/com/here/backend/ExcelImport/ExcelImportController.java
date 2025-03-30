@@ -1,9 +1,13 @@
+
 //backend\src\main\java\com\here\backend\ExcelImport\ExcelImportController.java
 
 
 package com.here.backend.ExcelImport;
 
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -118,13 +122,14 @@ public class ExcelImportController {
                 String endTime = getStringValue(row.getCell(5));
                 String day = getStringValue(row.getCell(6));
                 String category = getStringValue(row.getCell(7));
+                int credits = getIntValue(row.getCell(8));
 
                 // التأكد من أن جميع القيم ليست فارغة
                 if (courseId.isEmpty() || name.isEmpty() || roomId.isEmpty() || teacherId.isEmpty()) {
                     continue;
                 }
 
-                CourseEntity course = new CourseEntity(courseId, name, roomId, teacherId, startTime, endTime, day, category);
+                CourseEntity course = new CourseEntity(courseId, name, roomId, teacherId, startTime, endTime, day, category,credits);
                 courses.add(course);
             }
 
@@ -295,4 +300,52 @@ public class ExcelImportController {
             return 0;
         }
     }
+
+
+
+@PostMapping("/export-attendance")
+public ResponseEntity<?> exportAttendanceToExcel(@RequestBody List<Map<String, String>> attendanceData) {
+    try {
+        // Create a new workbook and sheet
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Attendance Report");
+
+        // Create header row
+        Row headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue("Student Name");
+        headerRow.createCell(1).setCellValue("Status");
+
+        // Fill data rows
+        int rowNum = 1;
+        for (Map<String, String> entry : attendanceData) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(entry.getOrDefault("name", ""));
+            row.createCell(1).setCellValue(entry.getOrDefault("status", ""));
+        }
+
+        // Auto-size columns
+        sheet.autoSizeColumn(0);
+        sheet.autoSizeColumn(1);
+
+        // Define the output path
+        String filePath = "C:\\Users\\HP-G9\\Desktop\\capstone\\Attendance_Report_" + 
+                         LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + 
+                         ".xlsx";
+        
+        // Write the workbook to the file system
+        try (FileOutputStream outputStream = new FileOutputStream(filePath)) {
+            workbook.write(outputStream);
+        }
+
+        // Close the workbook
+        workbook.close();
+
+        return ResponseEntity.ok(Collections.singletonMap("message", 
+            "Attendance data exported successfully to " + filePath));
+
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(Collections.singletonMap("error", "Error exporting attendance data: " + e.getMessage()));
+    }
+}
 }

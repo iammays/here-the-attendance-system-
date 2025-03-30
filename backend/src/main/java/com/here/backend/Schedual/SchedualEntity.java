@@ -4,31 +4,28 @@ package com.here.backend.Schedual;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.here.backend.Course.CourseEntity;
+
 import java.util.List;
 
 @Document(collection = "scheduals")
 public class SchedualEntity {
 
-    @Id
-    private String scheduleId;  // Unique schedule identifier
+   
+    private String scheduleId;  
     private String roomId;      // The room this schedule belongs to
-    private List<String> sessionIds; // List of session IDs in this schedule
+    private List<CourseEntity> listOfSessions; // Nested list of course objects
 
     // Constructors
     public SchedualEntity() {}
 
-    public SchedualEntity(String scheduleId, String roomId, List<String> sessionIds) {
+    public SchedualEntity(String scheduleId, String roomId, List<CourseEntity> listOfSessions) {
         this.scheduleId = scheduleId;
         this.roomId = roomId;
-        this.sessionIds = sessionIds;
+        this.listOfSessions = listOfSessions;
     }
 
-
-
-    public SchedualEntity(String scheduleId, String roomId) {
-        this.scheduleId = scheduleId;
-        this.roomId = roomId;
-    }
     // Getters and Setters
     public String getScheduleId() {
         return scheduleId;
@@ -46,11 +43,11 @@ public class SchedualEntity {
         this.roomId = roomId;
     }
 
-    public List<String> getSessionIds() {
-        return sessionIds;
+    public List<CourseEntity> getListOfSessions() {
+        return listOfSessions;
     }
 
-    public void setSessionIds(List<String> sessionIds) {
-        this.sessionIds = sessionIds;
+    public void setListOfSessions(List<CourseEntity> listOfSessions) {
+        this.listOfSessions = listOfSessions;
     }
 }

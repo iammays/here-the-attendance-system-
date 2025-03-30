@@ -1,3 +1,4 @@
+
 //backend\src\main\java\com\here\backend\Course\CourseRepository.java
 
 package com.here.backend.Course;
@@ -29,6 +30,10 @@ public interface CourseRepository extends MongoRepository<CourseEntity, String> 
     List<CourseEntity> findByDay(String day);
     // جلب مقررات باستخدام معرف الغرفة
     List<CourseEntity> findByRoomId(String roomId);
+    String findNameByCourseId(String courseId);
+    // int countByCourseId(String courseId);
+
+    int countByCourseName(String courseName);
 
     // جلب بيانات المقرر باستخدام المعرف
     default List<CourseEntity> getCourseTimeById(String courseId) {

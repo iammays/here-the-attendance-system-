@@ -1,3 +1,4 @@
+
 //backend\src\main\java\com\here\backend\Student\StudentController.java
 
 package com.here.backend.Student;
@@ -115,4 +116,48 @@ public class StudentController {
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found.");
     }
+
+
+   // API to get absences for a specific student
+   @GetMapping("/{studentId}/absences")
+   public ResponseEntity<Map<String, Integer>> getStudentAbsences(@PathVariable String studentId) {
+       Optional<StudentEntity> student = studentRepository.findByStudentId(studentId);
+       return student.map(s -> ResponseEntity.ok(s.getCourseAbsences()))
+                     .orElse(ResponseEntity.notFound().build());
+   }
+
+   @PostMapping("/{studentId}/absences/{courseId}")
+   public ResponseEntity<?> updateStudentAbsences(
+           @PathVariable String studentId,
+           @PathVariable String courseId,
+           @RequestBody Map<String, Integer> requestBody) {
+   
+       Optional<StudentEntity> student = studentRepository.findByStudentId(studentId);
+       if (student.isPresent()) {
+           StudentEntity updatedStudent = student.get();
+           Map<String, Integer> absencesMap = updatedStudent.getCourseAbsences();
+           
+           if (requestBody.containsKey("absences")) {
+               absencesMap.put(courseId, requestBody.get("absences"));
+               updatedStudent.setCourseAbsences(absencesMap);
+               studentRepository.save(updatedStudent);
+               return ResponseEntity.ok("Absence record updated successfully.");
+           }
+           return ResponseEntity.badRequest().body("Missing 'absences' field in request body.");
+       }
+       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found.");
+   }
+   
+
+
+   @GetMapping("/{studentId}/courses/{courseId}/wf-status")
+   public ResponseEntity<Boolean> getWfStatusForCourse(
+           @PathVariable String studentId,
+           @PathVariable String courseId) {
+       return studentRepository.findById(studentId)
+               .map(student -> ResponseEntity.ok(student.getCourseWfStatus().getOrDefault(courseId, false)))
+               .orElseGet(() -> ResponseEntity.notFound().build());
+   }
+
+
 }
