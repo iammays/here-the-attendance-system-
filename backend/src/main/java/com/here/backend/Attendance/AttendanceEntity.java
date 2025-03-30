@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 public class AttendanceEntity {
 
     @Id
+    private String id;
     private String attendanceId;    // Unique attendance identifier
     private String studentId;        // Student ID
     private String sessionId;        // Session ID
@@ -25,7 +26,16 @@ public class AttendanceEntity {
         this.detectedTime = detectedTime;
     }
 
-    // Getters and Setters
+   
+   
+   
+   
+   
+   
+   
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+     // Getters and Setters
     public String getAttendanceId() {
         return attendanceId;
     }
