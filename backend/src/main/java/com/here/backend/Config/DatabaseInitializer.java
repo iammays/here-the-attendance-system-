@@ -1,7 +1,3 @@
-
-//backend\src\main\java\com\here\backend\Config\DatabaseInitializer.java
-
-
 package com.here.backend.Config;
 
 
@@ -9,9 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Component
 public class DatabaseInitializer implements CommandLineRunner {
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseInitializer.class);
 
     private final MongoTemplate mongoTemplate;
 

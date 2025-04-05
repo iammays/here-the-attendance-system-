@@ -1,4 +1,3 @@
-//backend\src\main\java\com\here\backend\Schedual\SchedualRepository.java
 package com.here.backend.Schedual;
 
 import java.util.List;

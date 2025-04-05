@@ -1,4 +1,3 @@
-
 package com.here.backend.Security.controllers;
 
 import java.util.Arrays;
@@ -17,5 +16,4 @@ public class ClientsRestController {
     public List<String> getClients() {
         return Arrays.asList("First Client", "Second Client");
     }
-
 }

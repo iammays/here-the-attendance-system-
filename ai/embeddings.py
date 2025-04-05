@@ -1,3 +1,4 @@
+#ai\embeddings.py
 import os
 import numpy as np
 import cv2
@@ -79,5 +80,3 @@ def extract_embeddings_from_folder(base_dir="students_embeddings"):
 if __name__ == "__main__":
     folder_path = "students_embeddings"
     extract_embeddings_from_folder(folder_path)
-    
-    #just to make sure 

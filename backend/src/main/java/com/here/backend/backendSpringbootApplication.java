@@ -12,7 +12,7 @@ public class backendSpringbootApplication {
         SpringApplication.run(backendSpringbootApplication.class, args);
     }
 
-    // تعريف RestTemplate كـ bean
+    // تعليق: تعريف Bean لـ RestTemplate
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();

@@ -12,12 +12,17 @@ public class EmailSenderService {
     private JavaMailSender mailSender;
 
     public void sendSimpleEmail(String toEmail, String subject, String body) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("shouqalmaharabah@gmail.com");
-        message.setTo(toEmail);
-        message.setText(body);
-        message.setSubject(subject);
-        mailSender.send(message);
-        System.out.println("Mail Sent...");
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom("maysalbutmah311@gmail.com");
+            message.setTo(toEmail);
+            message.setText(body);
+            message.setSubject(subject);
+            mailSender.send(message);
+            System.out.println("✅ Mail Sent to: " + toEmail);
+        } catch (Exception e) {
+            System.out.println("❌ Failed to send email to " + toEmail + ": " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

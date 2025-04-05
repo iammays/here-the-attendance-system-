@@ -1,5 +1,3 @@
-//backend\src\main\java\com\here\backend\Room\RoomEntity.java
-
 package com.here.backend.Room;
 
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -42,4 +40,5 @@ public class RoomEntity {
 
     public void setScheduleId(String scheduleId) {
         this.scheduleId = scheduleId;
-    }}
+    }
+}

@@ -1,14 +1,16 @@
-
 package com.here.backend.Course;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.time.LocalDate;
 import java.util.*;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -18,97 +20,167 @@ public class CourseController {
     private static final Logger logger = LoggerFactory.getLogger(CourseController.class);
     @Autowired
     private CourseRepository courseRepository;
+    @Autowired
+    private RestTemplate restTemplate;
     
         public CourseController(CourseRepository courseRepository) {
             this.courseRepository = courseRepository;
         }
+        
+    
+            // get all courses ✅ getAllCourses() //done
+            // get course by id ✅ getCourseById() //done
+            // get course by name ✅ getCourseByName() //done
+            // get courses by teacherId ✅ getCoursesByTeacher()  //done
+            // get course name by id ✅ getCourseNameById() //done
+            // get course by category ✅ getCourseByCategory() //done
+            // get course by name and category ✅  getCourseByNameAndCategory() //done
+            // get course by name and teacher ✅ getCourseByNameAndTeacher() //done
+            // get courses by day ✅ getCourseByDay() //done
+            // get time of course by id in MINUTES ✅ getCourseTimeById() //done
+    
+        @GetMapping
+        public List<CourseEntity> getAllCourses() {
+            return courseRepository.findAll();
+        }
+    
+        @GetMapping("/{id}")
+        public ResponseEntity<CourseEntity> getCourseById(@PathVariable String id) {
+            return courseRepository.findByCourseId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+        }
+    
+        @GetMapping("/name/{courseName}")
+        public ResponseEntity<List<CourseEntity>> getCourseByName(@PathVariable String courseName) {
+            List<CourseEntity> courses = courseRepository.findByName(courseName);
+            return ResponseEntity.ok(courses);
+        }
+    
+        @GetMapping("/teacher/{teacherId}")
+        public ResponseEntity<List<CourseEntity>> getCoursesByTeacher(@PathVariable String teacherId) {
+            List<CourseEntity> courses = courseRepository.findByTeacherId(teacherId);
+            return ResponseEntity.ok(courses);
+        }
+    
+        @GetMapping("/{id}/name")
+        public ResponseEntity<String> getCourseNameById(@PathVariable String id) {
+            return courseRepository.findByCourseId(id)
+                .map(course -> ResponseEntity.ok(course.getName()))
+                .orElse(ResponseEntity.notFound().build());
+        }
+    
+        @GetMapping("/category/{category}")
+        public ResponseEntity<List<CourseEntity>> getCourseByCategory(@PathVariable String category) {
+            List<CourseEntity> courses = courseRepository.findByCategory(category);
+            return ResponseEntity.ok(courses);
+        }
+    
+        @GetMapping("/name/{courseName}/category/{category}")
+        public ResponseEntity<List<CourseEntity>> getCourseByNameAndCategory(@PathVariable String courseName, @PathVariable String category) {
+            List<CourseEntity> courses = courseRepository.findByNameAndCategory(courseName, category);
+            return ResponseEntity.ok(courses);
+        }
+    
+        @GetMapping("/name/{courseName}/teacher/{teacherId}")
+        public ResponseEntity<List<CourseEntity>> getCourseByNameAndTeacher(@PathVariable String courseName, @PathVariable String teacherId) {
+            List<CourseEntity> courses = courseRepository.findByNameAndTeacherId(courseName, teacherId);
+            return ResponseEntity.ok(courses);
+        }
+    
+        @GetMapping("/day/{day}")
+        public ResponseEntity<List<CourseEntity>> getCourseByDay(@PathVariable String day) {
+            List<CourseEntity> courses = courseRepository.findByDay(day);
+            return ResponseEntity.ok(courses);
+        }
+    
+        @GetMapping("/{id}/time")
+        public ResponseEntity<Integer> getCourseTimeById(@PathVariable String id) {
+            return (ResponseEntity<Integer>) courseRepository.findByCourseId(id)
+                .map(course -> {
+                    try {
+                        int startMinutes = convertTimeToMinutes(course.getStartTime());
+                        int endMinutes = convertTimeToMinutes(course.getEndTime());
+                        int duration = endMinutes - startMinutes;
+                        return ResponseEntity.ok(duration);
+                    } catch (Exception e) {
+                        return ResponseEntity.badRequest().build();
+                    }
+                })
+                .orElse(ResponseEntity.notFound().build());
+        }
+    
+        private int convertTimeToMinutes(String time) {
+            String[] parts = time.split(":");
+            int hours = Integer.parseInt(parts[0]);
+            int minutes = Integer.parseInt(parts[1]);
+            return (hours * 60) + minutes;
+        }
 
-        // get all courses ✅ getAllCourses()
-        // get course by id ✅ getCourseById()
-        // get course by name ✅ getCourseByName()
-        // get courses by teacherId ✅ getCoursesByTeacher() 
-        // get course name by id ✅ getCourseNameById()
-        // get course by category ✅ getCourseByCategory()
-        // get course by name and category ✅  getCourseByNameAndCategory()
-        // get course by name and teacher ✅ getCourseByNameAndTeacher() 
-        // get courses by day ✅ getCourseByDay()
-        // get time of course by id in MINUTES ✅ getCourseTimeById()
+    //for mays 
+    // إنشاء محاضرة يدوية جديدة مع نمط بسيط لـ lectureId
+    
+    @PostMapping("/manual")
+    public ResponseEntity<CourseEntity> createManualLecture(@RequestBody CourseEntity course) {
+    String date = LocalDate.now().toString(); // التاريخ بصيغة YYYY-MM-DD
+    String startTime = course.getStartTime().replace(":", ""); // تحويل 09:00 إلى 0900
+    String lectureId = course.getCourseId() + "-" + date + "-" + startTime; // نمط: courseId-date-startTime
+    course.setLectureId(lectureId);
+    CourseEntity savedCourse = courseRepository.save(course);
+    return ResponseEntity.status(HttpStatus.CREATED).body(savedCourse);
+}
 
-    @GetMapping
-    public List<CourseEntity> getAllCourses() {
-        return courseRepository.findAll();
+    // تشغيل الكاميرا لمحاضرة معينة
+    @PostMapping("/startCamera/{courseId}")
+    public ResponseEntity<String> startCamera(
+            @PathVariable String courseId,
+            @RequestBody Map<String, Object> body) {
+        String lectureId = (String) body.get("lecture_id");
+        int lectureDuration = (int) body.get("lecture_duration");
+        int lateThreshold = (int) body.get("late_threshold");
+        int interval = (int) body.get("interval");
+        String videoPath = (String) body.get("video_path");
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("lecture_id", lectureId);
+        params.put("lecture_duration", lectureDuration);
+        params.put("late_threshold", lateThreshold);
+        params.put("interval", interval);
+        params.put("video_path", videoPath);
+
+        restTemplate.postForObject("http://localhost:5000/start", params, String.class);
+        return ResponseEntity.ok("Camera started for lecture " + lectureId);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CourseEntity> getCourseById(@PathVariable String id) {
-        return courseRepository.findByCourseId(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
-    }
+    // تعليق: تشغيل الكاميرا بناءً على بيانات الداتا بيس
+    /*
+    @PostMapping("/startCamera/{courseId}")
+    public ResponseEntity<String> startCameraFromDB(@PathVariable String courseId) {
+        CourseEntity course = courseRepository.findByCourseId(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+        String lectureId = course.getLectureId() != null ? course.getLectureId() : course.getCourseId();
+        int lectureDuration = calculateDuration(course.getStartTime(), course.getEndTime()) * 60; // بالثواني
+        int lateThreshold = 5 * 60; // 5 دقايق بالثواني (قابل للتعديل من المعلم)
+        int numSessions = lectureDuration <= 75 * 60 ? 4 : (lectureDuration < 120 * 60 ? 6 : 8);
+        int interval = (lectureDuration - lateThreshold - 10 * 60) / numSessions; // نطرح آخر 10 دقايق
 
-    @GetMapping("/name/{courseName}")
-    public ResponseEntity<List<CourseEntity>> getCourseByName(@PathVariable String courseName) {
-        List<CourseEntity> courses = courseRepository.findByName(courseName);
-        return ResponseEntity.ok(courses);
-    }
+        Map<String, Object> params = new HashMap<>();
+        params.put("lecture_id", lectureId);
+        params.put("lecture_duration", lectureDuration);
+        params.put("late_threshold", lateThreshold);
+        params.put("interval", interval);
 
-    @GetMapping("/teacher/{teacherId}")
-    public ResponseEntity<List<CourseEntity>> getCoursesByTeacher(@PathVariable String teacherId) {
-        List<CourseEntity> courses = courseRepository.findByTeacherId(teacherId);
-        return ResponseEntity.ok(courses);
+        restTemplate.postForObject("http://localhost:5000/start", params, String.class);
+        return ResponseEntity.ok("Camera started for lecture " + lectureId);
     }
+    */
 
-    @GetMapping("/{id}/name")
-    public ResponseEntity<String> getCourseNameById(@PathVariable String id) {
-        return courseRepository.findByCourseId(id)
-            .map(course -> ResponseEntity.ok(course.getName()))
-            .orElse(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/category/{category}")
-    public ResponseEntity<List<CourseEntity>> getCourseByCategory(@PathVariable String category) {
-        List<CourseEntity> courses = courseRepository.findByCategory(category);
-        return ResponseEntity.ok(courses);
-    }
-
-    @GetMapping("/name/{courseName}/category/{category}")
-    public ResponseEntity<List<CourseEntity>> getCourseByNameAndCategory(@PathVariable String courseName, @PathVariable String category) {
-        List<CourseEntity> courses = courseRepository.findByNameAndCategory(courseName, category);
-        return ResponseEntity.ok(courses);
-    }
-
-    @GetMapping("/name/{courseName}/teacher/{teacherId}")
-    public ResponseEntity<List<CourseEntity>> getCourseByNameAndTeacher(@PathVariable String courseName, @PathVariable String teacherId) {
-        List<CourseEntity> courses = courseRepository.findByNameAndTeacherId(courseName, teacherId);
-        return ResponseEntity.ok(courses);
-    }
-
-    @GetMapping("/day/{day}")
-    public ResponseEntity<List<CourseEntity>> getCourseByDay(@PathVariable String day) {
-        List<CourseEntity> courses = courseRepository.findByDay(day);
-        return ResponseEntity.ok(courses);
-    }
-
-    @GetMapping("/{id}/time")
-    public ResponseEntity<Integer> getCourseTimeById(@PathVariable String id) {
-        return (ResponseEntity<Integer>) courseRepository.findByCourseId(id)
-            .map(course -> {
-                try {
-                    int startMinutes = convertTimeToMinutes(course.getStartTime());
-                    int endMinutes = convertTimeToMinutes(course.getEndTime());
-                    int duration = endMinutes - startMinutes;
-                    return ResponseEntity.ok(duration);
-                } catch (Exception e) {
-                    return ResponseEntity.badRequest().build();
-                }
-            })
-            .orElse(ResponseEntity.notFound().build());
-    }
-
-    private int convertTimeToMinutes(String time) {
-        String[] parts = time.split(":");
-        int hours = Integer.parseInt(parts[0]);
-        int minutes = Integer.parseInt(parts[1]);
-        return (hours * 60) + minutes;
+    // تعليق: دالة مساعدة لحساب المدة بالدقائق
+    private int calculateDuration(String startTime, String endTime) {
+        String[] startParts = startTime.split(":");
+        String[] endParts = endTime.split(":");
+        int startMinutes = Integer.parseInt(startParts[0]) * 60 + Integer.parseInt(startParts[1]);
+        int endMinutes = Integer.parseInt(endParts[0]) * 60 + Integer.parseInt(endParts[1]);
+        return endMinutes - startMinutes;
     }
 }

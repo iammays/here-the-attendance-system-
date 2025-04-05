@@ -1,6 +1,3 @@
-
-//backend\src\main\java\com\here\backend\Student\StudentController.java
-
 package com.here.backend.Student;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +20,32 @@ public class StudentController {
     private StudentRepository studentRepository;
     @Autowired
     private CourseRepository courseRepository;
+    
+    public StudentController(StudentRepository studentRepository, CourseRepository courseRepository) {
+        this.studentRepository = studentRepository;
+        this.courseRepository = courseRepository; 
+    }
 
-    // جلب طالب باستخدام المعرف
-    // get student by id ✅ getStudentById()
+        // get student by id ✅ getStudentById()  //done
+        // get student by name ✅ getStudentByName() //done
+        // get student by email ✅ getStudentByEmail() //done
+        // get all students ✅ getAllStudents() //done
+        // get all students in a specific course ✅ getStudentsByCourse() //done
+        // get all courses for a student ✅ getAllCoursesForStudent() //done
+        // get all students with advisorID ✅ getStudentsByAdvisor()    //done
+        // search on student name ✅ searchStudentsByName() //done
+        // add student in a course ✅ addStudentInCourse() //done
+
+
+        //------------------------------------------------------------
+        // get absences for a specific student ✅ getStudentAbsences()  //done
+        // post absences for a specific student ✅ postStudentAbsences()  //done
+        // get all student with them statuse in a specific course ✅  getStudentsByAttendanceStatus() //done
+        // post attendance for a specific student ✅ postStudentAttendance() //done
+        // get wf status for a specific student in a specific course ✅ getWfStatusForCourse() //done
+
+
+
     @GetMapping("/id/{id}")
     public ResponseEntity<StudentEntity> getStudentById(@PathVariable String id) {
         return studentRepository.findByStudentId(id)
@@ -33,16 +53,18 @@ public class StudentController {
         .orElse(ResponseEntity.notFound().build());
     }
 
-    // جلب طلاب باستخدام الاسم
-    // get student by name ✅ getStudentByName()
     @GetMapping("/name/{name}")
     public ResponseEntity<List<StudentEntity>> getStudentByName(@PathVariable String name) {
         List<StudentEntity> students = studentRepository.findByName(name);
         return students.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(students);
     }
 
-    // جلب طالب باستخدام البريد الإلكتروني
-    // get student by email ✅ getStudentByEmail()
+    @GetMapping("/search")
+    public ResponseEntity<List<StudentEntity>> searchStudentsByName(@RequestParam String name) {
+        List<StudentEntity> students = studentRepository.findByNameRegex(name);
+        return students.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(students);
+    }
+
     @GetMapping("/email/{email}")
     public ResponseEntity<StudentEntity> getStudentByEmail(@PathVariable String email) {
         Optional<StudentEntity> student = studentRepository.findByEmail(email).stream().findFirst();
@@ -50,56 +72,54 @@ public class StudentController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    // جلب كل الطلاب
-    // get all students ✅ getAllStudents()
     @GetMapping
     public List<StudentEntity> getAllStudents() {
         return studentRepository.findAll();
     }
 
-    // جلب طلاب مسجلين في مقرر معين
-    // get all students in a specific course ✅ getStudentsByCourse()
     @GetMapping("/course/{courseId}")
-    public List<StudentEntity> getStudentsByCourse(@PathVariable String courseId) {
+    public List<StudentEntity> getStudentsByCourse(@PathVariable String  courseId) {
         return studentRepository.findByCourseId(courseId);
     }
 
-    // جلب كل المقررات للطالب
-    // get all courses for a student ✅ getAllCoursesForStudent()
-    @GetMapping("/{id}/courses")
+    @GetMapping("/{id}/courses") 
     public List<CourseEntity> getAllCoursesForStudent(@PathVariable String id) {
         Optional<StudentEntity> student = studentRepository.findByStudentId(id);
+
+        System.out.println("Received Student ID: " + id);
     
         if (student.isPresent()) {
             List<String> courseIds = student.get().getCourseId();
+    
+            // System.out.println("Course IDs: " + courseIds); 
     
             if (courseIds == null || courseIds.isEmpty()) {
                 return Collections.emptyList();
             }
     
-            List<CourseEntity> courses = courseRepository.findByCourseIdIn(courseIds);
+            List<CourseEntity> courses = courseRepository.findByCourseIdIn(courseIds); 
+            // System.out.println("Courses found: " + courses); 
+
+            for (CourseEntity course : courses) {
+                course.setStudentId(id);  // تعيين studentId يدويًا
+            }
+    
             return courses;
         }
     
         return Collections.emptyList();
     }
 
-    // جلب طلاب باستخدام اسم المستشار
-    // get all students with advisorID ✅ getStudentsByAdvisor()
     @GetMapping("/advisor/{advisorName}")
     public List<StudentEntity> getStudentsByAdvisor(@PathVariable String advisorName) {
         return studentRepository.findByAdvisor(advisorName);
     }
 
-    // إنشاء طالب جديد
-    // Create a new student ✅ createStudent()
-    @PostMapping
-    public StudentEntity createStudent(@RequestBody StudentEntity studentEntity) {
-        return studentRepository.save(studentEntity);
-    }
+    // @PostMapping
+    // public StudentEntity createStudent(@RequestBody StudentEntity studentEntity) {
+    //     return studentRepository.save(studentEntity);
+    // }
 
-    // إضافة طالب لمقرر
-    // Add a student to a course addStudentInCourse()
     @PostMapping("/course/{courseId}/students/{studentId}")
     public ResponseEntity<?> addStudentInCourse(@PathVariable String courseId, @PathVariable String studentId) {
         Optional<StudentEntity> student = studentRepository.findByStudentId(studentId);
@@ -117,47 +137,91 @@ public class StudentController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found.");
     }
 
+    //-----------------------------------------------------------
+    @GetMapping("/{studentId}/absences")
+    public ResponseEntity<Map<String, Integer>> getStudentAbsences(@PathVariable String studentId) {
+        Optional<StudentEntity> student = studentRepository.findByStudentId(studentId);
+            return student.map(s -> ResponseEntity.ok(s.getCourseAbsences()))
+            .orElse(ResponseEntity.notFound().build());
+    }
 
-   // API to get absences for a specific student
-   @GetMapping("/{studentId}/absences")
-   public ResponseEntity<Map<String, Integer>> getStudentAbsences(@PathVariable String studentId) {
-       Optional<StudentEntity> student = studentRepository.findByStudentId(studentId);
-       return student.map(s -> ResponseEntity.ok(s.getCourseAbsences()))
-                     .orElse(ResponseEntity.notFound().build());
-   }
+    @PostMapping("/{studentId}/absences/{courseId}")
+    public ResponseEntity<?> postStudentAbsences(
+    @PathVariable String studentId,
+    @PathVariable String courseId,
+    @RequestBody Map<String, Integer> requestBody) {
 
-   @PostMapping("/{studentId}/absences/{courseId}")
-   public ResponseEntity<?> updateStudentAbsences(
-           @PathVariable String studentId,
-           @PathVariable String courseId,
-           @RequestBody Map<String, Integer> requestBody) {
-   
-       Optional<StudentEntity> student = studentRepository.findByStudentId(studentId);
-       if (student.isPresent()) {
-           StudentEntity updatedStudent = student.get();
-           Map<String, Integer> absencesMap = updatedStudent.getCourseAbsences();
-           
-           if (requestBody.containsKey("absences")) {
-               absencesMap.put(courseId, requestBody.get("absences"));
-               updatedStudent.setCourseAbsences(absencesMap);
-               studentRepository.save(updatedStudent);
-               return ResponseEntity.ok("Absence record updated successfully.");
-           }
-           return ResponseEntity.badRequest().body("Missing 'absences' field in request body.");
-       }
-       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found.");
-   }
-   
+        Optional<StudentEntity> student = studentRepository.findByStudentId(studentId);
+        if (student.isPresent()) {
+            StudentEntity updatedStudent = student.get();
+            Map<String, Integer> absencesMap = updatedStudent.getCourseAbsences();
 
+            if (requestBody.containsKey("absences")) {
+                absencesMap.put(courseId, requestBody.get("absences"));
+                updatedStudent.setCourseAbsences(absencesMap);
+                studentRepository.save(updatedStudent);
+                return ResponseEntity.ok("Absence record updated successfully.");
+            }
+            return ResponseEntity.badRequest().body("Missing 'absences' field in request body.");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found.");
+    }
 
-   @GetMapping("/{studentId}/courses/{courseId}/wf-status")
-   public ResponseEntity<Boolean> getWfStatusForCourse(
-           @PathVariable String studentId,
-           @PathVariable String courseId) {
-       return studentRepository.findById(studentId)
-               .map(student -> ResponseEntity.ok(student.getCourseWfStatus().getOrDefault(courseId, false)))
-               .orElseGet(() -> ResponseEntity.notFound().build());
-   }
+    @GetMapping("/course/{courseId}/attendance")
+    public ResponseEntity<List<StudentEntity>> getStudentsByAttendanceStatus(
+    @PathVariable String courseId,
+    @RequestParam(name = "status") String status) {
 
+        List<StudentEntity> students = studentRepository.findAll();
+        List<StudentEntity> filteredStudents = new ArrayList<>();
 
+        for (StudentEntity student : students) {
+            Map<String, String> attendance = student.getCourseAttendanceStatus();
+            if (attendance.containsKey(courseId) && attendance.get(courseId).equalsIgnoreCase(status)) {
+                filteredStudents.add(student);
+            }
+        }
+
+        return filteredStudents.isEmpty() 
+        ? ResponseEntity.notFound().build() 
+        : ResponseEntity.ok(filteredStudents);
+    }
+
+    @PostMapping("/{studentId}/attendance/{courseId}")
+    public ResponseEntity<?> postStudentAttendance(
+    @PathVariable String studentId,
+    @PathVariable String courseId,
+    @RequestBody Map<String, String> requestBody) {
+
+        Optional<StudentEntity> student = studentRepository.findByStudentId(studentId);
+        if (student.isPresent()) {
+            StudentEntity updatedStudent = student.get();
+            Map<String, String> attendanceMap = updatedStudent.getCourseAttendanceStatus();
+
+            if (requestBody.containsKey("status")) {
+                String status = requestBody.get("status");
+                List<String> validStatuses = Arrays.asList("Present", "Absent", "Excused", "Late");
+
+                if (!validStatuses.contains(status)) {
+                    return ResponseEntity.badRequest().body("Invalid status. Use Present, Absent, Excused, or Late.");
+                }
+
+                attendanceMap.put(courseId, status);
+                updatedStudent.setCourseAttendanceStatus(attendanceMap);
+                studentRepository.save(updatedStudent);
+                return ResponseEntity.ok("Attendance updated successfully.");
+            }
+            return ResponseEntity.badRequest().body("Missing 'status' field in request body.");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found.");
+    }
+
+    @GetMapping("/{studentId}/courses/{courseId}/wf-status")
+    public ResponseEntity<Boolean> getWfStatusForCourse(
+    @PathVariable String studentId,
+    @PathVariable String courseId) {
+        return studentRepository.findById(studentId)
+            .map(student -> ResponseEntity.ok(student.getCourseWfStatus().getOrDefault(courseId, false)))
+            .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 }

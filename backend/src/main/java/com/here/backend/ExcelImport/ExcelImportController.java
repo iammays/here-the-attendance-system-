@@ -1,7 +1,3 @@
-
-//backend\src\main\java\com\here\backend\ExcelImport\ExcelImportController.java
-
-
 package com.here.backend.ExcelImport;
 
 import java.io.FileOutputStream;
@@ -143,7 +139,6 @@ public class ExcelImportController {
     }
 
     
-
     @PostMapping("/teachers")
     public ResponseEntity<?> importTeachers(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty() || !file.getOriginalFilename().endsWith(".xlsx")) {

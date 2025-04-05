@@ -1,4 +1,3 @@
-
 package com.here.backend.Security.payload.request;
 
 import jakarta.validation.constraints.NotBlank;

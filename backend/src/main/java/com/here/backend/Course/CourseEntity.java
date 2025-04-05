@@ -1,149 +1,71 @@
-
 package com.here.backend.Course;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "courses")
 public class CourseEntity {
     @Id
     private String courseId;
-    @Field(name = "name")
-    private String courseName;
+    private String lectureId; // تعليق: معرف المحاضرة اليدوية (اختياري)
+    private String name;
     private String roomId;
     private String teacherId;
     private String studentId;
-    private String startTime;
-    private String endTime;
+    private String startTime; // بصيغة HH:mm
+    private String endTime;   // بصيغة HH:mm
     private String day;
     private String category;
     private int Credits;
 
-
-    // مُنشئ فارغ لإنشاء كائن بدون بيانات
-
-
-   
-    // مُنشئ كامل لإنشاء مقرر بكل البيانات
-    public CourseEntity(String courseId, String name, String roomId, String teacherId, String startTime, String endTime, String day, String category) {
-    }
-
     public CourseEntity() {}
 
-    public CourseEntity(String courseId, String courseName, String roomId, String teacherId, String startTime, String endTime, String day, String category,int Credits) {
-
+    public CourseEntity(String courseId, String lectureId, String name, String roomId, String teacherId, String startTime, String endTime, String day, String category) {
         this.courseId = courseId;
-        this.courseName = courseName;
+        this.lectureId = lectureId;
+        this.name = name;
         this.roomId = roomId;
         this.teacherId = teacherId;
         this.startTime = startTime;
         this.endTime = endTime;
         this.day = day;
         this.category = category;
-        this.Credits=Credits;
     }
 
-    public String getCourseId() {
-        return courseId;
+    public CourseEntity(String courseId2, String name2, String roomId2, String teacherId2, String startTime2,
+            String endTime2, String day2, String category2, int credits) {
+            this.courseId = courseId2;
+            this.name = name2;
+            this.roomId = roomId2;
+            this.teacherId = teacherId2;
+            this.startTime = startTime2;
+            this.endTime = endTime2;
+            this.day = day2;
+            this.category = category2;
+            this.Credits = credits;
     }
 
-    public void setCourseId(String courseid) {
-        courseId = courseid;
-    }
-
-    public String getName() {
-        return courseName;
-    }
-
-    public void setName(String courseName) {
-        this.courseName = courseName;
-    }
-
-    public String getRoomId() {
-        return roomId;
-    }
-
-    public void setRoomId(String roomid) {
-        roomId = roomid;
-    }
-
-    public String getTeacherId() {
-        return teacherId;
-    }
-
-    public void setTeacherId(String teacherid) {
-        teacherId = teacherid;
-    }
-
-    public String getStudentId() {
-        return studentId;
-    }
-
-    public void setStudentId(String studentid) {
-        studentId = studentid;
-    }
-
-    public String getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(String starttime) {
-        this.startTime = starttime;
-    }
-
-    public String getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(String endtime) {
-        this.endTime = endtime;
-    }
-
-    public String getDay() {
-        return day;
-    }
-
-    public void setDay(String day) {
-        this.day = day;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-    public int getCredit() {
-        return Credits;
-    }
-
-    public void setCredit(int Credits) {
-        this.Credits = Credits;
-    }
-
-
-    public String getCourseName() {
-        return courseName;
-    }
-
-
-    public void setCourseName(String courseName) {
-        this.courseName = courseName;
-    }
-
-
-    public int getCredits() {
-        return Credits;
-    }
-
-
-    public void setCredits(int credits) {
-        Credits = credits;
-    }
-
- 
-
-
+    // Getters and Setters
+    public String getCourseId() { return courseId; }
+    public void setCourseId(String courseId) { this.courseId = courseId; }
+    public String getLectureId() { return lectureId; }
+    public void setLectureId(String lectureId) { this.lectureId = lectureId; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getRoomId() { return roomId; }
+    public void setRoomId(String roomId) { this.roomId = roomId; }
+    public String getTeacherId() { return teacherId; }
+    public void setTeacherId(String teacherId) { this.teacherId = teacherId; }
+    public String getStudentId() { return studentId; }
+    public void setStudentId(String studentId) { this.studentId = studentId; }
+    public String getStartTime() { return startTime; }
+    public void setStartTime(String startTime) { this.startTime = startTime; }
+    public String getEndTime() { return endTime; }
+    public void setEndTime(String endTime) { this.endTime = endTime; }
+    public String getDay() { return day; }
+    public void setDay(String day) { this.day = day; }
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
+    public int getCredits() { return Credits; }
+    public void setCredits(int credits) { Credits = credits; }
 }
