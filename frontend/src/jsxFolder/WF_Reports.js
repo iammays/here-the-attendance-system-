@@ -6,30 +6,31 @@ const WFReports = () => {
   const [filteredReports, setFilteredReports] = useState([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const teacherData = JSON.parse(localStorage.getItem('teacher'));
+  const token = teacherData?.accessToken;
+  const teacherId = teacherData?.id;
 
   useEffect(() => {
-    const staticData = [
-      {
-        studentId: '202019194',
-        studentName: 'Mays Albutmah',
-        courseName: 'Swer111',
-        teacherName: 'Mohammad Abu Ayash',
-        date: '14/01/2024',
-        status: 'Approved'
+    if (!teacherId || !token) return;
+    setLoading(true);
+    fetch(`http://localhost:8080/api/wf-reports/teacher/${teacherId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
       },
-      {
-        studentId: '202019194',
-        studentName: 'Mays Albutmah',
-        courseName: 'Swer111',
-        teacherName: 'Mohammad Abu Ayash',
-        date: '14/01/2024',
-        status: 'Pending'
-      },
-      // Add more static records as needed
-    ];
-    setReports(staticData);
-    setFilteredReports(staticData);
-  }, []);
+    })
+      .then(res => res.json())
+      .then(data => {
+        setReports(data);
+        setFilteredReports(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, [teacherId, token]);
 
   useEffect(() => {
     let filtered = reports;
@@ -39,23 +40,64 @@ const WFReports = () => {
     }
 
     if (search) {
+      const searchLower = search.toLowerCase();
       filtered = filtered.filter(r =>
-        r.studentName.toLowerCase().includes(search.toLowerCase()) ||
-        r.courseName.toLowerCase().includes(search.toLowerCase())
+        Object.values(r).some(value =>
+          String(value).toLowerCase().includes(searchLower)
+        )
       );
     }
 
     setFilteredReports(filtered);
   }, [search, statusFilter, reports]);
 
+  const handleAction = async (studentId, courseId, action) => {
+    const url = action === 'approve'
+      ? 'http://localhost:8080/api/attendances/approve-wf'
+      : 'http://localhost:8080/api/attendances/ignore-wf';
+
+    setLoading(true);
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ studentId, courseId })
+      });
+
+      if (res.ok) {
+        const updatedReports = reports.map(r =>
+          r.studentId === studentId && r.courseId === courseId
+            ? { ...r, status: action === 'approve' ? 'Approved' : 'Ignored' }
+            : r
+        );
+        setReports(updatedReports);
+        setLoading(false);
+      } else {
+        const errorText = await res.text();
+        alert(`Failed to ${action} WF: ${errorText}`);
+        setLoading(false);
+      }
+    } catch (error) {
+      alert('Network error. Try again later.');
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="container mt-5">
       <h1 className="mb-4">WF Reports</h1>
+
+      {loading && <div className="text-center mb-3"><div className="spinner-border text-primary" role="status" /></div>}
+
       <div className="row mb-3">
         <div className="col-md-3">
           <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
             <option value="">Filter By</option>
-            <option value="Binding">Binding</option>
+            <option value="Ignored">Ignored</option>
             <option value="Approved">Approved</option>
             <option value="Pending">Pending</option>
           </select>
@@ -89,6 +131,7 @@ const WFReports = () => {
               <th>Teacher Name</th>
               <th>Date</th>
               <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -101,12 +144,36 @@ const WFReports = () => {
                 <td>{report.date}</td>
                 <td>
                   <span className={`badge ${
-                    report.status === 'Approved' ? 'bg-success' :
-                    report.status === 'Pending' ? 'bg-secondary' :
-                    'bg-warning text-dark'
+                    report.status === 'Approved'
+                      ? 'bg-success'
+                      : report.status === 'Pending'
+                      ? 'bg-secondary'
+                      : 'bg-warning text-dark'
                   }`}>
                     {report.status}
                   </span>
+                </td>
+                <td>
+                  {report.status === 'Pending' ? (
+                    <>
+                      <button
+                        className="btn btn-success btn-sm me-2"
+                        disabled={loading}
+                        onClick={() => handleAction(report.studentId, report.courseId, 'approve')}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        className="btn btn-danger btn-sm"
+                        disabled={loading}
+                        onClick={() => handleAction(report.studentId, report.courseId, 'ignore')}
+                      >
+                        Ignore
+                      </button>
+                    </>
+                  ) : (
+                    <span className="text-muted">{report.status}</span>
+                  )}
                 </td>
               </tr>
             ))}

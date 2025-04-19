@@ -1,85 +1,49 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '../styles/Settings.css';
+import '../cssFolder/Settings.css';
+import { useNavigate } from 'react-router-dom';
 
 const Settings = () => {
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    language: 'en',
-    notifications: true
-  });
+  const [language, setLanguage] = useState('en');
+  const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value
-    });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(formData);
+  const handleLanguageChange = (e) => {
+    setLanguage(e.target.value);
+    // You can add i18n language change logic here if needed
   };
 
   return (
-    <div className="settings-wrapper d-flex justify-content-center align-items-center vh-100">
-      <div className="settings-card shadow-lg p-5 rounded bg-white">
-        <h2 className="text-center mb-4 fw-bold">Settings</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label className="form-label fw-semibold">Full Name</label>
-            <input
-              type="text"
-              className="form-control"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              placeholder="Enter your full name"
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label fw-semibold">Email</label>
-            <input
-              type="email"
-              className="form-control"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label fw-semibold">Language</label>
-            <select
-              className="form-select"
-              name="language"
-              value={formData.language}
-              onChange={handleChange}
-            >
-              <option value="en">English</option>
-              <option value="ar">Arabic</option>
-              <option value="fr">French</option>
-            </select>
-          </div>
-          <div className="form-check form-switch mb-4">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              name="notifications"
-              id="notifications"
-              checked={formData.notifications}
-              onChange={handleChange}
-            />
-            <label className="form-check-label" htmlFor="notifications">
-              Enable Notifications
-            </label>
-          </div>
-          <button type="submit" className="btn btn-primary w-100">
-            Save Changes
+    <div className="d-flex flex-column align-items-center py-5 bg-light vh-100">
+      <div className="settings-container bg-white rounded shadow p-4" style={{ maxWidth: '600px', width: '100%' }}>
+        <h2 className="text-center fw-bold mb-4">Settings</h2>
+
+        <div className="mb-4">
+          <label className="form-label fw-semibold">Change Language</label>
+          <select
+            className="form-select"
+            value={language}
+            onChange={handleLanguageChange}
+          >
+            <option value="en">English</option>
+            <option value="ar">Arabic</option>
+          </select>
+        </div>
+
+        <hr />
+
+        <div className="d-flex flex-column gap-3 mt-4">
+          <button onClick={() => navigate('/Reset_Password')} className="btn btn-outline-primary text-start">
+            Change Password
           </button>
-        </form>
+
+          <button onClick={() => navigate('/help')} className="btn btn-outline-secondary text-start">
+            Help
+          </button>
+
+          <button onClick={() => navigate('/about')} className="btn btn-outline-dark text-start">
+            About Us
+          </button>
+        </div>
       </div>
     </div>
   );

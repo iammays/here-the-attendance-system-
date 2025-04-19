@@ -1,4 +1,4 @@
-// backend/src/main/java/com/here/backend/Student/StudentEntity.java
+// Updated StudentEntity.java
 package com.here.backend.Student;
 
 import org.springframework.data.annotation.Id;
@@ -10,17 +10,16 @@ import java.util.*;
 public class StudentEntity {
 
     @Id
-    private String studentId;               // رقم الطالب
-    private String name;                    // اسم الطالب
-    private String teacherId;               // معرف المعلم (غير مستخدم حالياً للطلاب، يمكن حذفه إذا لزم)
-    private String email;                   // إيميل الطالب
-    private String advisor;                 // معرف المستشار
-    private List<String> courseId;          // قائمة معرفات الكورسات
-    private Map<String, Integer> courseAbsences;        // عدد الغيابات لكل كورس
-    private Map<String, String> courseAttendanceStatus; // حالة الحضور لكل كورس
-    private Map<String, Boolean> courseWfStatus;        // حالة WF لكل كورس
+    private String studentId;
+    private String name;
+    private String teacherId;
+    private String email;
+    private String advisor;
+    private List<String> courseId;
+    private Map<String, Integer> courseAbsences;
+    private Map<String, String> courseAttendanceStatus;
+    private Map<String, String> courseWfStatus; // CHANGED from Boolean to String
 
-    // Default Constructor
     public StudentEntity() {
         this.courseId = new ArrayList<>();
         this.courseAbsences = new HashMap<>();
@@ -28,7 +27,6 @@ public class StudentEntity {
         this.courseWfStatus = new HashMap<>();
     }
 
-    // Parameterized Constructor
     public StudentEntity(String studentId, String name, String email, String advisor, List<String> courseId) {
         this.studentId = studentId;
         this.name = name;
@@ -40,14 +38,14 @@ public class StudentEntity {
         this.courseWfStatus = new HashMap<>();
         if (courseId != null) {
             for (String course : courseId) {
-                this.courseAbsences.put(course, 0);           // تهيئة الغيابات بـ 0
-                this.courseAttendanceStatus.put(course, "Absent"); // حالة افتراضية
-                this.courseWfStatus.put(course, false);       // WF افتراضي false
+                this.courseAbsences.put(course, 0);
+                this.courseAttendanceStatus.put(course, "Absent");
+                this.courseWfStatus.put(course, "Pending"); // Default
             }
         }
     }
 
-    // Getters and Setters
+    // All Getters and Setters...
     public String getStudentId() { return studentId; }
     public void setStudentId(String studentId) { this.studentId = studentId; }
     public String getName() { return name; }
@@ -68,7 +66,7 @@ public class StudentEntity {
             for (String course : courseId) {
                 this.courseAbsences.put(course, 0);
                 this.courseAttendanceStatus.put(course, "Absent");
-                this.courseWfStatus.put(course, false);
+                this.courseWfStatus.put(course, "Pending");
             }
         }
     }
@@ -80,14 +78,14 @@ public class StudentEntity {
     public void setCourseAttendanceStatus(Map<String, String> courseAttendanceStatus) {
         this.courseAttendanceStatus = (courseAttendanceStatus != null) ? courseAttendanceStatus : new HashMap<>();
     }
-    public Map<String, Boolean> getCourseWfStatus() { return courseWfStatus; }
-    public void setCourseWfStatus(Map<String, Boolean> courseWfStatus) {
+    public Map<String, String> getCourseWfStatus() { return courseWfStatus; } // CHANGED
+    public void setCourseWfStatus(Map<String, String> courseWfStatus) { // CHANGED
         this.courseWfStatus = (courseWfStatus != null) ? courseWfStatus : new HashMap<>();
     }
     public void addCourseAbsence(String courseId) {
         this.courseAbsences.put(courseId, this.courseAbsences.getOrDefault(courseId, 0) + 1);
     }
-    public void addCourseWfStatus(String courseId, Boolean wfStatus) {
+    public void updateCourseWfStatus(String courseId, String wfStatus) {
         this.courseWfStatus.put(courseId, wfStatus);
     }
     public void addCourseAttendanceStatus(String courseId, String attendanceStatus) {

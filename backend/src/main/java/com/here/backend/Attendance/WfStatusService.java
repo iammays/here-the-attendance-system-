@@ -29,8 +29,8 @@ public class WfStatusService {
 
     public String checkWfStatus(String studentId, String courseId) {
         return studentRepository.findById(studentId).map(student -> {
-            Map<String, Boolean> wfStatus = student.getCourseWfStatus();
-
+            Map<String, String> wfStatus = student.getCourseWfStatus();  // Now stores String values
+    
             // Fetch teacher and advisor emails
             String teacherId = courseRepository.findByCourseId(courseId)
                     .map(CourseEntity::getTeacherId)
@@ -43,15 +43,15 @@ public class WfStatusService {
             String advisorEmail = teacherRepository.findById(advisorId)
                     .map(TeacherEntity::getEmail)
                     .orElse(null);
-
-            // Check WF status
-            boolean isWfApproved = wfStatus.getOrDefault(courseId, false);
-
-            if (isWfApproved) {
+    
+            // Check WF status (compare string)
+            String wfState = wfStatus.getOrDefault(courseId, "Pending");
+    
+            if ("Approved".equalsIgnoreCase(wfState)) {
                 // WF is approved, send emails
                 String emailSubject = "WF Approved: " + courseId;
                 String emailBody = "Your WF status for course " + courseId + " has been approved due to excessive absences.";
-
+    
                 if (student.getEmail() != null) {
                     emailSenderService.sendSimpleEmail(student.getEmail(), emailSubject, emailBody);
                     System.out.println("WF email sent to student: " + student.getEmail());
@@ -67,9 +67,9 @@ public class WfStatusService {
                 }
                 return "WF is approved for course " + courseId;
             } else {
-                // WF is not approved (false or not set)
                 return "WF is not approved for course " + courseId;
             }
         }).orElse("Student not found.");
     }
+    
 }

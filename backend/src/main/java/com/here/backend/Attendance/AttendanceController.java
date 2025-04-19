@@ -203,8 +203,58 @@ private String getStudentName(String studentId) {
 
     
 
-@PostMapping("/approve-wf")
-public ResponseEntity<String> approveWf(@RequestBody Map<String, String> request) {
+    @PostMapping("/approve-wf")
+    public ResponseEntity<String> approveWf(@RequestBody Map<String, String> request) {
+        String studentId = request.get("studentId");
+        String courseId = request.get("courseId");
+    
+        if (studentId == null || courseId == null) {
+            return ResponseEntity.badRequest().body("Missing studentId or courseId in the request body.");
+        }
+    
+        return studentRepository.findById(studentId).map(student -> {
+            Map<String, String> wfStatus = student.getCourseWfStatus();
+    
+            // Set WF status to "Approved"
+            wfStatus.put(courseId, "Approved");
+            studentRepository.save(student);
+    
+            // Fetch emails
+            String teacherId = courseRepository.findByCourseId(courseId)
+                    .map(CourseEntity::getTeacherId)
+                    .orElse(null);
+            String teacherEmail = (teacherId != null) ?
+                    teacherRepository.findById(teacherId)
+                            .map(TeacherEntity::getEmail)
+                            .orElse(null) : null;
+            String advisorId = student.getAdvisor();
+            String advisorEmail = teacherRepository.findById(advisorId)
+                    .map(TeacherEntity::getEmail)
+                    .orElse(null);
+    
+            // Send email notifications
+            String emailSubject = "WF Approved: " + courseId;
+            String emailBody = "Your WF status for course " + courseId + " has been approved.";
+    
+            if (student.getEmail() != null) {
+                emailSenderService.sendSimpleEmail(student.getEmail(), emailSubject, emailBody);
+                System.out.println("WF status email sent to student: " + student.getEmail());
+            }
+            if (teacherEmail != null) {
+                emailSenderService.sendSimpleEmail(teacherEmail, emailSubject,
+                        "You approved WF for " + student.getName() + " in course " + courseId);
+                System.out.println("WF status email sent to teacher: " + teacherEmail);
+            }
+            if (advisorEmail != null) {
+                emailSenderService.sendSimpleEmail(advisorEmail, emailSubject, emailBody);
+                System.out.println("WF status email sent to advisor: " + advisorEmail);
+            }
+    
+            return ResponseEntity.ok("WF status set to Approved for course " + courseId);
+        }).orElse(ResponseEntity.badRequest().body("Student not found."));
+    }
+    @PostMapping("/ignore-wf")
+public ResponseEntity<String> ignoreWf(@RequestBody Map<String, String> request) {
     String studentId = request.get("studentId");
     String courseId = request.get("courseId");
 
@@ -213,10 +263,10 @@ public ResponseEntity<String> approveWf(@RequestBody Map<String, String> request
     }
 
     return studentRepository.findById(studentId).map(student -> {
-        Map<String, Boolean> wfStatus = student.getCourseWfStatus();
-        
-        // Set WF status to true
-        wfStatus.put(courseId, true);
+        Map<String, String> wfStatus = student.getCourseWfStatus();
+
+        // Set WF status to "Ignored"
+        wfStatus.put(courseId, "Ignored");
         studentRepository.save(student);
 
         // Fetch emails
@@ -233,75 +283,73 @@ public ResponseEntity<String> approveWf(@RequestBody Map<String, String> request
                 .orElse(null);
 
         // Send email notifications
-        String emailSubject = "WF Approved: " + courseId;
-        String emailBody = "Your WF status for course " + courseId + " has been approved.";
+        String emailSubject = "WF Ignored: " + courseId;
+        String emailBody = "Your WF request for course " + courseId + " has been ignored.";
 
         if (student.getEmail() != null) {
             emailSenderService.sendSimpleEmail(student.getEmail(), emailSubject, emailBody);
-            System.out.println("WF status email sent to student: " + student.getEmail());
+            System.out.println("WF ignore email sent to student: " + student.getEmail());
         }
         if (teacherEmail != null) {
             emailSenderService.sendSimpleEmail(teacherEmail, emailSubject,
-                    "You approved WF for " + student.getName() + " in course " + courseId);
-            System.out.println("WF status email sent to teacher: " + teacherEmail);
+                    "You ignored WF for " + student.getName() + " in course " + courseId);
+            System.out.println("WF ignore email sent to teacher: " + teacherEmail);
         }
         if (advisorEmail != null) {
             emailSenderService.sendSimpleEmail(advisorEmail, emailSubject, emailBody);
-            System.out.println("WF status email sent to advisor: " + advisorEmail);
+            System.out.println("WF ignore email sent to advisor: " + advisorEmail);
         }
 
-        return ResponseEntity.ok("WF status set to true for course " + courseId);
+        return ResponseEntity.ok("WF status set to Ignored for course " + courseId);
     }).orElse(ResponseEntity.badRequest().body("Student not found."));
 }
 
 
 @PostMapping("/check-wf-status")
-    public ResponseEntity<String> checkWfStatus(@RequestParam String studentId, @RequestParam String courseId) {
-        return studentRepository.findById(studentId).map(student -> {
-            // Check WF status map
-            Map<String, Boolean> wfStatus = student.getCourseWfStatus();
+public ResponseEntity<String> checkWfStatus(@RequestParam String studentId, @RequestParam String courseId) {
+    return studentRepository.findById(studentId).map(student -> {
+        Map<String, String> wfStatus = student.getCourseWfStatus();
 
-            // Fetch teacher and advisor emails
-            String teacherId = courseRepository.findByCourseId(courseId)
-                    .map(CourseEntity::getTeacherId)
-                    .orElse(null);
-            String teacherEmail = (teacherId != null) ?
-                    teacherRepository.findById(teacherId)
-                            .map(TeacherEntity::getEmail)
-                            .orElse(null) : null;
-            String advisorId = student.getAdvisor();
-            String advisorEmail = teacherRepository.findById(advisorId)
-                    .map(TeacherEntity::getEmail)
-                    .orElse(null);
+        // Fetch teacher and advisor emails
+        String teacherId = courseRepository.findByCourseId(courseId)
+                .map(CourseEntity::getTeacherId)
+                .orElse(null);
+        String teacherEmail = (teacherId != null) ?
+                teacherRepository.findById(teacherId)
+                        .map(TeacherEntity::getEmail)
+                        .orElse(null) : null;
+        String advisorId = student.getAdvisor();
+        String advisorEmail = teacherRepository.findById(advisorId)
+                .map(TeacherEntity::getEmail)
+                .orElse(null);
 
-            // Check WF status
-            boolean isWfApproved = wfStatus.getOrDefault(courseId, false);
+        // Check WF status
+        String status = wfStatus.getOrDefault(courseId, "Pending");
 
-            if (isWfApproved) {
-                // WF is approved, send emails
-                String emailSubject = "WF Approved: " + courseId;
-                String emailBody = "Your WF status for course " + courseId + " has been approved due to excessive absences.";
+        if ("Approved".equalsIgnoreCase(status)) {
+            // WF is approved, send emails
+            String emailSubject = "WF Approved: " + courseId;
+            String emailBody = "Your WF status for course " + courseId + " has been approved due to excessive absences.";
 
-                if (student.getEmail() != null) {
-                    emailSenderService.sendSimpleEmail(student.getEmail(), emailSubject, emailBody);
-                    System.out.println("WF email sent to student: " + student.getEmail());
-                }
-                if (teacherEmail != null) {
-                    emailSenderService.sendSimpleEmail(teacherEmail, emailSubject,
-                            "You approved WF for " + student.getName() + " in course " + courseId);
-                    System.out.println("WF email sent to teacher: " + teacherEmail);
-                }
-                if (advisorEmail != null) {
-                    emailSenderService.sendSimpleEmail(advisorEmail, emailSubject, emailBody);
-                    System.out.println("WF email sent to advisor: " + advisorEmail);
-                }
-                return ResponseEntity.ok("WF is approved for course " + courseId);
-            } else {
-                // WF is not approved (false or not set)
-                return ResponseEntity.ok("WF is not approved for course " + courseId);
+            if (student.getEmail() != null) {
+                emailSenderService.sendSimpleEmail(student.getEmail(), emailSubject, emailBody);
+                System.out.println("WF email sent to student: " + student.getEmail());
             }
-        }).orElse(ResponseEntity.badRequest().body("Student not found."));
-    }
+            if (teacherEmail != null) {
+                emailSenderService.sendSimpleEmail(teacherEmail, emailSubject,
+                        "You approved WF for " + student.getName() + " in course " + courseId);
+                System.out.println("WF email sent to teacher: " + teacherEmail);
+            }
+            if (advisorEmail != null) {
+                emailSenderService.sendSimpleEmail(advisorEmail, emailSubject, emailBody);
+                System.out.println("WF email sent to advisor: " + advisorEmail);
+            }
+            return ResponseEntity.ok("WF is approved for course " + courseId);
+        } else {
+            return ResponseEntity.ok("WF is not approved for course " + courseId);
+        }
+    }).orElse(ResponseEntity.badRequest().body("Student not found."));
+}
 
 
 //     @PostMapping("/finalize/{lectureId}")
