@@ -1,0 +1,173 @@
+/* CourseDashboard.css */
+
+/* General container */
+.course-dashboard-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 24px;
+  gap: 24px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* Loading state */
+.loading {
+  padding: 16px;
+  color: #6b7280;
+}
+
+/* Weeks Section (Left) */
+.weeks-section {
+  width: 66.67%;
+}
+
+.course-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 24px;
+}
+
+.week-item {
+  margin-bottom: 16px;
+}
+
+.week-details {
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.week-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  font-size: 18px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.week-summary:hover {
+  background-color: #f9fafb;
+}
+
+.week-title {
+  display: flex;
+  align-items: center;
+}
+
+.arrow-icon {
+  width: 20px;
+  height: 20px;
+  color: #6b7280;
+  transition: transform 0.2s;
+}
+
+details[open] .arrow-icon {
+  transform: rotate(180deg);
+}
+
+/* Hide default summary marker */
+summary {
+  list-style: none;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+.days-list {
+  margin-top: 8px;
+  margin-left: 40px;
+  padding: 0 16px 12px 16px;
+  list-style-type: disc;
+  color: #6b7280;
+}
+
+.day-item {
+  font-size: 14px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.day-item:hover {
+  color: #1f2937;
+}
+
+.add-day {
+  margin-top: 8px;
+}
+
+.add-day-input {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.add-day-button {
+  background-color: #2563eb;
+  color: #ffffff;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.add-day-button:hover {
+  background-color: #1d4ed8;
+}
+
+/* Upcoming Classes Section (Right) */
+.upcoming-section {
+  width: 33.33%;
+}
+
+.upcoming-card {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.upcoming-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 16px;
+}
+
+.upcoming-list {
+  font-size: 14px;
+}
+
+.upcoming-item {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.upcoming-item:last-child {
+  border-bottom: none;
+}
+
+.course-name {
+  color: #374151;
+  font-weight: 500;
+}
+
+.room-info,
+.time-info {
+  color: #6b7280;
+  font-size: 12px;
+  margin-top: 4px;
+}
