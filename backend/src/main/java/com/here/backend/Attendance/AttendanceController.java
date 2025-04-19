@@ -5,8 +5,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.here.backend.Course.CourseEntity;
+import com.here.backend.Course.CourseRepository;
+import com.here.backend.Emails.EmailSenderService;
 import com.here.backend.Student.StudentEntity;
 import com.here.backend.Student.StudentRepository;
+import com.here.backend.Teacher.TeacherEntity;
+import com.here.backend.Teacher.TeacherRepository;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,33 +33,93 @@ public class AttendanceController {
     @Autowired
     private StudentRepository studentRepository; // إضافة الـ Dependency
 
+    @Autowired
+    private CourseRepository courseRepository; // To get the course name
+    
+    @Autowired
+    private EmailSenderService emailSenderService; // To send emails
 
+    @Autowired
+    private TeacherRepository teacherRepository; // To send emails
+
+    @Autowired
+    private WfStatusService wfStatusService;
     // حفظ سجل حضور من الـ AI  و ببعت ايميل للطالب لو غايب
-   
-    @PostMapping
+
+
+@PostMapping
 public ResponseEntity<String> saveAttendance(@RequestBody AttendanceRecord record) {
     AttendanceEntity attendance = attendanceRepository.findByLectureIdAndStudentId(record.getLectureId(), record.getStudentId());
+
     if (attendance == null) {
         attendance = new AttendanceEntity();
         attendance.setAttendanceId(UUID.randomUUID().toString());
         attendance.setLectureId(record.getLectureId());
         attendance.setStudentId(record.getStudentId());
-        attendance.setCourseId(record.getLectureId().split("-")[0]); // استخراج courseId من lectureId
-        attendance.setStudentName(getStudentName(record.getStudentId())); // جلب اسم الطالب
+        attendance.setCourseId(record.getLectureId().split("-")[0]);
+        attendance.setStudentName(getStudentName(record.getStudentId()));
         attendance.setSessions(new ArrayList<>());
     }
+
     attendance.getSessions().add(new AttendanceEntity.SessionAttendance(record.getSessionId(), record.getDetectionTime()));
-    attendance.setStatus(record.getStatus()); // الحالة النهائية بتتسجل هنا مباشرة
+    attendance.setStatus(record.getStatus());
     attendanceRepository.save(attendance);
 
-    // إرسال إيميل فوراً إذا كان الطالب غايب
-    if ("Absent".equals(record.getStatus())) {
-        try {
-            attendanceService.sendAbsenceEmail(record.getLectureId(), record.getStudentId());
-        } catch (Exception e) {
-            System.out.println("Failed to send absence email to student " + record.getStudentId() + ": " + e.getMessage());
-            e.printStackTrace();
-            // ما نوقفش العملية لو الإيميل فشل
+    // Email + WF logic if student is absent
+    if ("absent".equalsIgnoreCase(attendance.getStatus())) {
+        String studentId = attendance.getStudentId();
+        String courseId = attendance.getLectureId();
+
+        StudentEntity student = studentRepository.findById(studentId).orElse(null);
+        if (student != null && student.getCourseId().contains(courseId)) {
+            int currentAbsences = student.getCourseAbsences().getOrDefault(courseId, 0);
+
+            long redundantOccurrences = 0;
+            String courseName = "Unknown";
+            try {
+                String courseNameJson = courseRepository.findNameByCourseId(courseId);
+                JsonNode jsonNode = new ObjectMapper().readTree(courseNameJson);
+                courseName = jsonNode.get("name").asText();
+
+                final String finalCourseName = courseName; // must be final for lambda
+                redundantOccurrences = courseRepository.findAll().stream()
+                        .filter(course -> finalCourseName.equals(course.getName()))
+                        .count();
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+
+            int newAbsences = currentAbsences + 1;
+            student.getCourseAbsences().put(courseId, newAbsences);
+            studentRepository.save(student);
+
+            String teacherId = courseRepository.findByCourseId(courseId)
+                    .map(CourseEntity::getTeacherId)
+                    .orElse(null);
+            String teacherEmail = (teacherId != null) ?
+                    teacherRepository.findById(teacherId).map(TeacherEntity::getEmail).orElse(null) : null;
+
+            String advisorId = student.getAdvisor();
+            String advisorEmail = teacherRepository.findById(advisorId).map(TeacherEntity::getEmail).orElse(null);
+
+            String emailSubject = "Absence Alert: " + courseId;
+            String emailBody = "An absence has been recorded for you in the course " + courseId + ".";
+
+            if (newAbsences < redundantOccurrences) {
+                emailSubject = "Absence Warning: " + courseId;
+                emailBody = "Warning: You have received your Absence Warning due to absences in course " + courseId + ".";
+            }
+
+            if (newAbsences == redundantOccurrences + 1) {
+                emailSubject = "First Detention Warning: " + courseId;
+                emailBody = "Warning: You have received your first detention due to multiple absences in course " + courseId + ".";
+            }
+
+            if (newAbsences + redundantOccurrences > (redundantOccurrences * 2)) {
+                wfStatusService.checkWfStatus(studentId, courseId);
+            }
+
+            emailSenderService.sendSimpleEmail(student.getEmail(), emailSubject, emailBody);
         }
     }
 
@@ -130,6 +199,110 @@ private String getStudentName(String studentId) {
 
         return ResponseEntity.ok(table);
     }
+
+
+    
+
+@PostMapping("/approve-wf")
+public ResponseEntity<String> approveWf(@RequestBody Map<String, String> request) {
+    String studentId = request.get("studentId");
+    String courseId = request.get("courseId");
+
+    if (studentId == null || courseId == null) {
+        return ResponseEntity.badRequest().body("Missing studentId or courseId in the request body.");
+    }
+
+    return studentRepository.findById(studentId).map(student -> {
+        Map<String, Boolean> wfStatus = student.getCourseWfStatus();
+        
+        // Set WF status to true
+        wfStatus.put(courseId, true);
+        studentRepository.save(student);
+
+        // Fetch emails
+        String teacherId = courseRepository.findByCourseId(courseId)
+                .map(CourseEntity::getTeacherId)
+                .orElse(null);
+        String teacherEmail = (teacherId != null) ?
+                teacherRepository.findById(teacherId)
+                        .map(TeacherEntity::getEmail)
+                        .orElse(null) : null;
+        String advisorId = student.getAdvisor();
+        String advisorEmail = teacherRepository.findById(advisorId)
+                .map(TeacherEntity::getEmail)
+                .orElse(null);
+
+        // Send email notifications
+        String emailSubject = "WF Approved: " + courseId;
+        String emailBody = "Your WF status for course " + courseId + " has been approved.";
+
+        if (student.getEmail() != null) {
+            emailSenderService.sendSimpleEmail(student.getEmail(), emailSubject, emailBody);
+            System.out.println("WF status email sent to student: " + student.getEmail());
+        }
+        if (teacherEmail != null) {
+            emailSenderService.sendSimpleEmail(teacherEmail, emailSubject,
+                    "You approved WF for " + student.getName() + " in course " + courseId);
+            System.out.println("WF status email sent to teacher: " + teacherEmail);
+        }
+        if (advisorEmail != null) {
+            emailSenderService.sendSimpleEmail(advisorEmail, emailSubject, emailBody);
+            System.out.println("WF status email sent to advisor: " + advisorEmail);
+        }
+
+        return ResponseEntity.ok("WF status set to true for course " + courseId);
+    }).orElse(ResponseEntity.badRequest().body("Student not found."));
+}
+
+
+@PostMapping("/check-wf-status")
+    public ResponseEntity<String> checkWfStatus(@RequestParam String studentId, @RequestParam String courseId) {
+        return studentRepository.findById(studentId).map(student -> {
+            // Check WF status map
+            Map<String, Boolean> wfStatus = student.getCourseWfStatus();
+
+            // Fetch teacher and advisor emails
+            String teacherId = courseRepository.findByCourseId(courseId)
+                    .map(CourseEntity::getTeacherId)
+                    .orElse(null);
+            String teacherEmail = (teacherId != null) ?
+                    teacherRepository.findById(teacherId)
+                            .map(TeacherEntity::getEmail)
+                            .orElse(null) : null;
+            String advisorId = student.getAdvisor();
+            String advisorEmail = teacherRepository.findById(advisorId)
+                    .map(TeacherEntity::getEmail)
+                    .orElse(null);
+
+            // Check WF status
+            boolean isWfApproved = wfStatus.getOrDefault(courseId, false);
+
+            if (isWfApproved) {
+                // WF is approved, send emails
+                String emailSubject = "WF Approved: " + courseId;
+                String emailBody = "Your WF status for course " + courseId + " has been approved due to excessive absences.";
+
+                if (student.getEmail() != null) {
+                    emailSenderService.sendSimpleEmail(student.getEmail(), emailSubject, emailBody);
+                    System.out.println("WF email sent to student: " + student.getEmail());
+                }
+                if (teacherEmail != null) {
+                    emailSenderService.sendSimpleEmail(teacherEmail, emailSubject,
+                            "You approved WF for " + student.getName() + " in course " + courseId);
+                    System.out.println("WF email sent to teacher: " + teacherEmail);
+                }
+                if (advisorEmail != null) {
+                    emailSenderService.sendSimpleEmail(advisorEmail, emailSubject, emailBody);
+                    System.out.println("WF email sent to advisor: " + advisorEmail);
+                }
+                return ResponseEntity.ok("WF is approved for course " + courseId);
+            } else {
+                // WF is not approved (false or not set)
+                return ResponseEntity.ok("WF is not approved for course " + courseId);
+            }
+        }).orElse(ResponseEntity.badRequest().body("Student not found."));
+    }
+
 
 //     @PostMapping("/finalize/{lectureId}")
 // public ResponseEntity<String> finalizeAttendance(@PathVariable String lectureId) {

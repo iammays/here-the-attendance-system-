@@ -11,7 +11,6 @@ public interface AttendanceRepository extends MongoRepository<AttendanceEntity, 
     
     @Query(value = "{'lectureId': ?0}", delete = true)
     void deleteByLectureId(String lectureId);
-
     List<AttendanceEntity> findByLectureId(String lectureId); // تعليق: جلب كل سجلات الحضور لمحاضرة معينة
     List<AttendanceEntity> findByStudentId(String studentId); // تعليق: جلب كل سجلات الحضور لطالب معين
 }

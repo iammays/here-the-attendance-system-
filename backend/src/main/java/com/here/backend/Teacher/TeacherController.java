@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import com.here.backend.Course.CourseEntity;
 import com.here.backend.Course.CourseRepository;
+import com.here.backend.Security.payload.request.PasswordValidationRequest;
 import com.here.backend.Security.security.services.UserDetailsImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -162,7 +163,15 @@ public class TeacherController {
         }
         return ResponseEntity.notFound().build();
     }
-
+    @PostMapping("/validate-password")
+    public ResponseEntity<?> validatePassword(@RequestBody PasswordValidationRequest request) {
+        boolean isValid = teacherRepository.validatePassword(request.getName(), request.getPassword());
+        if (!isValid) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Current password is incorrect");
+        }
+        return ResponseEntity.ok("Password is valid");
+    }
+    
     //---------------------------------------------------------
 
     @GetMapping("/{teacherId}/schedule")
