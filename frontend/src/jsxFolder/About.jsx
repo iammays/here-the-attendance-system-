@@ -1,8 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../cssFolder/HelpAbout.css';
 
 const About = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const teacher = JSON.parse(localStorage.getItem('teacher'));
+    if (!teacher || !teacher.accessToken) {
+      navigate('/'); // Redirect to login
+    }
+  }, [navigate]);
+
   return (
     <div className="page-container">
       <h2 className="page-title">About Us</h2>

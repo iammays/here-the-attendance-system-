@@ -1,0 +1,22 @@
+{
+    "english": "الإنجليزية",
+    "arabic": "العربية",
+    "settings": "الإعدادات",
+    "changeLanguage": "تغيير اللغة",
+    "changePassword": "تغيير كلمة المرور",
+    "help": "مساعدة",
+    "aboutUs": "معلومات عنا",
+    "resetPassword": "تغيير كلمة المرور",
+    "passwordReminder": "يرجى كتابة شيء تتذكره",
+    "currentPassword": "كلمة المرور الحالية",
+    "newPassword": "كلمة المرور الجديدة",
+    "confirmNewPassword": "تأكيد كلمة المرور الجديدة",
+    "passwordHint": "يجب أن تتكون من 8 أحرف",
+    "repeatPassword": "أعد كتابة كلمة المرور",
+    "passwordsDoNotMatch": "كلمات المرور الجديدة غير متطابقة.",
+    "invalidCurrentPassword": "كلمة المرور الحالية غير صحيحة.",
+    "updateFailed": "فشل في تحديث كلمة المرور.",
+    "passwordUpdated": "تم تحديث كلمة المرور بنجاح!",
+    "somethingWentWrong": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+  }
+  
