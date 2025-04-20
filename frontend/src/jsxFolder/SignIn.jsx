@@ -28,35 +28,49 @@ const SignIn = () => {
           tokenType: data.tokenType,
         })
       );
-      navigate("/Dashboard");
+      navigate("/dashboard");
     } else {
       alert("Login failed!");
     }
   };
 
   return (
-    <div className="p-4 max-w-md mx-auto">
-      <h2 className="text-xl font-bold mb-4">Sign In</h2>
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-        className="border p-2 w-full mb-2"
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Password"
-        className="border p-2 w-full mb-4"
-      />
-      <button
-        onClick={handleLogin}
-        className="bg-blue-600 text-white px-4 py-2 rounded"
-      >
-        Login
-      </button>
+    <div className="container d-flex justify-content-center align-items-center vh-100 bg-light">
+      <div className="card shadow p-4" style={{ width: "100%", maxWidth: "400px" }}>
+        <h2 className="text-center mb-4">Sign In</h2>
+        <div className="mb-3">
+          <label htmlFor="email" className="form-label fw-semibold">
+            Email
+          </label>
+          <input
+            type="email"
+            id="email"
+            className="form-control"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="password" className="form-label fw-semibold">
+            Password
+          </label>
+          <input
+            type="password"
+            id="password"
+            className="form-control"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password"
+          />
+        </div>
+        <button
+          onClick={handleLogin}
+          className="btn btn-primary w-100 fw-semibold"
+        >
+          Login
+        </button>
+      </div>
     </div>
   );
 };

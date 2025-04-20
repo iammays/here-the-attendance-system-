@@ -1,51 +1,44 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { FaBell } from 'react-icons/fa';
 import { Dropdown } from 'react-bootstrap';
-import { IoIosArrowDown } from 'react-icons/io';
+import logo from './logo.png';
+import '../cssFolder/Navbar.css';
+import { useTranslation } from 'react-i18next';
 
 const Navbar = () => {
+  const { t, i18n } = useTranslation();
+  const [language, setLanguage] = useState(localStorage.getItem('language') || 'en');
+
+  const handleLanguageChange = (lang) => {
+    setLanguage(lang);
+    i18n.changeLanguage(lang);
+    localStorage.setItem('language', lang);
+    document.body.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  };
+
+  useEffect(() => {
+    i18n.changeLanguage(language);
+    document.body.dir = language === 'ar' ? 'rtl' : 'ltr';
+  }, []);
+
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4 py-3">
+    <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4 py-3"   style={{ direction: 'ltr' }}>
       <div className="container-fluid">
-        <span className="navbar-brand fw-bold text-primary fs-4">HERE</span>
+        <img src={logo} alt="Logo" className="logo" />
 
         <div className="d-flex align-items-center ms-auto gap-3">
-
-
-          {/* Language dropdown */}
+          {/* Language Dropdown */}
           <Dropdown>
             <Dropdown.Toggle
               variant="light"
               className="d-flex align-items-center border-0 p-0 bg-transparent"
             >
-              <img
-                src="https://flagcdn.com/gb.svg"
-                width="24"
-                height="16"
-                alt="English"
-                className="me-1"
-              />
-              English <IoIosArrowDown className="ms-1" />
+              {language === 'en' ? 'English' : 'العربية'}
             </Dropdown.Toggle>
-            <Dropdown.Menu>
-              <Dropdown.Item>English</Dropdown.Item>
-              <Dropdown.Item>Arabic</Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
 
-          {/* User icon */}
-          <Dropdown align="end">
-            <Dropdown.Toggle
-              variant="light"
-              className="d-flex align-items-center justify-content-center rounded-circle bg-secondary-subtle text-dark"
-              style={{ width: '40px', height: '40px', fontWeight: 'bold', fontSize: '1.2rem' }}
-            >
-              S
-            </Dropdown.Toggle>
             <Dropdown.Menu>
-              <Dropdown.Item>Profile</Dropdown.Item>
-              <Dropdown.Item>Logout</Dropdown.Item>
+              <Dropdown.Item onClick={() => handleLanguageChange('en')}>{t('english')}</Dropdown.Item>
+              <Dropdown.Item onClick={() => handleLanguageChange('ar')}>{t('arabic')}</Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
         </div>

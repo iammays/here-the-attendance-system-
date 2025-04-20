@@ -1,0 +1,22 @@
+{
+    "english": "English",
+    "arabic": "Arabic",
+    "settings": "Settings",
+    "changeLanguage": "Change Language",
+    "changePassword": "Change Password",
+    "help": "Help",
+    "aboutUs": "About Us",
+    "resetPassword": "Reset password",
+    "passwordReminder": "Please type something you'll remember",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
+    "passwordHint": "must be 8 characters",
+    "repeatPassword": "repeat password",
+    "passwordsDoNotMatch": "New passwords do not match.",
+    "invalidCurrentPassword": "Invalid current password.",
+    "updateFailed": "Failed to update password.",
+    "passwordUpdated": "Password updated successfully!",
+    "somethingWentWrong": "Something went wrong. Please try again."
+  }
+  
