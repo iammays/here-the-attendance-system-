@@ -1,4 +1,3 @@
-// backend/src/main/java/com/here/backend/Attendance/AttendanceEntity.java
 package com.here.backend.Attendance;
 
 import org.springframework.data.annotation.Id;
@@ -10,16 +9,18 @@ import java.util.List;
 public class AttendanceEntity {
     @Id
     private String attendanceId;
-    private String lectureId;   // معرف المحاضرة (مثل CS101-2025-04-05)
-    private String courseId;    // معرف الكورس الأساسي (مثل CS101)
-    private String studentId;   // رقم الطالب
-    private String studentName; // اسم الطالب
-    private String status;      // الحالة: Present, Late, Absent, Excuse
+    private String lectureId;
+    private String courseId;
+    private String studentId;
+    private String studentName;
+    private String status;
     private List<SessionAttendance> sessions;
+    private List<FirstCheckTime> firstCheckTimes;
+    private String firstDetectedAt; // حقل جديد لتخزين أول وقت اكتشاف في المحاضرة
 
     public static class SessionAttendance {
         private int sessionId;
-        private String firstDetectionTime; // وقت أول اكتشاف في الجلسة (أو "undetected")
+        private String firstDetectionTime;
 
         public SessionAttendance() {}
 
@@ -32,6 +33,23 @@ public class AttendanceEntity {
         public void setSessionId(int sessionId) { this.sessionId = sessionId; }
         public String getFirstDetectionTime() { return firstDetectionTime; }
         public void setFirstDetectionTime(String firstDetectionTime) { this.firstDetectionTime = firstDetectionTime; }
+    }
+
+    public static class FirstCheckTime {
+        private int sessionId;
+        private String firstCheckTime;
+
+        public FirstCheckTime() {}
+
+        public FirstCheckTime(int sessionId, String firstCheckTime) {
+            this.sessionId = sessionId;
+            this.firstCheckTime = firstCheckTime;
+        }
+
+        public int getSessionId() { return sessionId; }
+        public void setSessionId(int sessionId) { this.sessionId = sessionId; }
+        public String getFirstCheckTime() { return firstCheckTime; }
+        public void setFirstCheckTime(String firstCheckTime) { this.firstCheckTime = firstCheckTime; }
     }
 
     // Getters and Setters
@@ -49,4 +67,8 @@ public class AttendanceEntity {
     public void setStatus(String status) { this.status = status; }
     public List<SessionAttendance> getSessions() { return sessions; }
     public void setSessions(List<SessionAttendance> sessions) { this.sessions = sessions; }
+    public List<FirstCheckTime> getFirstCheckTimes() { return firstCheckTimes; }
+    public void setFirstCheckTimes(List<FirstCheckTime> firstCheckTimes) { this.firstCheckTimes = firstCheckTimes; }
+    public String getFirstDetectedAt() { return firstDetectedAt; }
+    public void setFirstDetectedAt(String firstDetectedAt) { this.firstDetectedAt = firstDetectedAt; }
 }

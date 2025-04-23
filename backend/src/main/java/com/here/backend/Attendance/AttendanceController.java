@@ -50,94 +50,143 @@ public class AttendanceController {
     // حفظ سجل حضور من الـ AI و ببعت ايميل للطالب لو غايب
 
 
-@PostMapping
-public ResponseEntity<String> saveAttendance(@RequestBody AttendanceRecord record) {
-    AttendanceEntity attendance = attendanceRepository.findByLectureIdAndStudentId(record.getLectureId(), record.getStudentId());
+    @PostMapping
+    public ResponseEntity<String> saveAttendance(@RequestBody AttendanceRecord record) {
+        String lectureId = record.getLectureId();
+        String courseId = record.getCourseId();
 
-    if (attendance == null) {
-        attendance = new AttendanceEntity();
-        attendance.setAttendanceId(UUID.randomUUID().toString());
-        attendance.setLectureId(record.getLectureId());
-        attendance.setStudentId(record.getStudentId());
-        attendance.setCourseId(record.getLectureId().split("-")[0]);
-        attendance.setStudentName(getStudentName(record.getStudentId()));
-        attendance.setSessions(new ArrayList<>());
-    }
-
-    attendance.getSessions().add(new AttendanceEntity.SessionAttendance(record.getSessionId(), record.getDetectionTime()));
-    attendance.setStatus(record.getStatus());
-    attendanceRepository.save(attendance);
-
-    // Email + WF logic if student is absent
-    if ("absent".equalsIgnoreCase(attendance.getStatus())) {
-        String studentId = attendance.getStudentId();
-        String courseId = attendance.getCourseId();
-
-        StudentEntity student = studentRepository.findById(studentId).orElse(null);
-        if (student != null) {
-            int currentAbsences = student.getCourseAbsences().getOrDefault(courseId, 0);
-            int newAbsences = currentAbsences + 1;
-            student.getCourseAbsences().put(courseId, newAbsences);
-            studentRepository.save(student);
-
-            String courseName = courseRepository.findByCourseId(courseId)
-                    .map(CourseEntity::getName)
-                    .orElseGet(() -> {
-                        System.err.println("Course not found for courseId: " + courseId);
-                        return "Course Not Found";
-                    });
-
-            String teacherId = courseRepository.findByCourseId(courseId)
-                    .map(CourseEntity::getTeacherId)
-                    .orElse(null);
-            String teacherEmail = (teacherId != null) ?
-                    teacherRepository.findById(teacherId).map(TeacherEntity::getEmail).orElse(null) : null;
-
-            String advisorId = student.getAdvisor();
-            String advisorEmail = teacherRepository.findById(advisorId).map(TeacherEntity::getEmail).orElse(null);
-
-            String emailSubject = "Absence Alert: " + courseName;
-            String emailBody = "Dear " + student.getName() + ",\nAn absence has been recorded for you in the course " + courseName + ".";
-
-            try {
-                if (student.getEmail() != null) {
-                    emailSenderService.sendSimpleEmail(student.getEmail(), emailSubject, emailBody);
-                    System.out.println("Absence email sent to student: " + student.getEmail());
-                } else {
-                    System.err.println("No email found for student: " + studentId);
-                }
-                if (teacherEmail != null) {
-                    emailSenderService.sendSimpleEmail(teacherEmail, emailSubject, 
-                            "Absence recorded for " + student.getName() + " in course " + courseName);
-                    System.out.println("Absence email sent to teacher: " + teacherEmail);
-                }
-                if (advisorEmail != null) {
-                    emailSenderService.sendSimpleEmail(advisorEmail, emailSubject, emailBody);
-                    System.out.println("Absence email sent to advisor: " + advisorEmail);
-                }
-            } catch (Exception e) {
-                System.err.println("Failed to send absence email for student " + studentId + ": " + e.getMessage());
+        if (lectureId == null || lectureId.isEmpty()) {
+            if (courseId == null || courseId.isEmpty()) {
+                return ResponseEntity.badRequest().body("courseId is required when lectureId is not provided");
             }
+            LocalDate currentDate = LocalDate.now();
+            LocalTime currentTime = LocalTime.now();
+            String dateStr = currentDate.format(DateTimeFormatter.ISO_LOCAL_DATE);
+            String timeStr = currentTime.format(DateTimeFormatter.ofPattern("HHmm"));
+            lectureId = courseId + "-" + dateStr + "-" + timeStr;
 
-            try {
-                wfStatusService.checkWfStatus(studentId, courseId);
-            } catch (Exception e) {
-                System.err.println("Error checking WF status for student " + studentId + ": " + e.getMessage());
+            if (courseRepository.findByLectureId(lectureId).isPresent()) {
+                int counter = 1;
+                String newLectureId = lectureId;
+                while (courseRepository.findByLectureId(newLectureId).isPresent()) {
+                    newLectureId = lectureId + "_" + counter;
+                    counter++;
+                }
+                lectureId = newLectureId;
+            }
+        }
+
+        CourseEntity course = courseRepository.findByCourseId(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("Course not found for courseId: " + courseId));
+
+        AttendanceEntity attendance = attendanceRepository.findByLectureIdAndStudentId(lectureId, record.getStudentId());
+
+        if (attendance == null) {
+            attendance = new AttendanceEntity();
+            attendance.setAttendanceId(UUID.randomUUID().toString());
+            attendance.setLectureId(lectureId);
+            attendance.setStudentId(record.getStudentId());
+            attendance.setCourseId(courseId);
+            attendance.setStudentName(getStudentName(record.getStudentId()));
+            attendance.setSessions(new ArrayList<>());
+            attendance.setFirstCheckTimes(new ArrayList<>());
+            attendance.setFirstDetectedAt(record.getFirstDetectedAt() != null ? record.getFirstDetectedAt() : "undetected");
+        }
+
+        if (record.getSessions() != null && !record.getSessions().isEmpty()) {
+            for (AttendanceEntity.SessionAttendance session : record.getSessions()) {
+                boolean sessionExists = attendance.getSessions().stream()
+                        .anyMatch(s -> s.getSessionId() == session.getSessionId());
+                if (!sessionExists) {
+                    attendance.getSessions().add(new AttendanceEntity.SessionAttendance(
+                            session.getSessionId(),
+                            session.getFirstDetectionTime() != null ? session.getFirstDetectionTime() : "undetected"
+                    ));
+                }
+            }
+        } else if (record.getSessionId() >= 0 && record.getDetectionTime() != null) {
+            boolean sessionExists = attendance.getSessions().stream()
+                    .anyMatch(s -> s.getSessionId() == record.getSessionId());
+            if (!sessionExists) {
+                attendance.getSessions().add(new AttendanceEntity.SessionAttendance(
+                        record.getSessionId(),
+                        record.getDetectionTime() != null ? record.getDetectionTime() : "undetected"
+                ));
             }
         } else {
-            System.err.println("Student not found: " + studentId);
+            int sessionId = 0;
+            String detectionTime = "undetected";
+            attendance.getSessions().add(new AttendanceEntity.SessionAttendance(sessionId, detectionTime));
         }
+
+        if (record.getFirstCheckTimes() != null && !record.getFirstCheckTimes().isEmpty()) {
+            for (AttendanceRecord.FirstCheckTime checkTime : record.getFirstCheckTimes()) {
+                boolean checkTimeExists = attendance.getFirstCheckTimes().stream()
+                        .anyMatch(c -> c.getSessionId() == checkTime.getSessionId());
+                if (!checkTimeExists) {
+                    attendance.getFirstCheckTimes().add(new AttendanceEntity.FirstCheckTime(
+                            checkTime.getSessionId(),
+                            checkTime.getFirstCheckTime() != null ? checkTime.getFirstCheckTime() : "undetected"
+                    ));
+                }
+            }
+        }
+
+        attendance.setStatus(record.getStatus());
+        attendanceRepository.save(attendance);
+
+        if ("Absent".equalsIgnoreCase(attendance.getStatus())) {
+            String studentId = attendance.getStudentId();
+            StudentEntity student = studentRepository.findById(studentId).orElse(null);
+            if (student != null) {
+                int currentAbsences = student.getCourseAbsences().getOrDefault(courseId, 0);
+                int newAbsences = currentAbsences + 1;
+                student.getCourseAbsences().put(courseId, newAbsences);
+                studentRepository.save(student);
+
+                String courseName = courseRepository.findByCourseId(courseId)
+                        .map(CourseEntity::getName)
+                        .orElse("Course Not Found");
+
+                String teacherId = course.getTeacherId();
+                String teacherEmail = teacherRepository.findById(teacherId).map(TeacherEntity::getEmail).orElse(null);
+                String advisorId = student.getAdvisor();
+                String advisorEmail = teacherRepository.findById(advisorId).map(TeacherEntity::getEmail).orElse(null);
+
+                String emailSubject = "Absence Alert: " + courseName;
+                String emailBody = "Dear " + student.getName() + ",\nAn absence has been recorded for you in the course " + courseName + ".";
+
+                try {
+                    if (student.getEmail() != null) {
+                        emailSenderService.sendSimpleEmail(student.getEmail(), emailSubject, emailBody);
+                    }
+                    if (teacherEmail != null) {
+                        emailSenderService.sendSimpleEmail(teacherEmail, emailSubject,
+                                "Absence recorded for " + student.getName() + " in course " + courseName);
+                    }
+                    if (advisorEmail != null) {
+                        emailSenderService.sendSimpleEmail(advisorEmail, emailSubject, emailBody);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Failed to send absence email for student " + studentId + ": " + e.getMessage());
+                }
+
+                try {
+                    wfStatusService.checkWfStatus(studentId, courseId);
+                } catch (Exception e) {
+                    System.err.println("Error checking WF status for student " + studentId + ": " + e.getMessage());
+                }
+            }
+        }
+
+        return ResponseEntity.ok("Attendance saved with lectureId: " + lectureId);
     }
 
-    return ResponseEntity.ok("Attendance saved");
-}
-
-// دالة مساعدة لجلب اسم الطالب من StudentRepository
-private String getStudentName(String studentId) {
-    return studentRepository.findByStudentId(studentId)
-            .map(StudentEntity::getName)
-            .orElse("Unknown");
-}
+    private String getStudentName(String studentId) {
+        return studentRepository.findByStudentId(studentId)
+                .map(StudentEntity::getName)
+                .orElse("Unknown");
+    }
 
 
     // تعديل حالة الحضور يدوياً من قبل المعلم
@@ -268,93 +317,102 @@ private String getStudentName(String studentId) {
 
     // جلب جدول الحضور مع البحث باسم الطالب أو رقمه والترتيب
     @GetMapping("/table/{lectureId}")
-    public ResponseEntity<List<Map<String, Object>>> getAttendanceTable(
-            @PathVariable String lectureId,
-            @RequestParam(required = false) String search, // البحث باسم الطالب أو رقمه
-            @RequestParam(required = false, defaultValue = "studentId") String sortBy, // الترتيب حسب studentId أو status
-            @RequestParam(required = false, defaultValue = "asc") String sortOrder) {
-        List<AttendanceEntity> attendances = attendanceRepository.findByLectureId(lectureId);
-        List<Map<String, Object>> table = new ArrayList<>();
+public ResponseEntity<List<Map<String, Object>>> getAttendanceTable(
+        @PathVariable String lectureId,
+        @RequestParam(required = false) String search,
+        @RequestParam(required = false, defaultValue = "studentId") String sortBy,
+        @RequestParam(required = false, defaultValue = "asc") String sortOrder) {
+    List<AttendanceEntity> attendances = attendanceRepository.findByLectureId(lectureId);
+    List<Map<String, Object>> table = new ArrayList<>();
 
-        for (AttendanceEntity attendance : attendances) {
-            Map<String, Object> row = new HashMap<>();
-            String studentId = attendance.getStudentId();
-            
-            row.put("studentId", studentId);
-            row.put("status", attendance.getStatus());
+    for (AttendanceEntity attendance : attendances) {
+        Map<String, Object> row = new HashMap<>();
+        String studentId = attendance.getStudentId();
+        
+        row.put("studentId", studentId);
+        row.put("courseId", attendance.getCourseId());
+        row.put("status", attendance.getStatus());
 
-            String studentName = studentRepository.findById(studentId)
-                    .map(StudentEntity::getName)
-                    .orElse("Unknown");
-            row.put("studentName", studentName);
+        String studentName = studentRepository.findById(studentId)
+                .map(StudentEntity::getName)
+                .orElse("Unknown");
+        row.put("studentName", studentName);
 
-            List<String> sessions = attendance.getSessions() != null ?
-                    attendance.getSessions().stream()
-                            .map(s -> "Session " + s.getSessionId() + ": " + s.getFirstDetectionTime())
-                            .collect(Collectors.toList()) :
-                    new ArrayList<>();
-            row.put("sessions", sessions);
+        List<Map<String, Object>> sessions = attendance.getSessions() != null ?
+                attendance.getSessions().stream()
+                        .map(s -> {
+                            Map<String, Object> sessionInfo = new HashMap<>();
+                            sessionInfo.put("sessionId", s.getSessionId());
+                            sessionInfo.put("firstDetectionTime", s.getFirstDetectionTime() != null ? 
+                                    s.getFirstDetectionTime() : "undetected");
+                            return sessionInfo;
+                        })
+                        .collect(Collectors.toList()) :
+                new ArrayList<>();
+        row.put("sessions", sessions);
 
-            int totalSessions = attendance.getSessions() != null ? attendance.getSessions().size() : 0;
-            long detectionCount = attendance.getSessions() != null ?
-                    attendance.getSessions().stream()
-                            .filter(s -> !s.getFirstDetectionTime().equals("undetected"))
-                            .count() : 0;
-            row.put("totalSessions", totalSessions);
-            row.put("detectionCount", detectionCount);
+        int totalSessions = attendance.getSessions() != null ? attendance.getSessions().size() : 0;
+        long detectionCount = attendance.getSessions() != null ?
+                attendance.getSessions().stream()
+                        .filter(s -> s.getFirstDetectionTime() != null && !s.getFirstDetectionTime().equals("undetected"))
+                        .count() : 0;
+        row.put("totalSessions", totalSessions);
+        row.put("detectionCount", detectionCount);
 
-            List<Map<String, Object>> firstDetections = attendance.getSessions() != null ?
-                    attendance.getSessions().stream()
-                            .filter(s -> !s.getFirstDetectionTime().equals("undetected"))
-                            .map(s -> {
-                                Map<String, Object> sessionInfo = new HashMap<>();
-                                sessionInfo.put("sessionId", s.getSessionId());
-                                sessionInfo.put("firstDetectionTime", s.getFirstDetectionTime());
-                                return sessionInfo;
-                            })
-                            .collect(Collectors.toList()) :
-                    new ArrayList<>();
-            row.put("firstDetections", firstDetections);
+        String firstDetectedAt = sessions.stream()
+                .filter(s -> !s.get("firstDetectionTime").equals("undetected"))
+                .findFirst()
+                .map(s -> s.get("firstDetectionTime").toString())
+                .orElse("undetected");
+        row.put("firstDetectedAt", firstDetectedAt);
 
-            String firstDetectedAt = firstDetections.isEmpty() ? "undetected" :
-                    firstDetections.get(0).get("firstDetectionTime").toString();
-            row.put("firstDetectedAt", firstDetectedAt);
+        // إضافة firstCheckTimes إلى الاستجابة
+        List<Map<String, Object>> firstCheckTimes = attendance.getFirstCheckTimes() != null ?
+                attendance.getFirstCheckTimes().stream()
+                        .map(c -> {
+                            Map<String, Object> checkTimeInfo = new HashMap<>();
+                            checkTimeInfo.put("sessionId", c.getSessionId());
+                            checkTimeInfo.put("firstCheckTime", c.getFirstCheckTime() != null ? 
+                                    c.getFirstCheckTime() : "undetected");
+                            return checkTimeInfo;
+                        })
+                        .collect(Collectors.toList()) :
+                new ArrayList<>();
+        row.put("firstCheckTimes", firstCheckTimes);
 
-            table.add(row);
-        }
-
-        // البحث باسم الطالب أو رقمه
-        if (search != null && !search.isEmpty()) {
-            String searchLower = search.toLowerCase();
-            table = table.stream()
-                    .filter(row -> ((String) row.get("studentId")).toLowerCase().contains(searchLower) ||
-                            ((String) row.get("studentName")).toLowerCase().contains(searchLower))
-                    .collect(Collectors.toList());
-        }
-
-        // الترتيب حسب الحقل المحدد
-        Comparator<Map<String, Object>> comparator;
-        switch (sortBy) {
-            case "status":
-                comparator = Comparator.comparing(row -> (String) row.get("status"));
-                break;
-            case "studentName":
-                comparator = Comparator.comparing(row -> (String) row.get("studentName"));
-                break;
-            case "detectionCount":
-                comparator = Comparator.comparing(row -> (Long) row.get("detectionCount"));
-                break;
-            default:
-                comparator = Comparator.comparing(row -> (String) row.get("studentId"));
-        }
-        if ("desc".equals(sortOrder)) comparator = comparator.reversed();
-        table.sort(comparator);
-
-        return ResponseEntity.ok(table);
+        table.add(row);
     }
 
+    // البحث والترتيب
+    if (search != null && !search.isEmpty()) {
+        String searchLower = search.toLowerCase();
+        table = table.stream()
+                .filter(row -> ((String) row.get("studentId")).toLowerCase().contains(searchLower) ||
+                        ((String) row.get("studentName")).toLowerCase().contains(searchLower))
+                .collect(Collectors.toList());
+    }
 
-    
+    Comparator<Map<String, Object>> comparator;
+    switch (sortBy) {
+        case "status":
+            comparator = Comparator.comparing(row -> (String) row.get("status"));
+            break;
+        case "studentName":
+            comparator = Comparator.comparing(row -> (String) row.get("studentName"));
+            break;
+        case "detectionCount":
+            comparator = Comparator.comparing(row -> (Long) row.get("detectionCount"));
+            break;
+        default:
+            comparator = Comparator.comparing(row -> (String) row.get("studentId"));
+    }
+    if ("desc".equals(sortOrder)) comparator = comparator.reversed();
+    table.sort(comparator);
+
+    return ResponseEntity.ok(table);
+}
+
+
 
     @PostMapping("/approve-wf")
     public ResponseEntity<String> approveWf(@RequestBody Map<String, String> request) {
@@ -695,66 +753,76 @@ public ResponseEntity<String> checkWfStatus(@RequestParam String studentId, @Req
     // كرود لحذف محاضرة مؤقتة مع الاحتفاظ بسجل الحضور
     @DeleteMapping("/deleteTempLecture/{lectureId}")
     public ResponseEntity<String> deleteTempLecture(@PathVariable String lectureId) {
-        // تعليق: هذا الكرود بيحذف محاضرة مؤقتة من قاعدة البيانات بناءً على lectureId.
-        // بيحافظ على سجل الحضور والغياب في مجموعة attendances وما بيحذفه.
-        // بيتأكد إنه المحاضرة موجودة قبل الحذف.
-
-        Optional<CourseEntity> lectureOpt = courseRepository.findByLectureId(lectureId);
-        if (!lectureOpt.isPresent()) {
-            return ResponseEntity.badRequest().body("المحاضرة غير موجودة");
-        }
-
-        // حذف المحاضرة من مجموعة courses
-        courseRepository.delete(lectureOpt.get());
-        // سجل الحضور في attendances بيضل محفوظ وما بنحذفه
-        return ResponseEntity.ok("تم حذف المحاضرة المؤقتة بنجاح، مع الاحتفاظ بسجل الحضور");
+    Optional<CourseEntity> lectureOpt = courseRepository.findByLectureId(lectureId);
+    if (!lectureOpt.isPresent()) {
+        return ResponseEntity.badRequest().body("المحاضرة غير موجودة");
+      }
+    courseRepository.delete(lectureOpt.get());
+    return ResponseEntity.ok("تم حذف المحاضرة المؤقتة بنجاح، مع الاحتفاظ بسجل الحضور");
     }
 
     // كرود لتتبع أول وقت اكتشاف للوجه وعدد مرات الاكتشاف
     @GetMapping("/trackFirstDetection/{lectureId}/{studentId}")
-public ResponseEntity<Map<String, Object>> trackFirstDetection(
-        @PathVariable String lectureId,
-        @PathVariable String studentId) {
-    try {
-        AttendanceEntity attendance = attendanceRepository.findByLectureIdAndStudentId(lectureId, studentId);
-        if (attendance == null || attendance.getSessions() == null) {
+    public ResponseEntity<Map<String, Object>> trackFirstDetection(
+            @PathVariable String lectureId,
+            @PathVariable String studentId) {
+        try {
+            AttendanceEntity attendance = attendanceRepository.findByLectureIdAndStudentId(lectureId, studentId);
+            if (attendance == null || attendance.getSessions() == null) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "لا يوجد سجل حضور لهذا الطالب في هذه المحاضرة");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+
+            int totalSessions = attendance.getSessions().size();
+            long detectionCount = attendance.getSessions().stream()
+                    .filter(s -> s.getFirstDetectionTime() != null && !s.getFirstDetectionTime().equals("undetected"))
+                    .count();
+
+            List<Map<String, Object>> sessions = attendance.getSessions().stream()
+                    .map(s -> {
+                        Map<String, Object> sessionInfo = new HashMap<>();
+                        sessionInfo.put("sessionId", s.getSessionId());
+                        sessionInfo.put("firstDetectionTime", s.getFirstDetectionTime() != null ? s.getFirstDetectionTime() : "undetected");
+                        return sessionInfo;
+                    })
+                    .collect(Collectors.toList());
+
+            List<Map<String, Object>> firstCheckTimes = attendance.getFirstCheckTimes() != null ?
+                    attendance.getFirstCheckTimes().stream()
+                            .map(c -> {
+                                Map<String, Object> checkTimeInfo = new HashMap<>();
+                                checkTimeInfo.put("sessionId", c.getSessionId());
+                                checkTimeInfo.put("firstCheckTime", c.getFirstCheckTime() != null ? c.getFirstCheckTime() : "undetected");
+                                return checkTimeInfo;
+                            })
+                            .collect(Collectors.toList()) :
+                    new ArrayList<>();
+
+            String firstDetectedAt = sessions.stream()
+                    .filter(s -> !s.get("firstDetectionTime").equals("undetected"))
+                    .findFirst()
+                    .map(s -> s.get("firstDetectionTime").toString())
+                    .orElse("undetected");
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("lectureId", lectureId);
+            response.put("studentId", studentId);
+            response.put("courseId", attendance.getCourseId());
+            response.put("totalSessions", totalSessions);
+            response.put("detectionCount", detectionCount);
+            response.put("sessions", sessions);
+            response.put("firstCheckTimes", firstCheckTimes);
+            response.put("firstDetectedAt", firstDetectedAt);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("Error in trackFirstDetection for lectureId: " + lectureId + 
+                    ", studentId: " + studentId + ": " + e.getMessage());
             Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "لا يوجد سجل حضور لهذا الطالب في هذه المحاضرة");
-            return ResponseEntity.badRequest().body(errorResponse);
+            errorResponse.put("error", "خطأ داخلي في معالجة البيانات: " + e.getMessage());
+            return ResponseEntity.status(500).body(errorResponse);
         }
-
-        int totalSessions = attendance.getSessions().size();
-        long detectionCount = attendance.getSessions().stream()
-                .filter(s -> s.getFirstDetectionTime() != null && !s.getFirstDetectionTime().equals("undetected"))
-                .count();
-
-        List<Map<String, Object>> firstDetections = attendance.getSessions().stream()
-                .filter(s -> s.getFirstDetectionTime() != null && !s.getFirstDetectionTime().equals("undetected"))
-                .map(s -> {
-                    Map<String, Object> sessionInfo = new HashMap<>();
-                    sessionInfo.put("sessionId", s.getSessionId());
-                    sessionInfo.put("firstDetectionTime", s.getFirstDetectionTime());
-                    return sessionInfo;
-                })
-                .collect(Collectors.toList());
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("lectureId", lectureId);
-        response.put("studentId", studentId);
-        response.put("totalSessions", totalSessions);
-        response.put("detectionCount", detectionCount);
-        response.put("firstDetections", firstDetections);
-        response.put("firstDetectedAt", firstDetections.isEmpty() ? "undetected" : 
-                firstDetections.get(0).get("firstDetectionTime").toString());
-
-        return ResponseEntity.ok(response);
-    } catch (Exception e) {
-        System.err.println("Error in trackFirstDetection for lectureId: " + lectureId + 
-                ", studentId: " + studentId + ": " + e.getMessage());
-        Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("error", "خطأ داخلي في معالجة البيانات: " + e.getMessage());
-        return ResponseEntity.status(500).body(errorResponse);
     }
-}
  
 }

@@ -17,10 +17,11 @@ public class CourseEntity {
     private String day;
     private String category;
     private int Credits;
+    private int lateThreshold = 300;
 
     public CourseEntity() {}
 
-    public CourseEntity(String courseId, String lectureId, String name, String roomId, String teacherId, String startTime, String endTime, String day, String category) {
+    public CourseEntity(String courseId, String lectureId, String name, String roomId, String teacherId, String startTime, String endTime, String day, String category, int lateThreshold) {
         this.courseId = courseId;
         this.lectureId = lectureId;
         this.name = name;
@@ -30,6 +31,21 @@ public class CourseEntity {
         this.endTime = endTime;
         this.day = day;
         this.category = category;
+        this.lateThreshold = lateThreshold;
+    }
+
+    public CourseEntity(String courseId2, String name2, String roomId2, String teacherId2, String startTime2,
+            String endTime2, String day2, String category2, int credits, int lateThreshold) {
+            this.courseId = courseId2;
+            this.name = name2;
+            this.roomId = roomId2;
+            this.teacherId = teacherId2;
+            this.startTime = startTime2;
+            this.endTime = endTime2;
+            this.day = day2;
+            this.category = category2;
+            this.Credits = credits;
+            this.lateThreshold = lateThreshold != 0 ? lateThreshold : 300;
     }
 
     public CourseEntity(String courseId2, String name2, String roomId2, String teacherId2, String startTime2,
@@ -43,6 +59,7 @@ public class CourseEntity {
             this.day = day2;
             this.category = category2;
             this.Credits = credits;
+           
     }
 
     // Getters and Setters
@@ -68,4 +85,6 @@ public class CourseEntity {
     public void setCategory(String category) { this.category = category; }
     public int getCredits() { return Credits; }
     public void setCredits(int credits) { Credits = credits; }
+    public int getLateThreshold() { return lateThreshold; }
+    public void setLateThreshold(int lateThreshold) { this.lateThreshold = lateThreshold != 0 ? lateThreshold : 300; }
 }
