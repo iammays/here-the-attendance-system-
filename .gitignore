@@ -19,6 +19,7 @@ output/
 
 *.jpg
 
+*.log
 
 screenshots/
 students_embeddings_from_mongodb.npy

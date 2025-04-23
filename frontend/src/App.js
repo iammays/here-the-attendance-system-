@@ -55,7 +55,7 @@ const App = () => {
         <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
         <Route path="/wf_reports" element={<ProtectedRoute><WF_Reports /></ProtectedRoute>} />
         <Route path="/logout" element={<ProtectedRoute><Logout /></ProtectedRoute>} />
-
+        <Route path="/attendance/:courseId/:lectureId" element={<ProtectedRoute><AttendanceTable /></ProtectedRoute>} />
         {/* 404 Route */}
         <Route path="*" element={<NotFound />} />
       </Routes>

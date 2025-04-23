@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../cssFolder/CourseDashboard.css";
-import ScheduleComponent from "./ScheduleComponent.jsx";
 
 const CourseDashboard = () => {
   const { courseName } = useParams();
@@ -9,17 +8,13 @@ const CourseDashboard = () => {
   const [courseData, setCourseData] = useState([]);
   const [courseDays, setCourseDays] = useState([]);
   const [weeks, setWeeks] = useState([]);
-
   const [showModal, setShowModal] = useState(false);
   const [selectedWeek, setSelectedWeek] = useState(null);
-
   const [upcomingClasses, setUpcomingClasses] = useState([]);
-  const [newLecture, setNewLecture] = useState({
-    day: "",
-    startTime: "",
-    endTime: "",
-    roomId: "",
-  });
+  const [courseId, setCourseId] = useState(null);
+
+  const [lateThreshold, setLateThreshold] = useState("5"); // وقت التأخير بالدقائق
+  const [showLateModal, setShowLateModal] = useState(false); // مودال ضبط وقت التأخير
 
   useEffect(() => {
     const fetchCourseData = async () => {
@@ -40,34 +35,39 @@ const CourseDashboard = () => {
 
         const data = await res.json();
         setCourseData(data);
+        setCourseId(data[0]?.courseId);
 
-        const baseDate = new Date(); // نبدأ من اليوم
-        baseDate.setHours(0, 0, 0, 0); // ننظف الوقت
-        
+        // حساب الأسابيع بدءًا من تاريخ مُعين (يمكن تعديل التاريخ حسب الحاجة)
+        const startFromDate = new Date("2025-01-02");
+        startFromDate.setHours(0, 0, 0, 0);
+
         const today = new Date();
         const weeksData = [];
-        
-        const maxWeekToShow = Math.floor((today - baseDate) / (1000 * 60 * 60 * 24 * 7)) + 1;
+
+        // نحسب عدد الأسابيع التي مرّت من startFromDate حتى اليوم الحالي
+        const maxWeekToShow = Math.floor((today - startFromDate) / (1000 * 60 * 60 * 24 * 7)) + 1;
+
+        // نعرض حد أقصى 15 أسبوع
         for (let i = 0; i < Math.min(maxWeekToShow, 15); i++) {
-          const weekStart = new Date(baseDate);
-          weekStart.setDate(baseDate.getDate() + i * 7);
-        
+          const weekStart = new Date(startFromDate);
+          weekStart.setDate(startFromDate.getDate() + i * 7);
+
           const weekEnd = new Date(weekStart);
           weekEnd.setDate(weekStart.getDate() + 6);
-        
+
+          // هنا نقوم بتصفية المحاضرات التي تقع ضمن هذا الأسبوع
           const lecturesThisWeek = data.filter((lecture) => {
             const lectureDate = new Date(lecture.startTime);
             return lectureDate >= weekStart && lectureDate <= weekEnd;
           });
-        
+
           weeksData.push({
             week: i + 1,
             lectures: lecturesThisWeek,
           });
         }
-        
+
         setWeeks(weeksData);
-        
       } catch (err) {
         console.error(err.message);
       }
@@ -119,72 +119,41 @@ const CourseDashboard = () => {
     fetchCourseDays();
   }, [courseName]);
 
-  const handleAddLecture = async (week) => {
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest(".late-popup") && !e.target.closest(".late-icon")) {
+        setShowLateModal(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLateThresholdSave = async () => {
     try {
       const storedUser = JSON.parse(localStorage.getItem("teacher"));
       const headers = {
+        "Content-Type": "application/json",
         Authorization: `${storedUser.tokenType} ${storedUser.accessToken}`,
       };
 
-      const lectureData = {
-        courseId: courseData[0]?.courseId,
-        teacherId: storedUser.id,
-        day: newLecture.day,
-        startTime: newLecture.startTime,
-        endTime: newLecture.endTime,
-        roomId: newLecture.roomId,
-        week,
-      };
+      // نحول الدقائق إلى ثواني لأن الباك يستخدم الثواني
+      const thresholdInSeconds = parseInt(lateThreshold) * 60;
 
-      const res = await fetch("http://localhost:8080/courses/manual", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...headers,
-        },
-        body: JSON.stringify(lectureData),
+      const res = await fetch(`http://localhost:8080/courses/${courseId}/lateThreshold`, {
+        method: "PUT",
+        headers,
+        credentials: "include",
+        body: JSON.stringify({ lateThreshold: thresholdInSeconds }),
       });
 
-      if (res.ok) {
-        // Re-fetch updated data
-        const updatedRes = await fetch(
-          `http://localhost:8080/courses/name/${courseName}`,
-          { credentials: "include", headers }
-        );
-        const updatedData = await updatedRes.json();
-        setCourseData(updatedData);
+      if (!res.ok) throw new Error("Failed to update late threshold");
 
-        const baseDate = new Date(updatedData[0]?.startTime);
-        const today = new Date();
-        const updatedWeeks = [];
-
-        for (let i = 0; i < 15; i++) {
-          const weekStart = new Date(baseDate);
-          weekStart.setDate(baseDate.getDate() + i * 7);
-
-          const weekEnd = new Date(weekStart);
-          weekEnd.setDate(weekStart.getDate() + 6);
-
-          if (today >= weekStart) {
-            const lecturesThisWeek = updatedData.filter((lecture) => {
-              const lectureDate = new Date(lecture.startTime);
-              return lectureDate >= weekStart && lectureDate <= weekEnd;
-            });
-
-            updatedWeeks.push({
-              week: i + 1,
-              lectures: lecturesThisWeek,
-            });
-          }
-        }
-
-        setWeeks(updatedWeeks);
-        setNewLecture({ day: "", startTime: "", endTime: "", roomId: "" });
-      } else {
-        console.error("Failed to add lecture");
-      }
+      alert("تم تحديث وقت التأخير بنجاح ✅");
+      setShowLateModal(false);
     } catch (err) {
-      console.error(err.message);
+      console.error("Error updating late threshold:", err.message);
+      alert("فشل التحديث ❌");
     }
   };
 
@@ -222,30 +191,15 @@ const CourseDashboard = () => {
                 </svg>
               </summary>
               <ul className="days-list">
-              {courseDays.map((day, index) => (
-                <li
-                  key={index}
-                  className="day-item"
-                  onClick={() => handleDayClick(day, weekData.week)}
-                >
-                  {day}
-                </li>
+                {courseDays.map((day, index) => (
+                  <li
+                    key={index}
+                    className="day-item"
+                    onClick={() => handleDayClick(day, weekData.week)}
+                  >
+                    {day}
+                  </li>
                 ))}
-                <button
-                  className="add-day-button"
-                  onClick={() => {
-                  setSelectedWeek(weekData.week);
-                  setShowModal(true);
-                  }}
-                >
-                  + Add new day
-                </button>
-                {showModal && (
-                  <ScheduleComponent
-                    selectedWeek={selectedWeek}
-                    onClose={() => setShowModal(false)}
-                  />
-                )}
               </ul>
             </details>
           </div>
@@ -273,8 +227,79 @@ const CourseDashboard = () => {
           </ul>
         </div>
       </div>
+
+      {/* مودال ضبط وقت التأخير */}
+      <span
+        className="late-icon"
+        onClick={() => setShowLateModal(true)}
+        title="Set Late Threshold"
+        style={{
+          marginLeft: "10px",
+          cursor: "pointer",
+          fontSize: "20px",
+          color: "#555",
+          position: "relative",
+        }}
+      >
+        ⏰
+      </span>
+
+      {showLateModal && (
+        <div
+          className="late-popup"
+          style={{
+            position: "absolute",
+            top: "100px",
+            right: "50px", // عدل حسب المكان المطلوب
+            background: "white",
+            border: "1px solid #ccc",
+            borderRadius: "8px",
+            padding: "10px",
+            zIndex: 1000,
+            boxShadow: "0px 2px 10px rgba(0,0,0,0.2)",
+            minWidth: "160px",
+          }}
+        >
+          <label style={{ fontSize: "14px" }}>late after:</label>
+          <input
+            type="number"
+            value={lateThreshold}
+            onChange={(e) => setLateThreshold(e.target.value)}
+            min="0"
+            style={{
+              width: "50px",
+              padding: "4px",
+              marginLeft: "5px",
+              fontSize: "14px",
+            }}
+          />
+          <span style={{ fontSize: "14px", marginLeft: "4px" }}>minutes</span>
+          <div style={{ marginTop: "8px", textAlign: "right" }}>
+            <button
+              onClick={handleLateThresholdSave}
+              style={{
+                padding: "4px 8px",
+                fontSize: "12px",
+                marginRight: "5px",
+              }}
+            >
+              save
+            </button>
+            <button
+              onClick={() => setShowLateModal(false)}
+              style={{
+                padding: "4px 8px",
+                fontSize: "12px",
+              }}
+            >
+              cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default CourseDashboard;
+

@@ -128,7 +128,8 @@ summary::-webkit-details-marker {
 
 /* Upcoming Classes Section (Right) */
 .upcoming-section {
-  width: 33.33%;
+  width: 30%;
+  margin-top: 400px;
 }
 
 .upcoming-card {
@@ -170,4 +171,19 @@ summary::-webkit-details-marker {
   color: #6b7280;
   font-size: 12px;
   margin-top: 4px;
+}
+
+.late-popup {
+  position: absolute;
+  top: 30px;
+  right: 10px; 
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  width: max-content;
+  min-width: 180px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 100;
+  font-family: inherit;
 }
