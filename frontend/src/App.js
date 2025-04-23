@@ -45,7 +45,7 @@ const App = () => {
       {!shouldHideNavbar && <Navbar />}
 
       <Routes>
-        {/* <Route path="/" element={<SignIn />} /> */}
+        <Route path="/" element={<SignIn />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/course/:courseName" element={<ProtectedRoute><CourseDashboard /></ProtectedRoute>} />
         <Route path="/schedule/:courseName/:week/:day" element={<ProtectedRoute><div>Schedule Page</div></ProtectedRoute>} />

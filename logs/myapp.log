@@ -4266,3 +4266,400 @@ java.lang.NullPointerException: Cannot invoke "String.equals(Object)" because th
 2025-04-20T20:03:01.185+03:00 DEBUG 15372 --- [here-springboot] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'text/plain', given [*/*] and supported [text/plain, */*, application/json, application/*+json, application/yaml]
 2025-04-20T20:03:01.186+03:00 DEBUG 15372 --- [here-springboot] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing ["Attendance status updated to Absent"]
 2025-04-20T20:03:01.189+03:00 DEBUG 15372 --- [here-springboot] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:33:28.126+03:00  INFO 852 --- [here-springboot] [main] c.h.b.backendSpringbootApplication       : Starting backendSpringbootApplication using Java 21.0.2 with PID 852 (C:\Users\HP-G9\Desktop\capstone\here-the-attendance-system--1\backend\target\classes started by HP-G9 in C:\Users\HP-G9\Desktop\capstone\here-the-attendance-system--1)
+2025-04-23T11:33:28.132+03:00  INFO 852 --- [here-springboot] [main] c.h.b.backendSpringbootApplication       : No active profile set, falling back to 1 default profile: "default"
+2025-04-23T11:33:32.029+03:00  INFO 852 --- [here-springboot] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data MongoDB repositories in DEFAULT mode.
+2025-04-23T11:33:32.366+03:00  INFO 852 --- [here-springboot] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 317 ms. Found 9 MongoDB repository interfaces.
+2025-04-23T11:33:34.286+03:00  INFO 852 --- [here-springboot] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-04-23T11:33:34.333+03:00  INFO 852 --- [here-springboot] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-04-23T11:33:34.335+03:00  INFO 852 --- [here-springboot] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.34]
+2025-04-23T11:33:34.517+03:00  INFO 852 --- [here-springboot] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-04-23T11:33:34.519+03:00  INFO 852 --- [here-springboot] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 6211 ms
+2025-04-23T11:33:35.395+03:00  INFO 852 --- [here-springboot] [main] org.mongodb.driver.client                : MongoClient with metadata {"driver": {"name": "mongo-java-driver|sync|spring-boot", "version": "5.2.1"}, "os": {"type": "Windows", "name": "Windows 11", "architecture": "amd64", "version": "10.0"}, "platform": "Java/Oracle Corporation/21.0.2+13-LTS-58"} created with settings MongoClientSettings{readPreference=primary, writeConcern=WriteConcern{w=null, wTimeout=null ms, journal=null}, retryWrites=true, retryReads=true, readConcern=ReadConcern{level=null}, credential=null, transportSettings=null, commandListeners=[io.micrometer.core.instrument.binder.mongodb.MongoMetricsCommandListener@75b363c3], codecRegistry=ProvidersCodecRegistry{codecProviders=[ValueCodecProvider{}, BsonValueCodecProvider{}, DBRefCodecProvider{}, DBObjectCodecProvider{}, DocumentCodecProvider{}, CollectionCodecProvider{}, IterableCodecProvider{}, MapCodecProvider{}, GeoJsonCodecProvider{}, GridFSFileCodecProvider{}, Jsr310CodecProvider{}, JsonObjectCodecProvider{}, BsonCodecProvider{}, EnumCodecProvider{}, com.mongodb.client.model.mql.ExpressionCodecProvider@6ea3a513, com.mongodb.Jep395RecordCodecProvider@3c4059a, com.mongodb.KotlinCodecProvider@4b336cc8]}, loggerSettings=LoggerSettings{maxDocumentLength=1000}, clusterSettings={hosts=[localhost:27017], srvServiceName=mongodb, mode=SINGLE, requiredClusterType=UNKNOWN, requiredReplicaSetName='null', serverSelector='null', clusterListeners='[]', serverSelectionTimeout='30000 ms', localThreshold='15 ms'}, socketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=0, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, heartbeatSocketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=10000, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, connectionPoolSettings=ConnectionPoolSettings{maxSize=100, minSize=0, maxWaitTimeMS=120000, maxConnectionLifeTimeMS=0, maxConnectionIdleTimeMS=0, maintenanceInitialDelayMS=0, maintenanceFrequencyMS=60000, connectionPoolListeners=[io.micrometer.core.instrument.binder.mongodb.MongoMetricsConnectionPoolListener@2570b316], maxConnecting=2}, serverSettings=ServerSettings{heartbeatFrequencyMS=10000, minHeartbeatFrequencyMS=500, serverMonitoringMode=AUTO, serverListeners='[]', serverMonitorListeners='[]'}, sslSettings=SslSettings{enabled=false, invalidHostNameAllowed=false, context=null}, applicationName='null', compressorList=[], uuidRepresentation=JAVA_LEGACY, serverApi=null, autoEncryptionSettings=null, dnsClient=null, inetAddressResolver=null, contextProvider=null, timeoutMS=null}
+2025-04-23T11:33:35.433+03:00  INFO 852 --- [here-springboot] [cluster-ClusterId{value='6808a5dfa26abf2c6dd008ce', description='null'}-localhost:27017] org.mongodb.driver.cluster               : Monitor thread successfully connected to server with description ServerDescription{address=localhost:27017, type=STANDALONE, cryptd=false, state=CONNECTED, ok=true, minWireVersion=0, maxWireVersion=25, maxDocumentSize=16777216, logicalSessionTimeoutMinutes=30, roundTripTimeNanos=102924000, minRoundTripTimeNanos=0}
+2025-04-23T11:33:37.106+03:00 DEBUG 852 --- [here-springboot] [main] o.s.w.f.ServerHttpObservationFilter      : Filter 'webMvcObservationFilter' configured for use
+2025-04-23T11:33:37.108+03:00 DEBUG 852 --- [here-springboot] [main] o.springframework.web.filter.CorsFilter  : Filter 'corsFilterRegistrationBean' configured for use
+2025-04-23T11:33:37.974+03:00  INFO 852 --- [here-springboot] [main] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2025-04-23T11:33:37.977+03:00  WARN 852 --- [here-springboot] [main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2025-04-23T11:33:38.607+03:00 DEBUG 852 --- [here-springboot] [main] s.w.s.m.m.a.RequestMappingHandlerMapping : 84 mappings in 'requestMappingHandlerMapping'
+2025-04-23T11:33:38.631+03:00 DEBUG 852 --- [here-springboot] [main] o.s.w.s.h.BeanNameUrlHandlerMapping      : Detected 1 mappings in 'beanNameHandlerMapping'
+2025-04-23T11:33:40.325+03:00 DEBUG 852 --- [here-springboot] [main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**] in 'resourceHandlerMapping'
+2025-04-23T11:33:40.827+03:00  INFO 852 --- [here-springboot] [main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2025-04-23T11:33:41.001+03:00 DEBUG 852 --- [here-springboot] [main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, LogoutFilter, AuthTokenFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, SessionManagementFilter, ExceptionTranslationFilter, AuthorizationFilter
+2025-04-23T11:33:41.203+03:00 DEBUG 852 --- [here-springboot] [main] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2025-04-23T11:33:41.326+03:00 DEBUG 852 --- [here-springboot] [main] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 0 @ExceptionHandler, 1 ResponseBodyAdvice
+2025-04-23T11:33:42.269+03:00  INFO 852 --- [here-springboot] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-04-23T11:33:42.302+03:00  INFO 852 --- [here-springboot] [main] c.h.b.backendSpringbootApplication       : Started backendSpringbootApplication in 15.192 seconds (process running for 16.999)
+2025-04-23T11:33:42.738+03:00  INFO 852 --- [here-springboot] [RMI TCP Connection(3)-127.0.0.1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-04-23T11:33:42.740+03:00  INFO 852 --- [here-springboot] [RMI TCP Connection(3)-127.0.0.1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-04-23T11:33:42.740+03:00 DEBUG 852 --- [here-springboot] [RMI TCP Connection(3)-127.0.0.1] o.s.web.servlet.DispatcherServlet        : Detected StandardServletMultipartResolver
+2025-04-23T11:33:42.741+03:00 DEBUG 852 --- [here-springboot] [RMI TCP Connection(3)-127.0.0.1] o.s.web.servlet.DispatcherServlet        : Detected AcceptHeaderLocaleResolver
+2025-04-23T11:33:42.742+03:00 DEBUG 852 --- [here-springboot] [RMI TCP Connection(3)-127.0.0.1] o.s.web.servlet.DispatcherServlet        : Detected FixedThemeResolver
+2025-04-23T11:33:42.746+03:00 DEBUG 852 --- [here-springboot] [RMI TCP Connection(3)-127.0.0.1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@2a7eba14
+2025-04-23T11:33:42.748+03:00 DEBUG 852 --- [here-springboot] [RMI TCP Connection(3)-127.0.0.1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.support.SessionFlashMapManager@7661fa45
+2025-04-23T11:33:42.749+03:00 DEBUG 852 --- [here-springboot] [RMI TCP Connection(3)-127.0.0.1] o.s.web.servlet.DispatcherServlet        : enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
+2025-04-23T11:33:42.750+03:00  INFO 852 --- [here-springboot] [RMI TCP Connection(3)-127.0.0.1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 10 ms
+2025-04-23T11:34:04.018+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing POST /api/auth/signin
+2025-04-23T11:34:04.073+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T11:34:04.101+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured POST /api/auth/signin
+2025-04-23T11:34:04.111+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : POST "/api/auth/signin", parameters={}
+2025-04-23T11:34:04.119+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Security.controllers.AuthController#authenticateUser(LoginRequest)
+2025-04-23T11:34:04.378+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [com.here.backend.Security.payload.request.LoginRequest@11cc1216]
+2025-04-23T11:34:05.481+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.s.a.dao.DaoAuthenticationProvider    : Failed to find user 'Teacher_7'
+2025-04-23T11:34:05.501+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'text/plain', given [*/*] and supported [text/plain, */*, application/json, application/*+json, application/yaml]
+2025-04-23T11:34:05.507+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing ["Incorrect username or password."]
+2025-04-23T11:34:05.529+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 401 UNAUTHORIZED
+2025-04-23T11:34:31.205+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing POST /api/auth/signin
+2025-04-23T11:34:31.209+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T11:34:31.212+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured POST /api/auth/signin
+2025-04-23T11:34:31.214+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : POST "/api/auth/signin", parameters={}
+2025-04-23T11:34:31.217+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Security.controllers.AuthController#authenticateUser(LoginRequest)
+2025-04-23T11:34:31.221+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [com.here.backend.Security.payload.request.LoginRequest@302facb7]
+2025-04-23T11:34:31.424+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-4] o.s.s.a.dao.DaoAuthenticationProvider    : Failed to find user 'Teacher_2'
+2025-04-23T11:34:31.427+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'text/plain', given [*/*] and supported [text/plain, */*, application/json, application/*+json, application/yaml]
+2025-04-23T11:34:31.429+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing ["Incorrect username or password."]
+2025-04-23T11:34:31.433+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 401 UNAUTHORIZED
+2025-04-23T11:35:19.750+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing POST /api/auth/signin
+2025-04-23T11:35:19.753+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T11:35:19.760+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured POST /api/auth/signin
+2025-04-23T11:35:19.762+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : POST "/api/auth/signin", parameters={}
+2025-04-23T11:35:19.765+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Security.controllers.AuthController#authenticateUser(LoginRequest)
+2025-04-23T11:35:19.769+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [com.here.backend.Security.payload.request.LoginRequest@4e8fed8]
+2025-04-23T11:35:19.970+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.s.a.dao.DaoAuthenticationProvider    : Failed to find user '202109215@bethlehem.edu'
+2025-04-23T11:35:19.972+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'text/plain', given [*/*] and supported [text/plain, */*, application/json, application/*+json, application/yaml]
+2025-04-23T11:35:19.973+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing ["Incorrect username or password."]
+2025-04-23T11:35:19.975+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 401 UNAUTHORIZED
+2025-04-23T11:37:20.055+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing POST /api/excel/teachers
+2025-04-23T11:37:20.058+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T11:37:20.062+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured POST /api/excel/teachers
+2025-04-23T11:37:20.063+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.web.servlet.DispatcherServlet        : POST "/api/excel/teachers", parameters={multipart}
+2025-04-23T11:37:20.146+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.ExcelImport.ExcelImportController#importTeachers(MultipartFile)
+2025-04-23T11:37:24.155+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:37:24.157+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [{message=Teacher data imported and updated successfully!}]
+2025-04-23T11:37:24.179+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:37:38.616+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing POST /api/auth/signin
+2025-04-23T11:37:38.618+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T11:37:38.618+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured POST /api/auth/signin
+2025-04-23T11:37:38.619+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : POST "/api/auth/signin", parameters={}
+2025-04-23T11:37:38.619+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Security.controllers.AuthController#authenticateUser(LoginRequest)
+2025-04-23T11:37:38.621+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [com.here.backend.Security.payload.request.LoginRequest@666f983f]
+2025-04-23T11:37:38.761+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.s.a.dao.DaoAuthenticationProvider    : Authenticated user
+2025-04-23T11:37:38.811+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:37:38.812+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.here.backend.Security.payload.response.JwtResponse@280f9e8b]
+2025-04-23T11:37:38.816+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:37:38.882+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /teachers/courses/T106
+2025-04-23T11:37:38.931+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /teachers/courses/T106
+2025-04-23T11:37:38.933+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/teachers/courses/T106", parameters={}
+2025-04-23T11:37:38.935+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getAllCoursesForTeacher(String)
+2025-04-23T11:37:38.977+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:37:38.978+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.here.backend.Course.CourseEntity@70b838b3, com.here.backend.Course.CourseEntity@7f96b19d]]
+2025-04-23T11:37:38.988+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:37:38.996+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /teachers/courses/T106
+2025-04-23T11:37:39.009+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /teachers/T106/upcoming-classes
+2025-04-23T11:37:39.020+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /teachers/courses/T106
+2025-04-23T11:37:39.022+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/teachers/courses/T106", parameters={}
+2025-04-23T11:37:39.028+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getAllCoursesForTeacher(String)
+2025-04-23T11:37:39.039+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /teachers/T106/upcoming-classes
+2025-04-23T11:37:39.042+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/teachers/T106/upcoming-classes", parameters={}
+2025-04-23T11:37:39.045+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getUpcomingClassesForTeacher(String)
+2025-04-23T11:37:39.059+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:37:39.061+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.here.backend.Course.CourseEntity@3ca0854d, com.here.backend.Course.CourseEntity@2639d05c]]
+2025-04-23T11:37:39.063+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:37:39.071+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:37:39.073+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[{dateTime=2025-04-24T15:30, courseName=Course_7, startTime=15:30, courseId=C207, day=Thursday, room (truncated)...]
+2025-04-23T11:37:39.078+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:37:39.086+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /teachers/T106/upcoming-classes
+2025-04-23T11:37:39.110+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /teachers/T106/upcoming-classes
+2025-04-23T11:37:39.111+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/teachers/T106/upcoming-classes", parameters={}
+2025-04-23T11:37:39.113+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getUpcomingClassesForTeacher(String)
+2025-04-23T11:37:39.127+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:37:39.129+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[{dateTime=2025-04-24T15:30, courseName=Course_7, startTime=15:30, courseId=C207, day=Thursday, room (truncated)...]
+2025-04-23T11:37:39.131+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:38:57.864+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /teachers/T106/upcoming-classes
+2025-04-23T11:38:57.864+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /courses/name/Course_7
+2025-04-23T11:38:57.877+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /teachers/T106/upcoming-classes
+2025-04-23T11:38:57.878+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /courses/name/Course_7
+2025-04-23T11:38:57.878+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/teachers/T106/upcoming-classes", parameters={}
+2025-04-23T11:38:57.878+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/courses/name/Course_7", parameters={}
+2025-04-23T11:38:57.880+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getUpcomingClassesForTeacher(String)
+2025-04-23T11:38:57.880+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Course.CourseController#getCourseByName(String)
+2025-04-23T11:38:57.886+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /courses/days/Course_7
+2025-04-23T11:38:57.890+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:38:57.892+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.here.backend.Course.CourseEntity@3a7f6bd0, com.here.backend.Course.CourseEntity@2041dbb9]]
+2025-04-23T11:38:57.895+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:38:57.899+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:38:57.899+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[{dateTime=2025-04-24T15:30, courseName=Course_7, startTime=15:30, courseId=C207, day=Thursday, room (truncated)...]
+2025-04-23T11:38:57.905+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:38:57.908+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing GET /courses/name/Course_7
+2025-04-23T11:38:57.910+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /courses/days/Course_7
+2025-04-23T11:38:57.911+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/courses/days/Course_7", parameters={}
+2025-04-23T11:38:57.912+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /teachers/T106/upcoming-classes
+2025-04-23T11:38:57.913+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Course.CourseController#getDaysByCourseName(String)
+2025-04-23T11:38:57.929+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /courses/name/Course_7
+2025-04-23T11:38:57.929+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:38:57.930+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/courses/name/Course_7", parameters={}
+2025-04-23T11:38:57.930+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[Thursday, Tuesday]]
+2025-04-23T11:38:57.931+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /teachers/T106/upcoming-classes
+2025-04-23T11:38:57.932+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/teachers/T106/upcoming-classes", parameters={}
+2025-04-23T11:38:57.932+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Course.CourseController#getCourseByName(String)
+2025-04-23T11:38:57.934+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:38:57.935+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getUpcomingClassesForTeacher(String)
+2025-04-23T11:38:57.941+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /courses/days/Course_7
+2025-04-23T11:38:57.945+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:38:57.947+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.here.backend.Course.CourseEntity@3f4937f2, com.here.backend.Course.CourseEntity@3f98a23f]]
+2025-04-23T11:38:57.950+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:38:57.959+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:38:57.960+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[{dateTime=2025-04-24T15:30, courseName=Course_7, startTime=15:30, courseId=C207, day=Thursday, room (truncated)...]
+2025-04-23T11:38:57.963+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:38:57.965+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /courses/days/Course_7
+2025-04-23T11:38:57.966+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/courses/days/Course_7", parameters={}
+2025-04-23T11:38:57.969+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Course.CourseController#getDaysByCourseName(String)
+2025-04-23T11:38:57.980+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:38:57.981+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[Thursday, Tuesday]]
+2025-04-23T11:38:57.983+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:01.701+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /courses/name/Course_7
+2025-04-23T11:39:01.701+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /courses/days/Course_7
+2025-04-23T11:39:01.701+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /teachers/T106/upcoming-classes
+2025-04-23T11:39:01.720+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /courses/name/Course_7
+2025-04-23T11:39:01.721+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /courses/days/Course_7
+2025-04-23T11:39:01.721+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/courses/name/Course_7", parameters={}
+2025-04-23T11:39:01.721+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.web.servlet.DispatcherServlet        : GET "/courses/days/Course_7", parameters={}
+2025-04-23T11:39:01.723+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Course.CourseController#getDaysByCourseName(String)
+2025-04-23T11:39:01.723+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Course.CourseController#getCourseByName(String)
+2025-04-23T11:39:01.726+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /teachers/T106/upcoming-classes
+2025-04-23T11:39:01.728+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/teachers/T106/upcoming-classes", parameters={}
+2025-04-23T11:39:01.730+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getUpcomingClassesForTeacher(String)
+2025-04-23T11:39:01.735+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:01.735+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:01.736+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[Thursday, Tuesday]]
+2025-04-23T11:39:01.736+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.here.backend.Course.CourseEntity@381162dd, com.here.backend.Course.CourseEntity@5ae55c90]]
+2025-04-23T11:39:01.739+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:01.739+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:01.748+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /courses/days/Course_7
+2025-04-23T11:39:01.751+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:01.752+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /courses/name/Course_7
+2025-04-23T11:39:01.752+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[{dateTime=2025-04-24T15:30, courseName=Course_7, startTime=15:30, courseId=C207, day=Thursday, room (truncated)...]
+2025-04-23T11:39:01.754+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:01.763+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /teachers/T106/upcoming-classes
+2025-04-23T11:39:01.772+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /courses/days/Course_7
+2025-04-23T11:39:01.774+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/courses/days/Course_7", parameters={}
+2025-04-23T11:39:01.775+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /courses/name/Course_7
+2025-04-23T11:39:01.776+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Course.CourseController#getDaysByCourseName(String)
+2025-04-23T11:39:01.776+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/courses/name/Course_7", parameters={}
+2025-04-23T11:39:01.779+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Course.CourseController#getCourseByName(String)
+2025-04-23T11:39:01.787+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:01.788+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[Thursday, Tuesday]]
+2025-04-23T11:39:01.789+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /teachers/T106/upcoming-classes
+2025-04-23T11:39:01.790+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/teachers/T106/upcoming-classes", parameters={}
+2025-04-23T11:39:01.790+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:01.790+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:01.791+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getUpcomingClassesForTeacher(String)
+2025-04-23T11:39:01.791+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.here.backend.Course.CourseEntity@27a5b311, com.here.backend.Course.CourseEntity@6cdbe0a4]]
+2025-04-23T11:39:01.794+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:01.810+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:01.811+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[{dateTime=2025-04-24T15:30, courseName=Course_7, startTime=15:30, courseId=C207, day=Thursday, room (truncated)...]
+2025-04-23T11:39:01.817+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:03.371+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /teachers/courses/T106
+2025-04-23T11:39:03.384+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /teachers/courses/T106
+2025-04-23T11:39:03.385+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/teachers/courses/T106", parameters={}
+2025-04-23T11:39:03.386+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getAllCoursesForTeacher(String)
+2025-04-23T11:39:03.400+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:03.401+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.here.backend.Course.CourseEntity@2192e1e1, com.here.backend.Course.CourseEntity@6c9ee689]]
+2025-04-23T11:39:03.404+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:03.411+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /teachers/courses/T106
+2025-04-23T11:39:03.424+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /teachers/T106/upcoming-classes
+2025-04-23T11:39:03.430+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /teachers/courses/T106
+2025-04-23T11:39:03.431+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/teachers/courses/T106", parameters={}
+2025-04-23T11:39:03.434+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getAllCoursesForTeacher(String)
+2025-04-23T11:39:03.442+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /teachers/T106/upcoming-classes
+2025-04-23T11:39:03.444+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.web.servlet.DispatcherServlet        : GET "/teachers/T106/upcoming-classes", parameters={}
+2025-04-23T11:39:03.446+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getUpcomingClassesForTeacher(String)
+2025-04-23T11:39:03.454+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:03.456+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.here.backend.Course.CourseEntity@72c0e7ed, com.here.backend.Course.CourseEntity@f56ed08]]
+2025-04-23T11:39:03.458+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:03.464+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:03.465+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[{dateTime=2025-04-24T15:30, courseName=Course_7, startTime=15:30, courseId=C207, day=Thursday, room (truncated)...]
+2025-04-23T11:39:03.468+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:03.508+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /teachers/T106/upcoming-classes
+2025-04-23T11:39:03.529+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /teachers/T106/upcoming-classes
+2025-04-23T11:39:03.529+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/teachers/T106/upcoming-classes", parameters={}
+2025-04-23T11:39:03.534+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getUpcomingClassesForTeacher(String)
+2025-04-23T11:39:03.558+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:03.559+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[{dateTime=2025-04-24T15:30, courseName=Course_7, startTime=15:30, courseId=C207, day=Thursday, room (truncated)...]
+2025-04-23T11:39:03.563+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:12.798+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /courses/name/Course_7
+2025-04-23T11:39:12.798+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /teachers/T106/upcoming-classes
+2025-04-23T11:39:12.799+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /courses/days/Course_7
+2025-04-23T11:39:12.818+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /courses/name/Course_7
+2025-04-23T11:39:12.819+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/courses/name/Course_7", parameters={}
+2025-04-23T11:39:12.819+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /teachers/T106/upcoming-classes
+2025-04-23T11:39:12.819+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /courses/days/Course_7
+2025-04-23T11:39:12.820+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/teachers/T106/upcoming-classes", parameters={}
+2025-04-23T11:39:12.820+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.web.servlet.DispatcherServlet        : GET "/courses/days/Course_7", parameters={}
+2025-04-23T11:39:12.820+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Course.CourseController#getCourseByName(String)
+2025-04-23T11:39:12.821+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Course.CourseController#getDaysByCourseName(String)
+2025-04-23T11:39:12.821+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getUpcomingClassesForTeacher(String)
+2025-04-23T11:39:12.829+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:12.829+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:12.830+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[Thursday, Tuesday]]
+2025-04-23T11:39:12.830+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.here.backend.Course.CourseEntity@2c99b346, com.here.backend.Course.CourseEntity@191cfa14]]
+2025-04-23T11:39:12.832+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:12.832+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:12.835+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:12.836+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[{dateTime=2025-04-24T15:30, courseName=Course_7, startTime=15:30, courseId=C207, day=Thursday, room (truncated)...]
+2025-04-23T11:39:12.843+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /courses/name/Course_7
+2025-04-23T11:39:12.843+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /courses/days/Course_7
+2025-04-23T11:39:12.843+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:12.852+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /teachers/T106/upcoming-classes
+2025-04-23T11:39:12.863+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /courses/days/Course_7
+2025-04-23T11:39:12.863+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /courses/name/Course_7
+2025-04-23T11:39:12.867+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/courses/days/Course_7", parameters={}
+2025-04-23T11:39:12.868+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/courses/name/Course_7", parameters={}
+2025-04-23T11:39:12.869+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Course.CourseController#getCourseByName(String)
+2025-04-23T11:39:12.869+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Course.CourseController#getDaysByCourseName(String)
+2025-04-23T11:39:12.876+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /teachers/T106/upcoming-classes
+2025-04-23T11:39:12.877+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:12.877+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:12.877+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/teachers/T106/upcoming-classes", parameters={}
+2025-04-23T11:39:12.879+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[Thursday, Tuesday]]
+2025-04-23T11:39:12.879+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.here.backend.Course.CourseEntity@37e4553, com.here.backend.Course.CourseEntity@3648b174]]
+2025-04-23T11:39:12.881+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getUpcomingClassesForTeacher(String)
+2025-04-23T11:39:12.883+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:12.883+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:12.908+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:12.913+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[{dateTime=2025-04-24T15:30, courseName=Course_7, startTime=15:30, courseId=C207, day=Thursday, room (truncated)...]
+2025-04-23T11:39:12.916+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:20.361+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /teachers/T106/upcoming-classes
+2025-04-23T11:39:20.361+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /courses/name/Course_7
+2025-04-23T11:39:20.361+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /courses/days/Course_7
+2025-04-23T11:39:20.376+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /courses/days/Course_7
+2025-04-23T11:39:20.376+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /teachers/T106/upcoming-classes
+2025-04-23T11:39:20.377+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /courses/name/Course_7
+2025-04-23T11:39:20.377+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/courses/days/Course_7", parameters={}
+2025-04-23T11:39:20.377+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/teachers/T106/upcoming-classes", parameters={}
+2025-04-23T11:39:20.378+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/courses/name/Course_7", parameters={}
+2025-04-23T11:39:20.379+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Course.CourseController#getDaysByCourseName(String)
+2025-04-23T11:39:20.379+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getUpcomingClassesForTeacher(String)
+2025-04-23T11:39:20.381+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Course.CourseController#getCourseByName(String)
+2025-04-23T11:39:20.389+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:20.390+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[Thursday, Tuesday]]
+2025-04-23T11:39:20.392+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:20.392+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:20.393+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.here.backend.Course.CourseEntity@513a92db, com.here.backend.Course.CourseEntity@74d29365]]
+2025-04-23T11:39:20.394+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:20.395+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:20.398+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[{dateTime=2025-04-24T15:30, courseName=Course_7, startTime=15:30, courseId=C207, day=Thursday, room (truncated)...]
+2025-04-23T11:39:20.399+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /courses/days/Course_7
+2025-04-23T11:39:20.406+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:20.406+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /courses/name/Course_7
+2025-04-23T11:39:20.411+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /teachers/T106/upcoming-classes
+2025-04-23T11:39:20.434+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /courses/days/Course_7
+2025-04-23T11:39:20.435+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /courses/name/Course_7
+2025-04-23T11:39:20.436+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/courses/days/Course_7", parameters={}
+2025-04-23T11:39:20.437+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/courses/name/Course_7", parameters={}
+2025-04-23T11:39:20.441+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Course.CourseController#getDaysByCourseName(String)
+2025-04-23T11:39:20.443+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Course.CourseController#getCourseByName(String)
+2025-04-23T11:39:20.446+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /teachers/T106/upcoming-classes
+2025-04-23T11:39:20.455+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/teachers/T106/upcoming-classes", parameters={}
+2025-04-23T11:39:20.457+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getUpcomingClassesForTeacher(String)
+2025-04-23T11:39:20.459+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:20.461+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.here.backend.Course.CourseEntity@253ee1d3, com.here.backend.Course.CourseEntity@2148d7d7]]
+2025-04-23T11:39:20.460+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:20.464+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:20.464+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[Thursday, Tuesday]]
+2025-04-23T11:39:20.473+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:20.487+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:20.491+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[{dateTime=2025-04-24T15:30, courseName=Course_7, startTime=15:30, courseId=C207, day=Thursday, room (truncated)...]
+2025-04-23T11:39:20.493+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:34.326+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /teachers/T106/upcoming-classes
+2025-04-23T11:39:34.332+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /courses/name/Course_7
+2025-04-23T11:39:34.333+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /courses/days/Course_7
+2025-04-23T11:39:34.342+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /teachers/T106/upcoming-classes
+2025-04-23T11:39:34.343+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/teachers/T106/upcoming-classes", parameters={}
+2025-04-23T11:39:34.346+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getUpcomingClassesForTeacher(String)
+2025-04-23T11:39:34.347+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /courses/name/Course_7
+2025-04-23T11:39:34.348+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/courses/name/Course_7", parameters={}
+2025-04-23T11:39:34.349+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Course.CourseController#getCourseByName(String)
+2025-04-23T11:39:34.351+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /courses/days/Course_7
+2025-04-23T11:39:34.352+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/courses/days/Course_7", parameters={}
+2025-04-23T11:39:34.355+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Course.CourseController#getDaysByCourseName(String)
+2025-04-23T11:39:34.366+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:34.367+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:34.367+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[{dateTime=2025-04-24T15:30, courseName=Course_7, startTime=15:30, courseId=C207, day=Thursday, room (truncated)...]
+2025-04-23T11:39:34.368+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.here.backend.Course.CourseEntity@24c420b9, com.here.backend.Course.CourseEntity@38b9a26]]
+2025-04-23T11:39:34.370+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:34.370+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:34.371+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:34.373+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[Thursday, Tuesday]]
+2025-04-23T11:39:34.379+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:34.381+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /teachers/T106/upcoming-classes
+2025-04-23T11:39:34.382+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /courses/name/Course_7
+2025-04-23T11:39:34.385+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /courses/days/Course_7
+2025-04-23T11:39:34.400+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /teachers/T106/upcoming-classes
+2025-04-23T11:39:34.401+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /courses/name/Course_7
+2025-04-23T11:39:34.401+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/teachers/T106/upcoming-classes", parameters={}
+2025-04-23T11:39:34.402+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/courses/name/Course_7", parameters={}
+2025-04-23T11:39:34.404+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /courses/days/Course_7
+2025-04-23T11:39:34.404+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getUpcomingClassesForTeacher(String)
+2025-04-23T11:39:34.404+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Course.CourseController#getCourseByName(String)
+2025-04-23T11:39:34.405+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/courses/days/Course_7", parameters={}
+2025-04-23T11:39:34.409+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Course.CourseController#getDaysByCourseName(String)
+2025-04-23T11:39:34.416+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:34.417+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.here.backend.Course.CourseEntity@53225d5, com.here.backend.Course.CourseEntity@57d20a00]]
+2025-04-23T11:39:34.419+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:34.419+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:34.420+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[Thursday, Tuesday]]
+2025-04-23T11:39:34.422+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:39:34.423+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:39:34.424+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[{dateTime=2025-04-24T15:30, courseName=Course_7, startTime=15:30, courseId=C207, day=Thursday, room (truncated)...]
+2025-04-23T11:39:34.426+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:40:08.678+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /teachers/courses/T106
+2025-04-23T11:40:08.689+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /teachers/courses/T106
+2025-04-23T11:40:08.689+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/teachers/courses/T106", parameters={}
+2025-04-23T11:40:08.690+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getAllCoursesForTeacher(String)
+2025-04-23T11:40:08.707+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:40:08.708+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.here.backend.Course.CourseEntity@1ff62e6c, com.here.backend.Course.CourseEntity@bb422be]]
+2025-04-23T11:40:08.710+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:40:08.717+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /teachers/courses/T106
+2025-04-23T11:40:08.727+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /teachers/T106/upcoming-classes
+2025-04-23T11:40:08.730+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /teachers/courses/T106
+2025-04-23T11:40:08.732+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/teachers/courses/T106", parameters={}
+2025-04-23T11:40:08.736+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getAllCoursesForTeacher(String)
+2025-04-23T11:40:08.753+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /teachers/T106/upcoming-classes
+2025-04-23T11:40:08.754+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/teachers/T106/upcoming-classes", parameters={}
+2025-04-23T11:40:08.755+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:40:08.756+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getUpcomingClassesForTeacher(String)
+2025-04-23T11:40:08.756+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.here.backend.Course.CourseEntity@6351b01, com.here.backend.Course.CourseEntity@7c746a92]]
+2025-04-23T11:40:08.758+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:40:08.773+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:40:08.774+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[{dateTime=2025-04-24T15:30, courseName=Course_7, startTime=15:30, courseId=C207, day=Thursday, room (truncated)...]
+2025-04-23T11:40:08.776+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:40:08.785+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /teachers/T106/upcoming-classes
+2025-04-23T11:40:08.802+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /teachers/T106/upcoming-classes
+2025-04-23T11:40:08.804+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/teachers/T106/upcoming-classes", parameters={}
+2025-04-23T11:40:08.805+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Teacher.TeacherController#getUpcomingClassesForTeacher(String)
+2025-04-23T11:40:08.822+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:40:08.823+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[{dateTime=2025-04-24T15:30, courseName=Course_7, startTime=15:30, courseId=C207, day=Thursday, room (truncated)...]
+2025-04-23T11:40:08.825+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:43:24.267+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /api/wf-reports/teacher/T106
+2025-04-23T11:43:24.281+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /api/wf-reports/teacher/T106
+2025-04-23T11:43:24.282+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/api/wf-reports/teacher/T106", parameters={}
+2025-04-23T11:43:24.284+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Attendance.WfStatusController#getWfReportsForTeacher(String)
+2025-04-23T11:43:24.401+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:43:24.402+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[{studentId=202108705, date=2025-04-23, courseName=Course_7, teacherName=Teacher_7, studentName=Joel (truncated)...]
+2025-04-23T11:43:24.405+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:43:24.425+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/wf-reports/teacher/T106
+2025-04-23T11:43:24.451+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/wf-reports/teacher/T106
+2025-04-23T11:43:24.453+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.web.servlet.DispatcherServlet        : GET "/api/wf-reports/teacher/T106", parameters={}
+2025-04-23T11:43:24.456+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Attendance.WfStatusController#getWfReportsForTeacher(String)
+2025-04-23T11:43:24.535+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-04-23T11:43:24.538+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[{studentId=202108705, date=2025-04-23, courseName=Course_7, teacherName=Teacher_7, studentName=Joel (truncated)...]
+2025-04-23T11:43:24.540+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-23T11:45:24.954+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing POST /api/attendances/approve-wf
+2025-04-23T11:45:24.975+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured POST /api/attendances/approve-wf
+2025-04-23T11:45:24.976+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : POST "/api/attendances/approve-wf", parameters={}
+2025-04-23T11:45:24.977+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.here.backend.Attendance.AttendanceController#approveWf(Map)
+2025-04-23T11:45:24.984+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [{studentId=202108705, courseId=C207}]
+2025-04-23T11:45:37.579+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'text/plain', given [*/*] and supported [text/plain, */*, application/json, application/*+json, application/yaml]
+2025-04-23T11:45:37.581+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing ["WF status set to Approved for course C207"]
+2025-04-23T11:45:37.584+03:00 DEBUG 852 --- [here-springboot] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
