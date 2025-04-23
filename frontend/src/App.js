@@ -12,7 +12,7 @@ import Navbar from './jsxFolder/Navbar';
 import Logout from './jsxFolder/Logout';
 import NotFound from './jsxFolder/NotFound'; // 👈 Make sure you import this
 import ProtectedRoute from './jsxFolder/ProtectedRoute';
-
+import AttendanceTable from './jsxFolder/AttendanceTable';
 const App = () => {
   const location = useLocation();
 
@@ -45,7 +45,7 @@ const App = () => {
       {!shouldHideNavbar && <Navbar />}
 
       <Routes>
-        <Route path="/" element={<SignIn />} />
+        {/* <Route path="/" element={<SignIn />} /> */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/course/:courseName" element={<ProtectedRoute><CourseDashboard /></ProtectedRoute>} />
         <Route path="/schedule/:courseName/:week/:day" element={<ProtectedRoute><div>Schedule Page</div></ProtectedRoute>} />
@@ -56,6 +56,7 @@ const App = () => {
         <Route path="/wf_reports" element={<ProtectedRoute><WF_Reports /></ProtectedRoute>} />
         <Route path="/logout" element={<ProtectedRoute><Logout /></ProtectedRoute>} />
         <Route path="/attendance/:courseId/:lectureId" element={<ProtectedRoute><AttendanceTable /></ProtectedRoute>} />
+
         {/* 404 Route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
