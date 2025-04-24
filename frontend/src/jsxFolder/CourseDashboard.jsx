@@ -8,13 +8,11 @@ const CourseDashboard = () => {
   const [courseData, setCourseData] = useState([]);
   const [courseDays, setCourseDays] = useState([]);
   const [weeks, setWeeks] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedWeek, setSelectedWeek] = useState(null);
   const [upcomingClasses, setUpcomingClasses] = useState([]);
   const [courseId, setCourseId] = useState(null);
 
-  const [lateThreshold, setLateThreshold] = useState("5"); // وقت التأخير بالدقائق
-  const [showLateModal, setShowLateModal] = useState(false); // مودال ضبط وقت التأخير
+  const [lateThreshold, setLateThreshold] = useState("5");
+  const [showLateModal, setShowLateModal] = useState(false);
 
   useEffect(() => {
     const fetchCourseData = async () => {
@@ -37,17 +35,14 @@ const CourseDashboard = () => {
         setCourseData(data);
         setCourseId(data[0]?.courseId);
 
-        // حساب الأسابيع بدءًا من تاريخ مُعين (يمكن تعديل التاريخ حسب الحاجة)
         const startFromDate = new Date("2025-01-02");
         startFromDate.setHours(0, 0, 0, 0);
 
         const today = new Date();
         const weeksData = [];
 
-        // نحسب عدد الأسابيع التي مرّت من startFromDate حتى اليوم الحالي
         const maxWeekToShow = Math.floor((today - startFromDate) / (1000 * 60 * 60 * 24 * 7)) + 1;
 
-        // نعرض حد أقصى 15 أسبوع
         for (let i = 0; i < Math.min(maxWeekToShow, 15); i++) {
           const weekStart = new Date(startFromDate);
           weekStart.setDate(startFromDate.getDate() + i * 7);
@@ -55,7 +50,6 @@ const CourseDashboard = () => {
           const weekEnd = new Date(weekStart);
           weekEnd.setDate(weekStart.getDate() + 6);
 
-          // هنا نقوم بتصفية المحاضرات التي تقع ضمن هذا الأسبوع
           const lecturesThisWeek = data.filter((lecture) => {
             const lectureDate = new Date(lecture.startTime);
             return lectureDate >= weekStart && lectureDate <= weekEnd;
@@ -84,11 +78,9 @@ const CourseDashboard = () => {
           `http://localhost:8080/teachers/${storedUser.id}/upcoming-classes`,
           { credentials: "include", headers }
         );
-        const data = await res.json();
 
-        const sortedClasses = data.sort(
-          (a, b) => new Date(a.dateTime) - new Date(b.dateTime)
-        );
+        const data = await res.json();
+        const sortedClasses = data.sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
         setUpcomingClasses(sortedClasses);
       } catch (err) {
         console.error("Error fetching upcoming classes", err);
@@ -101,13 +93,15 @@ const CourseDashboard = () => {
         const headers = {
           Authorization: `${storedUser.tokenType} ${storedUser.accessToken}`,
         };
-        const res1 = await fetch(`http://localhost:8080/courses/days/${courseName}`, {
+
+        const res = await fetch(`http://localhost:8080/courses/days/${courseName}`, {
           credentials: "include",
           headers,
         });
-        if (!res1.ok) throw new Error("Failed to fetch course days");
 
-        const days = await res1.json();
+        if (!res.ok) throw new Error("Failed to fetch course days");
+
+        const days = await res.json();
         setCourseDays(days);
       } catch (err) {
         console.error("Error fetching course days", err);
@@ -137,7 +131,6 @@ const CourseDashboard = () => {
         Authorization: `${storedUser.tokenType} ${storedUser.accessToken}`,
       };
 
-      // نحول الدقائق إلى ثواني لأن الباك يستخدم الثواني
       const thresholdInSeconds = parseInt(lateThreshold) * 60;
 
       const res = await fetch(`http://localhost:8080/courses/${courseId}/lateThreshold`, {
@@ -157,8 +150,27 @@ const CourseDashboard = () => {
     }
   };
 
-  const handleDayClick = (day, week) => {
-    navigate(`/schedule/${courseName}/${week}/${day}`);
+  const handleDayClick = async (day, week) => {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("teacher"));
+      const headers = {
+        Authorization: `${storedUser.tokenType} ${storedUser.accessToken}`,
+      };
+
+      const weekData = weeks.find((w) => w.week === week);
+      const lecture = weekData?.lectures.find((l) => {
+        const lectureDate = new Date(l.startTime);
+        return lectureDate.toLocaleDateString("en-US", { weekday: "long" }) === day;
+      });
+
+      if (lecture) {
+        navigate(`/attendance/${courseId}/${lecture.lectureId}`);
+      } else {
+        navigate(`/attendance/${courseId}/no-lecture`);
+      }
+    } catch (err) {
+      console.error("Error navigating to attendance:", err);
+    }
   };
 
   if (!courseData.length) return <div className="loading">Loading...</div>;
@@ -228,7 +240,7 @@ const CourseDashboard = () => {
         </div>
       </div>
 
-      {/* مودال ضبط وقت التأخير */}
+      {/* Late Threshold Popup */}
       <span
         className="late-icon"
         onClick={() => setShowLateModal(true)}
@@ -238,29 +250,17 @@ const CourseDashboard = () => {
           cursor: "pointer",
           fontSize: "20px",
           color: "#555",
-          position: "relative",
+          position: "fixed",
+          top: "80px",
+          right: "20px",
         }}
       >
         ⏰
       </span>
 
       {showLateModal && (
-        <div
-          className="late-popup"
-          style={{
-            position: "absolute",
-            top: "100px",
-            right: "50px", // عدل حسب المكان المطلوب
-            background: "white",
-            border: "1px solid #ccc",
-            borderRadius: "8px",
-            padding: "10px",
-            zIndex: 1000,
-            boxShadow: "0px 2px 10px rgba(0,0,0,0.2)",
-            minWidth: "160px",
-          }}
-        >
-          <label style={{ fontSize: "14px" }}>late after:</label>
+        <div className="late-popup">
+          <label style={{ fontSize: "14px" }}>Late after:</label>
           <input
             type="number"
             value={lateThreshold}
@@ -277,22 +277,15 @@ const CourseDashboard = () => {
           <div style={{ marginTop: "8px", textAlign: "right" }}>
             <button
               onClick={handleLateThresholdSave}
-              style={{
-                padding: "4px 8px",
-                fontSize: "12px",
-                marginRight: "5px",
-              }}
+              style={{ padding: "4px 8px", fontSize: "12px", marginRight: "5px" }}
             >
-              save
+              Save
             </button>
             <button
               onClick={() => setShowLateModal(false)}
-              style={{
-                padding: "4px 8px",
-                fontSize: "12px",
-              }}
+              style={{ padding: "4px 8px", fontSize: "12px" }}
             >
-              cancel
+              Cancel
             </button>
           </div>
         </div>
@@ -302,4 +295,3 @@ const CourseDashboard = () => {
 };
 
 export default CourseDashboard;
-

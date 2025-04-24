@@ -1,5 +1,7 @@
+
 import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import '../cssFolder/WFReports.css'; // Import the custom styles
 
 const WFReports = () => {
   const [reports, setReports] = useState([]);
@@ -88,12 +90,16 @@ const WFReports = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <h1 className="mb-4">WF Reports</h1>
+    <div className="wf-reports-wrapper">
+      <h1 className="wf-title">WF Reports</h1>
 
-      {loading && <div className="text-center mb-3"><div className="spinner-border text-primary" role="status" /></div>}
+      {loading && (
+        <div className="wf-spinner">
+          <div className="spinner-border text-primary" role="status" />
+        </div>
+      )}
 
-      <div className="row mb-3">
+      <div className="row wf-filters">
         <div className="col-md-3">
           <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
             <option value="">Filter By</option>
@@ -121,9 +127,9 @@ const WFReports = () => {
         </div>
       </div>
 
-      <div className="table-responsive">
+      <div className="table-responsive wf-table">
         <table className="table table-bordered table-striped">
-          <thead className="table-light">
+          <thead>
             <tr>
               <th>Student ID</th>
               <th>Student Name</th>

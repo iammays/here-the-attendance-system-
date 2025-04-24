@@ -1,0 +1,80 @@
+.layout-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  .top-navbar {
+    height: 60px;
+    background: white;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+  }
+  
+  .toggle-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+  }
+  
+  .navbar-right {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  .user-icon {
+    background: #ccc;
+    border-radius: 50%;
+    padding: 0.5rem;
+  }
+  
+  .main-content {
+    display: flex;
+    height: calc(100vh - 60px);
+  }
+  
+  .sidebar {
+    width: 240px;
+    padding: 1rem;
+    border-right: 1px solid #ddd;
+    background-color: #fff;
+  }
+  
+  .sidebar-links button {
+    background: none;
+    border: none;
+    padding: 0.75rem;
+    width: 100%;
+    text-align: left;
+    font-size: 1rem;
+    color: #333;
+    transition: background 0.2s ease;
+    border-radius: 0.5rem;
+  }
+  
+  .sidebar-links button:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .logout-btn {
+    color: #d00;
+  }
+  
+  .content-area {
+    flex-grow: 1;
+    padding: 1rem;
+    overflow-y: auto;
+  }
+  
+  .full-width {
+    width: 100%;
+  }
+  
+  .with-sidebar {
+    width: calc(100% - 240px);
+  }
+  

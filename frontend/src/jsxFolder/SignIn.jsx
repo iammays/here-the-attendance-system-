@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const SignIn = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState(""); // changed from email
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
@@ -13,7 +13,7 @@ const SignIn = () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name: email, password }),
+      body: JSON.stringify({ name: username, password }), // still uses `name`
     });
 
     if (res.ok) {
@@ -39,16 +39,16 @@ const SignIn = () => {
       <div className="card shadow p-4" style={{ width: "100%", maxWidth: "400px" }}>
         <h2 className="text-center mb-4">Sign In</h2>
         <div className="mb-3">
-          <label htmlFor="email" className="form-label fw-semibold">
-            Email
+          <label htmlFor="username" className="form-label fw-semibold">
+            Username
           </label>
           <input
-            type="email"
-            id="email"
+            type="text"
+            id="username"
             className="form-control"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Enter your username"
           />
         </div>
         <div className="mb-4">

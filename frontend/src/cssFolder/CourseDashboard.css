@@ -2,12 +2,15 @@
 
 /* General container */
 .course-dashboard-container {
-  display: flex;
-  justify-content: space-between;
-  padding: 24px;
-  gap: 24px;
+  margin-left: 220px; /* to account for fixed sidebar */
+  padding: 84px 24px 24px; /* 60px navbar + spacing */
   background-color: #f5f5f5;
-  min-height: 100vh;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: calc(100vh - 60px);
+  box-sizing: border-box;
 }
 
 /* Loading state */
