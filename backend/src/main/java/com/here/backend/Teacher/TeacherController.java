@@ -1,18 +1,3 @@
-
-// get all teachers ✅  getAllTeachers() //done
-    // get teacher by id ✅  getTeacherById() //done
-    // get teacher by name ✅ getTeacherByName() //done
-    // get all teachers for a course ✅ getTeachersByCourseId() //done
-    // get teacher by email ✅ getTeacherByEmail() //done
-    // get teacher with courses ✅ getTeacherWithCourses() //done
-    // get all courses for a teacher ✅ getAllCoursesForTeacher() //done
-    // update teacher password by id ✅ updateTeacherPassword() //done
-
-    //---------------------------------------------------
-    // get all schedules for a teacher ✅ getAllSchedulesForTeacher()  // done
-    // post all teachers schedules ✅ postAllTeachersSchedules()  // done  بدي جويل تعطيني ال json لالها
-    // get upcoming classes for a teacher ✅ getUpcomingClassesForTeacher()  // done
-
 package com.here.backend.Teacher;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +17,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -52,7 +38,17 @@ public class TeacherController {
         this.courseRepository = courseRepository;
     }
 
-    
+    // get all teachers ✅  getAllTeachers() //done
+    // get teacher by id ✅  getTeacherById() //done
+    // get teacher by name ✅ getTeacherByName() //done
+    // get all teachers for a course ✅ getTeachersByCourseId() //done
+    // get teacher by email ✅ getTeacherByEmail() //done
+    // get teacher with courses ✅ getTeacherWithCourses() //done
+    // get all courses for a teacher ✅ getAllCoursesForTeacher() //done
+    // update teacher password by id ✅ updateTeacherPassword() //done
+    // get all schedules for a teacher ✅ getAllSchedulesForTeacher()  // done
+    // post all teachers schedules ✅ postAllTeachersSchedules()  // done 
+    // get upcoming classes for a teacher ✅ getUpcomingClassesForTeacher()  // done
 
     @GetMapping
     public List<TeacherEntity> getAllTeachers() {
@@ -82,16 +78,6 @@ public class TeacherController {
         }
         return ResponseEntity.ok(teachers);
     }
-
-    // @GetMapping("/email/{email}")
-    // public ResponseEntity<Map<String, Object>> getTeacherByEmail(@PathVariable String email) {
-    //     Optional<TeacherEntity> teacher = teacherRepository.findByEmail(email);
-    //     if (teacher.isPresent()) {
-    //         return ResponseEntity.ok(Collections.singletonMap("teacher", teacher.get()));
-    //     }
-    //     return ResponseEntity.status(HttpStatus.NOT_FOUND)
-    //     .body(Collections.singletonMap("message", "Teacher not found with this email."));
-    // }
 
     @GetMapping("/email/{email}")
     public ResponseEntity<?> getTeacherByEmail(@PathVariable String email) {
@@ -171,20 +157,16 @@ public class TeacherController {
         }
         return ResponseEntity.ok("Password is valid");
     }
-    
-    //---------------------------------------------------------
 
     @GetMapping("/{teacherId}/schedule")
     public ResponseEntity<?> getAllSchedulesForTeacher(@PathVariable String teacherId) {
         try {
-            // Fetch all courses taught by this teacher
             List<CourseEntity> courses = courseRepository.findByTeacherId(teacherId);
 
             if (courses.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No courses found for this teacher.");
             }
 
-            // Initialize the schedule map
             Map<String, List<CourseEntity>> scheduleMap = new LinkedHashMap<>();
             scheduleMap.put("Monday", new ArrayList<>());
             scheduleMap.put("Tuesday", new ArrayList<>());
@@ -192,7 +174,6 @@ public class TeacherController {
             scheduleMap.put("Thursday", new ArrayList<>());
             scheduleMap.put("Friday", new ArrayList<>());
 
-            // Group the courses by day of the week
             for (CourseEntity course : courses) {
                 String dayOfWeek = course.getDay();
                 if (scheduleMap.containsKey(dayOfWeek)) {
@@ -200,7 +181,6 @@ public class TeacherController {
                 }
             }
 
-            // Return the schedule map
             return ResponseEntity.ok(scheduleMap);
         } catch (Exception e) {
             e.printStackTrace();
@@ -211,17 +191,14 @@ public class TeacherController {
     @PostMapping("/update-schedules")
     public ResponseEntity<?> postAllTeachersSchedules() {
         try {
-            // Fetch all teachers
             List<TeacherEntity> teachers = teacherRepository.findAll();
             if (teachers.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No teachers found.");
             }
 
-            // Iterate over all teachers and update their schedules
             for (TeacherEntity teacher : teachers) {
                 List<CourseEntity> courses = courseRepository.findByTeacherId(teacher.getTeacherId());
 
-                // Initialize the schedule map
                 Map<String, List<CourseEntity>> scheduleMap = new LinkedHashMap<>();
                 scheduleMap.put("Monday", new ArrayList<>());
                 scheduleMap.put("Tuesday", new ArrayList<>());
@@ -229,7 +206,6 @@ public class TeacherController {
                 scheduleMap.put("Thursday", new ArrayList<>());
                 scheduleMap.put("Friday", new ArrayList<>());
 
-                // Group courses by day and update the schedule
                 for (CourseEntity course : courses) {
                     String dayOfWeek = course.getDay();
                     if (scheduleMap.containsKey(dayOfWeek)) {
@@ -237,7 +213,6 @@ public class TeacherController {
                     }
                 }
 
-                // Update the teacher's schedule list
                 teacher.setSchedulelist(scheduleMap);
                 teacherRepository.save(teacher);
             }
@@ -250,76 +225,73 @@ public class TeacherController {
     }
 
     @GetMapping("/{teacherId}/upcoming-classes")
-public ResponseEntity<?> getUpcomingClassesForTeacher(@PathVariable String teacherId) {
-    try {
-        // Get current date and time
-        LocalDateTime now = LocalDateTime.now();
-        DayOfWeek currentDay = now.getDayOfWeek();
-
-        // Fetch teacher
-        TeacherEntity teacher = teacherRepository.findByTeacherId(teacherId)
+    public ResponseEntity<?> getUpcomingClassesForTeacher(@PathVariable String teacherId) {
+        try {
+            LocalDateTime now = LocalDateTime.now();
+            DayOfWeek currentDay = now.getDayOfWeek();
+            TeacherEntity teacher = teacherRepository.findByTeacherId(teacherId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Teacher not found"));
 
-        // Fetch all courses for the teacher
-        List<CourseEntity> courses = courseRepository.findByTeacherId(teacherId);
-        if (courses.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No courses found for this teacher.");
-        }
+            List<CourseEntity> courses = courseRepository.findByTeacherId(teacherId);
+            if (courses.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No courses found for this teacher.");
+            }
 
-        // Create a list to store upcoming sessions
-        List<Map<String, Object>> upcomingSessions = new ArrayList<>();
+            List<Map<String, Object>> upcomingSessions = new ArrayList<>();
 
-        // DateTimeFormatter for parsing string time (assuming format "HH:mm")
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
-        // Calculate upcoming sessions for the next 7 days (to ensure we get at least 3 sessions)
-        for (int daysAhead = 0; daysAhead < 7 && upcomingSessions.size() < 3; daysAhead++) {
-            LocalDateTime targetDateTime = now.plusDays(daysAhead);
-            String targetDay = targetDateTime.getDayOfWeek().toString().substring(0, 1) + 
+            for (int daysAhead = 0; daysAhead < 7 && upcomingSessions.size() < 3; daysAhead++) {
+                LocalDateTime targetDateTime = now.plusDays(daysAhead);
+                String targetDay = targetDateTime.getDayOfWeek().toString().substring(0, 1) + 
                     targetDateTime.getDayOfWeek().toString().substring(1).toLowerCase();
 
-            // Check each course for matching day
-            for (CourseEntity course : courses) {
-                if (course.getDay().equals(targetDay)) {
-                    // Get time as String and convert to LocalTime for comparison
-                    String courseTimeStr = course.getStartTime(); // Now a String
-                    LocalTime courseTime = LocalTime.parse(courseTimeStr, timeFormatter);
-                    LocalDateTime sessionDateTime = targetDateTime.with(courseTime);
+                for (CourseEntity course : courses) {
+                    if (course.getDay().equals(targetDay)) {
+                        String courseTimeStr = course.getStartTime();
+                        if (courseTimeStr == null || !courseTimeStr.matches("\\d{2}:\\d{2}")) {
+                            logger.warn("Invalid startTime format for course {}: {}", course.getCourseId(), courseTimeStr);
+                            continue; 
+                        }
 
-                    // Only include future sessions
-                    if (sessionDateTime.isAfter(now) && upcomingSessions.size() < 3) {
-                        Map<String, Object> sessionInfo = new HashMap<>();
-                        sessionInfo.put("courseId", course.getCourseId());
-                        sessionInfo.put("courseName", course.getName());
-                        sessionInfo.put("day", course.getDay());
-                        sessionInfo.put("startTime", courseTimeStr); // Return original string time
-                        sessionInfo.put("dateTime", sessionDateTime);
-                        sessionInfo.put("roomId", course.getRoomId()); // Include roomId (اسم القاعة)
-                        upcomingSessions.add(sessionInfo);
+                        try {
+                            LocalTime courseTime = LocalTime.parse(courseTimeStr, timeFormatter);
+                            LocalDateTime sessionDateTime = targetDateTime.with(courseTime);
+
+                            if (sessionDateTime.isAfter(now) && upcomingSessions.size() < 3) {
+                                Map<String, Object> sessionInfo = new HashMap<>();
+                                sessionInfo.put("courseId", course.getCourseId());
+                                sessionInfo.put("courseName", course.getName());
+                                sessionInfo.put("day", course.getDay());
+                                sessionInfo.put("startTime", courseTimeStr); 
+                                sessionInfo.put("dateTime", sessionDateTime);
+                                sessionInfo.put("roomId", course.getRoomId()); 
+                                upcomingSessions.add(sessionInfo);
+                            }
+                        } catch (DateTimeParseException e) {
+                            logger.warn("Failed to parse startTime for course {}: {}", course.getCourseId(), courseTimeStr, e);
+                            continue; 
+                        }
                     }
                 }
             }
-        }
 
-        // Sort sessions by date/time
-        upcomingSessions.sort(Comparator.comparing(m -> (LocalDateTime) m.get("dateTime")));
+            upcomingSessions.sort(Comparator.comparing(m -> (LocalDateTime) m.get("dateTime")));
 
-        // Limit to 3 sessions
-        if (upcomingSessions.size() > 3) {
-            upcomingSessions = upcomingSessions.subList(0, 3);
-        }
+            if (upcomingSessions.size() > 3) {
+                upcomingSessions = upcomingSessions.subList(0, 3);
+            }
 
-        if (upcomingSessions.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No upcoming classes found for this teacher.");
-        }
+            if (upcomingSessions.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No upcoming classes found for this teacher.");
+            }
 
-        return ResponseEntity.ok(upcomingSessions);
+            return ResponseEntity.ok(upcomingSessions);
 
-    } catch (Exception e) {
-        logger.error("Error fetching upcoming classes: ", e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        } catch (Exception e) {
+            logger.error("Error fetching upcoming classes for teacher {}: {}", teacherId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Error fetching upcoming classes: " + e.getMessage());
+        }
     }
-}
-
 }

@@ -1,42 +1,50 @@
-/* Shared styles for Help and About pages */
-.page-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 3rem 1rem;
-    background-color: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  }
-  
+/* Base layout for content pages */
+body {
+  background-color: #f5f7fa;
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Page title */
+.page-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 2rem 0 1.5rem;
+  color: #3f526d;
+  text-align: center;
+}
+
+/* Page content */
+.page-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.page-content p,
+.page-content ul {
+  font-size: 1.1rem;
+  color: #3f526d;
+  line-height: 1.6;
+}
+
+.page-content ul {
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.page-content li {
+  margin-bottom: 0.5rem;
+}
+
+/* Responsive typography */
+@media (max-width: 576px) {
   .page-title {
-    font-size: 2rem;
-    font-weight: bold;
-    margin-bottom: 1.5rem;
-    color: #343a40;
+    font-size: 1.5rem;
   }
-  
+
   .page-content p,
   .page-content ul {
-    font-size: 1.1rem;
-    color: #495057;
+    font-size: 1rem;
   }
-  
-  .page-content ul {
-    padding-left: 1.25rem;
-    list-style-type: disc;
-  }
-  
-  .page-content li {
-    margin-bottom: 0.5rem;
-  }
-  
-  @media (max-width: 576px) {
-    .page-title {
-      font-size: 1.5rem;
-    }
-    .page-content p,
-    .page-content ul {
-      font-size: 1rem;
-    }
-  }
-  
+}

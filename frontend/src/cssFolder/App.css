@@ -1,0 +1,36 @@
+/* Full height for body and root */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  /* background-color: #f5f7fa; */
+}
+
+/* Flex layout after the navbar */
+.app-layout {
+  display: flex;
+  height: calc(100vh - 60px); /* if navbar is 60px tall */
+  
+}
+
+/* Sidebar stays sticky */
+.sidebar {
+  position: sticky;
+  top: 60px;
+  height: calc(100vh - 60px);
+  width: 220px;
+  background-color: #fff;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Page content area */
+.main-content {
+  margin-left: 220px; /* matches sidebar width */
+  padding: 2rem;
+  overflow-y: auto;
+  /* background-color: #f5f7fa; */
+      height: calc(100vh - 60px); /* fill available height under navbar */
+}

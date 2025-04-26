@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next"; // ✅ Import i18n
 import "../cssFolder/Dashboard.css";
 
 const Dashboard = () => {
+  const { t } = useTranslation(); // ✅ Setup translation
   const [user, setUser] = useState(null);
   const [courses, setCourses] = useState([]);
   const [upcomingClasses, setUpcomingClasses] = useState([]);
@@ -57,13 +59,13 @@ const Dashboard = () => {
     navigate(`/course/${courseName}`);
   };
 
-  if (!user) return <div className="loading">Loading...</div>;
+  if (!user) return <div className="loading">{t('loading')}</div>; // ✅ Translated Loading
 
   return (
     <div className="dashboard-container">
       {/* Left Section */}
       <div className="courses-section">
-        <h2 className="teacher-name">Dr. {user.name}</h2>
+        <h2 className="teacher-name">{t('dr')} {user.name}</h2> {/* ✅ Translated Dr. */}
         {courses.map((subject, index) => (
           <div key={index} className="course-item">
             <details className="course-details">
@@ -106,14 +108,14 @@ const Dashboard = () => {
       {/* Right Section */}
       <div className="upcoming-section">
         <div className="upcoming-card">
-          <h3 className="upcoming-title">Upcoming Classes</h3>
+          <h3 className="upcoming-title">{t('upcomingClasses')}</h3> {/* ✅ Translated */}
           <ul className="upcoming-list">
             {upcomingClasses.map((cls, index) => (
               <li key={index} className="upcoming-item">
                 <div className="course-name">{cls.courseName}</div>
-                <div className="room-info">Room: {cls.roomId}</div>
+                <div className="room-info">{t('room')}: {cls.roomId}</div> {/* ✅ */}
                 <div className="time-info">
-                Time:{" "}
+                  {t('time')}: {" "}
                   {new Date(cls.dateTime).toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",

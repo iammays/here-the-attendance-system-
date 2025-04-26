@@ -1,31 +1,42 @@
-/* CourseDashboard.css */
-
-/* General container */
 .course-dashboard-container {
+  margin-left: 220px;
+  padding: 84px 24px 24px;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  padding: 24px;
   gap: 24px;
-  background-color: #f5f5f5;
-  min-height: 100vh;
+  min-height: calc(100vh - 60px);
+  box-sizing: border-box;
+  color: #3f526d;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
-/* Loading state */
+/* Loading State */
 .loading {
-  padding: 16px;
+  padding: 24px;
+  font-size: 16px;
   color: #6b7280;
 }
 
 /* Weeks Section (Left) */
 .weeks-section {
-  width: 66.67%;
+  width: 58%;
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .course-title {
-  font-size: 24px;
+  font-size: 1.6rem;
   font-weight: 600;
-  color: #1f2937;
   margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
 .week-item {
@@ -33,26 +44,26 @@
 }
 
 .week-details {
-  background-color: #ffffff;
+  background: #f0f4f9;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .week-summary {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  font-size: 18px;
-  font-weight: 500;
-  color: #374151;
+  padding: 14px 18px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #3f526d;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .week-summary:hover {
-  background-color: #f9fafb;
+  background-color: #e6ecf3;
 }
 
 .week-title {
@@ -63,7 +74,6 @@
 .arrow-icon {
   width: 20px;
   height: 20px;
-  color: #6b7280;
   transition: transform 0.2s;
 }
 
@@ -71,7 +81,123 @@ details[open] .arrow-icon {
   transform: rotate(180deg);
 }
 
-/* Hide default summary marker */
+/* Days List */
+.days-list {
+  margin-top: 8px;
+  margin-left: 32px;
+  padding: 0 16px 12px;
+  list-style-type: disc;
+}
+
+.day-item {
+  padding: 8px 0;
+  cursor: pointer;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+
+.day-item:hover {
+  color: #1f2a40;
+}
+
+/* Upcoming Classes Section (Right) */
+.upcoming-section {
+  width: 30%;
+  margin-right: 30px;
+}
+
+.upcoming-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.upcoming-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.upcoming-list {
+  list-style: none;
+  padding: 0;
+}
+
+.upcoming-item {
+  padding: 12px;
+  margin-bottom: 12px;
+  background-color: #f0f4f9;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.course-name {
+  font-weight: 600;
+  color: #3f526d;
+}
+
+.room-info,
+.time-info {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+/* Late Threshold Popup */
+.late-icon {
+  font-size: 24px;
+  color: #3f526d;
+  cursor: pointer;
+  position: fixed;
+  top: 80px;
+  right: 20px;
+}
+
+.late-popup {
+  position: fixed;
+  top: 110px;
+  right: 20px;
+  background: #ffffff;
+  border: 1px solid #e0e6ed;
+  border-radius: 12px;
+  padding: 20px;
+  width: 220px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+}
+
+.late-popup label,
+.late-popup input,
+.late-popup span {
+  color: #3f526d;
+  font-size: 14px;
+}
+
+.late-popup input {
+  width: 60px;
+  padding: 6px;
+  margin: 6px 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+}
+
+.late-popup button {
+  background-color: #3f526d;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  margin-left: 6px;
+}
+
+.late-popup button:hover {
+  background-color: #32455b;
+}
+
+/* Hide default arrow on summary */
 summary {
   list-style: none;
 }
@@ -80,110 +206,52 @@ summary::-webkit-details-marker {
   display: none;
 }
 
-.days-list {
-  margin-top: 8px;
-  margin-left: 40px;
-  padding: 0 16px 12px 16px;
-  list-style-type: disc;
-  color: #6b7280;
-}
-
-.day-item {
+.change-late-btn {
+  margin-left: 12px;
+  padding: 4px 10px;
   font-size: 14px;
-  line-height: 1.5;
+  color: #021225;
+  background-color: #a4bddc;
+  border: 1px solid #ccc;
+  border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
-.day-item:hover {
-  color: #1f2937;
+.change-late-btn:hover {
+  background-color: #4f6986;
 }
 
-.add-day {
-  margin-top: 8px;
-}
-
-.add-day-input {
-  display: block;
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 8px;
-  border: 1px solid #e5e7eb;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.add-day-button {
-  background-color: #2563eb;
-  color: #ffffff;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
+.change-late-text {
+  font-size: 13px;
+  background-color: #e5f1ff;
+  color: #4e698b; /* نفس لون الزر */
+  text-decoration: underline;
   cursor: pointer;
-  font-size: 14px;
-}
-
-.add-day-button:hover {
-  background-color: #1d4ed8;
-}
-
-/* Upcoming Classes Section (Right) */
-.upcoming-section {
-  width: 30%;
-  margin-top: 200px;
-}
-
-.upcoming-card {
-  background-color: #ffffff;
-  padding: 20px;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.upcoming-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 16px;
-}
-
-.upcoming-list {
-  font-size: 14px;
-}
-
-.upcoming-item {
-  margin-bottom: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.upcoming-item:last-child {
-  border-bottom: none;
-}
-
-.course-name {
-  color: #374151;
   font-weight: 500;
+  transition: opacity 0.2s ease;
 }
 
-.room-info,
-.time-info {
-  color: #6b7280;
-  font-size: 12px;
-  margin-top: 4px;
+.change-late-text:hover {
+  opacity: 0.8;
 }
 
-.late-popup {
+
+.late-container {
+  display: inline-block;
+  position: relative;
+}
+
+.relative-popup {
   position: absolute;
-  top: 30px;
-  right: 10px; 
-  background: #fff;
+  top: 100%;
+  left: 0;
+  background-color: white;
   border: 1px solid #ccc;
   border-radius: 8px;
   padding: 10px;
-  width: max-content;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  margin-top: 5px;
   min-width: 180px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  z-index: 100;
-  font-family: inherit;
 }

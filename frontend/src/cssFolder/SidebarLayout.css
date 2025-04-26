@@ -1,0 +1,67 @@
+/* Sidebar wrapper */
+.sidebar {
+  position: fixed;
+  top: 85px; /* sits below sticky navbar */
+  left: 0;
+  height: calc(100vh - 60px);
+  width: 220px;
+  background-color: #3f526ddc; /* main background color */
+  box-shadow: 2px 0 8px rgba(63, 82, 109, 0.25); /* soft right shadow */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  z-index: 999;
+  margin-top: 0;
+}
+
+/* Make the top list of links scrollable */
+.sidebar-links {
+  flex-grow: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Bottom section stays pinned */
+.sidebar-bottom {
+  padding: 1rem 1rem 1rem 1rem;
+  border-top: 1px solid #5c6d85; /* lighter border to blend in */
+}
+
+/* Shared style for all sidebar links and buttons */
+.sidebar-link,
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  text-decoration: none;
+  color: #f0f4f8; /* light text for contrast */
+  font-size: 1rem;
+  background: none;
+  border: none;
+  text-align: left;
+  width: 100%;
+  border-left: 4px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-link:hover,
+.logout-btn:hover {
+  background-color: #5c6d85; /* light hover */
+  color: #ffffff;
+}
+
+.sidebar-link.active {
+  background-color: #2e3f56; /* darker active */
+  font-weight: 600;
+  border-left: 4px solid #ffffff;
+  color: #ffffff;
+}
+
+.logout-backdrop {
+  /* Add this if it's missing */
+  pointer-events: auto; /* Allow interaction */
+}

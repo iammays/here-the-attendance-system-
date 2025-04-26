@@ -4,11 +4,15 @@ import axios from 'axios';
 import SearchBar from './SearchBar';
 import LectureNavigation from './LectureNavigation';
 import ActionButtons from './ActionButtons';
+import { useTranslation } from 'react-i18next';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import '../cssFolder/AttendanceTable.css';
 
 const AttendanceTable = () => {
+  const { t, i18n } = useTranslation();
   const { courseId, lectureId } = useParams();
   const navigate = useNavigate();
+
   const [attendanceData, setAttendanceData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [lectureInfo, setLectureInfo] = useState({ date: '', startTime: '', endTime: '', day: '', courseName: '' });
@@ -17,16 +21,22 @@ const AttendanceTable = () => {
   const [sortConfig, setSortConfig] = useState({ key: 'studentId', direction: 'asc' });
   const [error, setError] = useState(null);
   const [statusChanges, setStatusChanges] = useState({});
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
   const getAuthHeaders = () => {
     const teacher = JSON.parse(localStorage.getItem('teacher'));
     if (!teacher?.accessToken) {
       console.error('No access token found in localStorage');
-      setError('يرجى تسجيل الدخول لإتمام العملية');
+      setError(t('loginRequired'));
       return {};
     }
     return { Authorization: `Bearer ${teacher.accessToken}` };
   };
+
+  useEffect(() => {
+    document.body.dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
+  }, [i18n.language]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,49 +69,43 @@ const AttendanceTable = () => {
         const index = courseLectures.findIndex(lecture => lecture.lectureId === lectureId);
         setCurrentLectureIndex(index >= 0 ? index : 0);
       } catch (err) {
-        setError(`خطأ في جلب البيانات: ${err.response?.status === 401 ? 'غير مصرح: يرجى تسجيل الدخول' : err.message}`);
+        setError(`${t('fetchError')}: ${err.response?.status === 401 ? t('unauthorized') : err.message}`);
         console.error('Fetch error:', err);
       }
     };
     fetchData();
   }, [courseId, lectureId]);
 
-  const handleStatusChange = (studentId, newStatus) => {
-    setStatusChanges(prev => ({
-      ...prev,
-      [studentId]: newStatus,
-    }));
+  useEffect(() => {
+    let filtered = attendanceData;
+    if (statusFilter) filtered = filtered.filter(r => r.status === statusFilter);
+    if (search) {
+      const lower = search.toLowerCase();
+      filtered = filtered.filter(row =>
+        row.studentId.toLowerCase().includes(lower) ||
+        row.studentName.toLowerCase().includes(lower)
+      );
+    }
+    setFilteredData(filtered);
+  }, [search, statusFilter, attendanceData]);
 
-    setFilteredData(prev =>
-      prev.map(row =>
-        row.studentId === studentId ? { ...row, status: newStatus } : row
-      )
-    );
+  const handleStatusChange = (studentId, newStatus) => {
+    setStatusChanges(prev => ({ ...prev, [studentId]: newStatus }));
+    setFilteredData(prev => prev.map(row => row.studentId === studentId ? { ...row, status: newStatus } : row));
   };
 
   const handleSave = async () => {
     try {
       const updatePromises = Object.entries(statusChanges).map(([studentId, newStatus]) =>
-        axios.put(
-          `http://localhost:8080/api/attendances/updateWithEmail/${lectureId}/${studentId}`,
-          { status: newStatus },
-          { headers: getAuthHeaders() }
-        )
+        axios.put(`http://localhost:8080/api/attendances/updateWithEmail/${lectureId}/${studentId}`,
+          { status: newStatus }, { headers: getAuthHeaders() })
       );
-
       await Promise.all(updatePromises);
-
-      setAttendanceData(prev =>
-        prev.map(row => ({
-          ...row,
-          status: statusChanges[row.studentId] || row.status,
-        }))
-      );
-
+      setAttendanceData(prev => prev.map(row => ({ ...row, status: statusChanges[row.studentId] || row.status })));
       setStatusChanges({});
-      alert('تم حفظ التغييرات بنجاح');
+      alert(t('saveSuccess'));
     } catch (err) {
-      setError(`خطأ أثناء حفظ التغييرات: ${err.response?.data || err.message}`);
+      setError(`${t('saveError')}: ${err.response?.data || err.message}`);
       console.error('Save error:', err);
     }
   };
@@ -123,24 +127,6 @@ const AttendanceTable = () => {
     setFilteredData(sortedData);
   };
 
-  const handleSearch = (searchTerm) => {
-    const filtered = attendanceData.filter(
-      row =>
-        row.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        row.studentName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredData(filtered);
-  };
-
-  const handleFilter = (status) => {
-    if (status === 'All') {
-      setFilteredData(attendanceData);
-    } else {
-      const filtered = attendanceData.filter(row => row.status === status);
-      setFilteredData(filtered);
-    }
-  };
-
   const handleNavigateLecture = (direction) => {
     const newIndex = direction === 'next' ? currentLectureIndex + 1 : currentLectureIndex - 1;
     if (newIndex >= 0 && newIndex < lectures.length) {
@@ -150,101 +136,78 @@ const AttendanceTable = () => {
     }
   };
 
-  const handleAddNewLecture = async () => {
-    try {
-      const newLecture = {
-        courseId,
-        date: new Date().toISOString().split('T')[0],
-        startTime: '09:00',
-        endTime: '10:30',
-        day: 'Monday',
-        name: lectureInfo.courseName || 'New Lecture',
-        teacherId: 'T001',
-        category: 'General',
-        credits: 3,
-      };
-      const response = await axios.post(`http://localhost:8080/courses/manual`, newLecture, {
-        headers: getAuthHeaders(),
-      });
-      const newLectureId = response.data.lectureId;
-      setLectures([...lectures, response.data]);
-      alert(`تمت إضافة محاضرة جديدة: ${newLectureId}`);
-    } catch (err) {
-      setError(`خطأ أثناء إضافة المحاضرة: ${err.response?.data || err.message}`);
-      console.error('Add lecture error:', err);
-    }
-  };
-
-  const handleExport = async () => {
-    try {
-      const exportData = filteredData.map(row => ({
-        name: row.studentName,
-        status: row.status,
-        firstDetectedAt: row.firstDetectedAt,
-        sessions: row.firstCheckTimes.map(check => `Session ${check.sessionId}: ${check.firstCheckTime}`).join(', '),
-      }));
-      await axios.post(`http://localhost:8080/api/excel/export-attendance`, exportData, {
-        headers: getAuthHeaders(),
-      });
-      alert('تم تصدير الحضور إلى Excel');
-    } catch (err) {
-      setError(`خطأ أثناء التصدير إلى Excel: ${err.response?.data || err.message}`);
-      console.error('Export error:', err);
-    }
-  };
-
-  const handleDelete = async () => {
-    try {
-      console.log(`Sending DELETE request for lectureId: ${lectureId}`);
-      const response = await axios.delete(`http://localhost:8080/api/attendances/deleteTempLecture/${lectureId}`, {
-        headers: getAuthHeaders(),
-      });
-      console.log('Delete response:', response.data);
-      alert('تم حذف المحاضرة بنجاح');
-      navigate(`/course/${courseId}`);
-    } catch (err) {
-      const errorMessage = err.response?.data || err.message;
-      setError(`خطأ أثناء حذف المحاضرة: ${errorMessage}`);
-      console.error('Delete error:', err);
-    }
-  };
-
   const formatFirstCheckTimes = (firstCheckTimes) => {
-    if (!firstCheckTimes || firstCheckTimes.length === 0) {
-      return 'No detections';
-    }
-    const validCheckTimes = firstCheckTimes
-      .filter(check => check.firstCheckTime !== 'undetected')
+    if (!firstCheckTimes || firstCheckTimes.length === 0) return t('noDetections');
+    const validCheckTimes = firstCheckTimes.filter(check => check.firstCheckTime !== 'undetected')
       .map(check => `Session ${check.sessionId}: ${check.firstCheckTime}`);
-    return validCheckTimes.length > 0 ? validCheckTimes.join(', ') : 'No detections';
+    return validCheckTimes.length > 0 ? validCheckTimes.join(', ') : t('noDetections');
   };
 
-  if (error) {
-    return <div className="error">{error}</div>;
-  }
+  if (error) return <div className="error">{error}</div>;
 
   return (
-    <div className="attendance-container">
-      <div className="content">
-        <div className="course-info">
-          <h2>{lectureInfo.courseName}</h2>
-          <p>اليوم: {lectureInfo.day}</p>
-          <p>وقت البدء: {lectureInfo.startTime}</p>
+    <div className="wf-reports-wrapper">
+      <h1 className="wf-title">{lectureInfo.courseName}</h1>
+
+      <div className="mb-4">
+        <p><strong>{t('day')}:</strong> {lectureInfo.day}</p>
+        <p><strong>{t('startTime')}:</strong> {lectureInfo.startTime}</p>
+      </div>
+
+      <LectureNavigation
+        lectureInfo={lectureInfo}
+        currentLectureIndex={currentLectureIndex}
+        totalLectures={lectures.length}
+        onNavigate={handleNavigateLecture}
+      />
+
+      <div className="row wf-filters">
+        <div className="col-md-3">
+          <select
+            className="form-select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            style={{
+              padding: '0.75rem 2rem' // ✅ Added vertical and horizontal padding
+            }}
+          >
+            <option value="">{t('filterBy')}</option>
+            <option value="Present">{t('present')}</option>
+            <option value="Absent">{t('absent')}</option>
+            <option value="Late">{t('late')}</option>
+            <option value="Excuse">{t('excuse')}</option>
+          </select>
         </div>
-        <LectureNavigation
-          lectureInfo={lectureInfo}
-          currentLectureIndex={currentLectureIndex}
-          totalLectures={lectures.length}
-          onNavigate={handleNavigateLecture}
-        />
-        <SearchBar onSearch={handleSearch} onFilter={handleFilter} />
-        <table className="attendance-table">
+        <div className="col-md-6">
+          <input
+            type="text"
+            className="form-control"
+            placeholder={t('searchPlaceholder')}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="col-md-3">
+          <button
+            className="btn btn-outline-secondary w-100"
+            onClick={() => {
+              setStatusFilter('');
+              setSearch('');
+            }}
+          >
+            {t('resetFilter')}
+          </button>
+        </div>
+      </div>
+
+      <div className="table-responsive wf-table">
+        <table className="table table-bordered table-striped">
           <thead>
             <tr>
-              <th onClick={() => handleSort('studentName')}>اسم الطالب</th>
-              <th onClick={() => handleSort('status')}>الحالة</th>
-              <th onClick={() => handleSort('firstDetectedAt')}>وقت التسجيل الأول</th>
-              <th onClick={() => handleSort('detectionCount')}>ملاحظات إضافية</th>
+              <th onClick={() => handleSort('studentName')}>{t('studentName')}</th>
+              <th onClick={() => handleSort('status')}>{t('status')}</th>
+              <th onClick={() => handleSort('firstDetectedAt')}>{t('firstDetectedAt')}</th>
+              <th onClick={() => handleSort('detectionCount')}>{t('notes')}</th>
             </tr>
           </thead>
           <tbody>
@@ -262,12 +225,12 @@ const AttendanceTable = () => {
                           checked={row.status === status}
                           onChange={() => handleStatusChange(row.studentId, status)}
                         />
-                        <span>{status.charAt(0)}</span>
+                        <span>{t(status.toLowerCase())}</span>
                       </label>
                     ))}
                   </div>
                 </td>
-                <td>{row.firstDetectedAt === 'undetected' ? 'غير مكتشف' : row.firstDetectedAt}</td>
+                <td>{row.firstDetectedAt === 'undetected' ? t('noDetections') : row.firstDetectedAt}</td>
                 <td className="notes-tooltip">
                   {formatFirstCheckTimes(row.firstCheckTimes)}
                   <span className="tooltip-text">{formatFirstCheckTimes(row.firstCheckTimes)}</span>
@@ -276,13 +239,14 @@ const AttendanceTable = () => {
             ))}
           </tbody>
         </table>
-        <ActionButtons
-          onAddNewLecture={handleAddNewLecture}
-          onExport={handleExport}
-          onSave={handleSave}
-          onDelete={handleDelete}
-        />
       </div>
+
+      <ActionButtons
+        onAddNewLecture={() => {}}
+        onExport={() => {}}
+        onSave={handleSave}
+        onDelete={() => {}}
+      />
     </div>
   );
 };

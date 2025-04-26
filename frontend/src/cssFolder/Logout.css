@@ -1,0 +1,75 @@
+/* Logout Modal Backdrop */
+.logout-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 2rem;
+}
+
+/* Modal Box */
+.logout-modal {
+  background-color: #fff;
+  border-radius: 16px;
+  padding: 32px 40px;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Modal Title */
+.logout-title {
+  margin-bottom: 20px;
+  color: #3f526d;
+  font-size: 24px;
+}
+
+/* Modal Text */
+.logout-text {
+  margin-bottom: 32px;
+  font-size: 18px;
+  color: #444;
+}
+
+/* Button Wrapper */
+.logout-actions {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+/* Base Button Styling */
+.logout-actions .btn {
+  padding: 12px 24px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  color: #fff;
+}
+
+/* Primary Button (e.g., Confirm Logout) */
+.logout-actions .btn-primary {
+  background-color: #3f526d;
+}
+
+.logout-actions .btn-primary:hover {
+  background-color: #2f3e57;
+}
+
+/* Secondary Button (e.g., Cancel) */
+.logout-actions .btn-secondary {
+  background-color: #5a6d89;
+}
+
+.logout-actions .btn-secondary:hover {
+  background-color: #4a5a73;
+}
