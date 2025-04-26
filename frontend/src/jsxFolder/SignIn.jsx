@@ -4,35 +4,73 @@ import { useNavigate } from "react-router-dom";
 const SignIn = () => {
   const [username, setUsername] = useState(""); // changed from email
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
-    const res = await fetch("http://localhost:8080/api/auth/signin", {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name: username, password }), // still uses `name`
-    });
+  // const handleLogin = async () => {
+  //   const res = await fetch("http://localhost:8080/api/auth/signin", {
+  //     method: "POST",
+  //     credentials: "include",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({ name: username, password }), // still uses `name`
+  //   });
 
-    if (res.ok) {
-      const data = await res.json();
-      localStorage.setItem(
-        "teacher",
-        JSON.stringify({
-          id: data.id,
-          name: data.name,
-          email: data.email,
-          accessToken: data.accessToken,
-          tokenType: data.tokenType,
-        })
-      );
-      navigate("/dashboard");
-    } else {
-      alert("Login failed!");
+  //   if (res.ok) {
+  //     const data = await res.json();
+  //     localStorage.setItem(
+  //       "teacher",
+  //       JSON.stringify({
+  //         id: data.id,
+  //         name: data.name,
+  //         email: data.email,
+  //         accessToken: data.accessToken,
+  //         tokenType: data.tokenType,
+  //       })
+  //     );
+  //     navigate("/dashboard");
+  //   } else {
+  //     alert("Login failed!");
+  //   }
+  // };
+
+  const handleLogin = async () => {
+    try {
+      const res = await fetch("http://localhost:8080/api/auth/signin", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: username, password }),
+      });
+  
+      const data = await res.text(); 
+  
+      if (res.ok) {
+        const parsedData = JSON.parse(data);
+        localStorage.setItem(
+          "teacher",
+          JSON.stringify({
+            id: parsedData.id,
+            name: parsedData.name,
+            email: parsedData.email,
+            accessToken: parsedData.accessToken,
+            tokenType: parsedData.tokenType,
+          })
+        );
+        navigate("/dashboard");
+      } else {
+        setErrorMessage(data.error || "Login failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setErrorMessage("Something went wrong. Please try again later.");
     }
   };
+  
 
   return (
     <div className="container d-flex justify-content-center align-items-center vh-100 bg-light">
@@ -70,6 +108,18 @@ const SignIn = () => {
         >
           Login
         </button>
+        {errorMessage && (
+  <div
+    className="mt-3 text-center"
+    style={{
+      color: "#A01220FF",
+      fontSize: "12px",
+      textDecoration: "underline",
+    }}
+  >
+    {errorMessage}
+  </div>
+)}
       </div>
     </div>
   );
