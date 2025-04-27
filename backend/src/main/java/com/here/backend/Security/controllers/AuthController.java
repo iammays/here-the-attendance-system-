@@ -50,9 +50,9 @@ public class AuthController {
         String username = loginRequest.getName();
         
         if (failedAttempts.getOrDefault(username, 0) >= MAX_FAILED_ATTEMPTS) {
-            return ResponseEntity.status(403).body("Your account has been temporarily banned due to the number of failed login attempts.");
+            return ResponseEntity.status(403).body("Your account has been temporarily banned due to multiple failed login attempts. You entered the wrong password 3 times. Your account will be banned for 10 minutes before you can try again.");
         }
-        
+
         try {
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username, loginRequest.getPassword())

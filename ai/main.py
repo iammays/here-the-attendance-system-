@@ -11,14 +11,14 @@ import requests
 from face_utils import load_student_embeddings, recognize_face, ensure_dir
 
 # إعداد المسار المحلي لـ YOLOv5
-sys.path.append("C:\\Users\\MaysM.M\\yolov5")
+sys.path.append("C:\\Users\\user\\yolov5")
 from utils.general import scale_boxes
 
 # حل مشكلة توافق المسارات في Windows
 pathlib.PosixPath = pathlib.WindowsPath
 
 # تحميل نموذج YOLOv5
-model = torch.hub.load("C:/Users/MaysM.M/yolov5", "custom", path="C:\\Users\\MaysM.M\\yolov5\\best.pt", source="local", force_reload=True)
+model = torch.hub.load("C:/Users/user/yolov5", "custom", path="C:\\Users\\user\\yolov5\\best.pt", source="local", force_reload=True)
 model.conf = 0.25
 model.iou = 0.4
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
