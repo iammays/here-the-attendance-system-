@@ -2,15 +2,13 @@ package com.here.backend.Schedual;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
 import com.here.backend.Course.CourseEntity;
-
 import java.util.List;
 
 @Document(collection = "scheduals")
 public class SchedualEntity {
 
-   
+    @Id
     private String scheduleId;  
     private String roomId;      // The room this schedule belongs to
     private List<CourseEntity> listOfSessions; // Nested list of course objects

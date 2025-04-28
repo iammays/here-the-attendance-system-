@@ -67,14 +67,11 @@ public class RoomController {
         }
     }
 
-
-    
     // Find rooms by schedule ID
     @GetMapping("/schedule/{schedule_id}")
     public List<RoomEntity> getRoomsByScheduleId(@PathVariable String courseId) {
         return roomRepository.findBycourseId(courseId);
     }
-
 
         @GetMapping("/{roomId}/schedule")
     public ResponseEntity<?> getRoomSchedule(@PathVariable String roomId) {
