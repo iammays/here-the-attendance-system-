@@ -3,10 +3,8 @@ package com.here.backend.Room;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import com.here.backend.Schedual.SchedualEntity;
 import com.here.backend.Schedual.SchedualRepository;
-
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +18,7 @@ public class RoomController {
     @Autowired
     private RoomRepository roomRepository;
 
-        @Autowired
+    @Autowired
     private SchedualRepository schedualRepository;
 
 
@@ -73,8 +71,8 @@ public class RoomController {
     
     // Find rooms by schedule ID
     @GetMapping("/schedule/{schedule_id}")
-    public List<RoomEntity> getRoomsByScheduleId(@PathVariable String schedule_id) {
-        return roomRepository.findByScheduleId(schedule_id);
+    public List<RoomEntity> getRoomsByScheduleId(@PathVariable String courseId) {
+        return roomRepository.findBycourseId(courseId);
     }
 
 
