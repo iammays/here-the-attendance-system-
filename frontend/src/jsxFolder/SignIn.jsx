@@ -52,7 +52,7 @@ const SignIn = () => {
   };
 
   const handleForgotPassword = () => {
-    navigate("/ForgotPassword"); 
+    // navigate("/ForgotPassword"); 
   };
 
   return (
@@ -109,7 +109,7 @@ const SignIn = () => {
             onClick={() => setShowPassword(!showPassword)}
             style={{
               position: "absolute",
-              top: "52px",
+              top: "38px",
               right: "20px",
               cursor: "pointer",
               color: "#6c757d"

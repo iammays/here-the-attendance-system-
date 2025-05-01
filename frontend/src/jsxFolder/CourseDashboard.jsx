@@ -70,6 +70,7 @@ const CourseDashboard = () => {
         }
         const daysData = await daysResponse.json();
         setCourseDays(daysData);
+        console.log("Course days:", daysData);
 
         // Fetch all lectures for the course
         const lecturesResponse = await fetch(`http://localhost:8080/courses/${courseTemplate.courseId}/lectures`, {
@@ -109,7 +110,7 @@ const CourseDashboard = () => {
         }
         setWeeks(weeksData);
       } catch (err) {
-        const errorMessage = err.message.includes("401") ? t('unauthorized') :
+        const errorMessage = err.message.includes("401") ? t('Unauthorized') :
                             err.message.includes("404") ? t('No Data') :
                             err.message.includes("500") ? t('Server Error') :
                             err.message;
@@ -163,7 +164,7 @@ const CourseDashboard = () => {
       setLoading(true);
       setError(null);
       if (!courseId) {
-        setError(t("No Course Id"));
+        setError(t("No CourseId"));
         return;
       }
       if (!lateThreshold || isNaN(lateThreshold) || Number(lateThreshold) < 0) {
@@ -199,19 +200,42 @@ const CourseDashboard = () => {
     try {
       setError(null);
       // Calculate the lecture date
-      const startFromDate = new Date("2025-01-28");
-      const lectureDate = new Date(startFromDate);
-      lectureDate.setDate(startFromDate.getDate() + (week - 1) * 7);
-      const dayOffset = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"].indexOf(day.toUpperCase());
-      if (dayOffset === -1) {
+      const semesterStart = new Date("2025-01-28"); // Tuesday
+      semesterStart.setHours(0, 0, 0, 0);
+
+      // Define days of week aligned with Date.getDay() (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+      const daysOfWeek = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+      const targetDayIndex = daysOfWeek.indexOf(day.toUpperCase());
+      if (targetDayIndex === -1) {
         throw new Error(`Invalid day: ${day}`);
       }
-      lectureDate.setDate(lectureDate.getDate() + dayOffset);
-      const formattedDate = lectureDate.toISOString().split('T')[0]; // YYYY-MM-DD
 
-      // Calculate the day of the week from the date
-      const calculatedDay = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"][lectureDate.getDay()];
-  
+      // Get the day of the week for the semester start (Tuesday = 2)
+      const startDayIndex = semesterStart.getDay();
+
+      // Calculate days to target day in the first week
+      const daysToTargetDay = targetDayIndex < startDayIndex 
+        ? 7 - (startDayIndex - targetDayIndex) 
+        : (targetDayIndex - startDayIndex) + 1;
+      const daysToAdd = (week - 1) * 7 + daysToTargetDay;
+
+      // Calculate the target date in UTC to avoid timezone issues
+      const lectureDate = new Date(Date.UTC(
+        semesterStart.getUTCFullYear(),
+        semesterStart.getUTCMonth(),
+        semesterStart.getUTCDate() + daysToAdd
+      ));
+      const formattedDate = lectureDate.toISOString().split('T')[0]; // YYYY-MM-DD
+      const calculatedDay = daysOfWeek[lectureDate.getDay()];
+
+      // Log for debugging
+      console.log(`Clicked day: ${day}, Week: ${week}, Days to add: ${daysToAdd}, Target day index: ${targetDayIndex}, Start day index: ${startDayIndex}, Days to target: ${daysToTargetDay}, Calculated date: ${formattedDate}, Calculated day: ${calculatedDay}`);
+
+      // Validate that the calculated day matches the clicked day
+      if (calculatedDay.toUpperCase() !== day.toUpperCase()) {
+        throw new Error(`Date calculation error: Expected ${day}, got ${calculatedDay} for date ${formattedDate}`);
+      }
+
       // Validate courseData and time formats
       if (!courseData || !courseData.startTime || !courseData.endTime) {
         throw new Error(t("Missing Course Data"));
@@ -221,15 +245,15 @@ const CourseDashboard = () => {
       const timeRegex = /^\d{2}:\d{2}$/;
       if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
         console.warn(`Invalid time format - startTime: ${startTime}, endTime: ${endTime}`);
-        startTime = "14:30"; // Fallback default
-        endTime = "15:15";   // Fallback default
+        startTime = "15:00"; // Default to match observed time
+        endTime = "16:00";   // Default to match observed time
       }
-  
+
       const formattedStartTime = startTime.replace(":", "");
       const lectureId = `${courseId}-${formattedDate}-${formattedStartTime}`;
-  
+
       console.log(`Attempting to navigate to lecture: ${lectureId}`);
-  
+
       // Check if lecture exists
       const existingLecture = lectures.find(l => l.lectureId === lectureId);
       if (existingLecture) {
@@ -237,7 +261,7 @@ const CourseDashboard = () => {
         navigate(`/attendance/${courseId}/${lectureId}`);
         return;
       }
-  
+
       // Create new lecture
       const headers = getAuthHeaders();
       const lectureData = {
@@ -245,18 +269,18 @@ const CourseDashboard = () => {
         date: formattedDate,
         startTime,
         endTime,
-        day: calculatedDay, // Use the calculated day
+        day: calculatedDay,
         roomId: courseData?.roomId || "B-205",
       };
-      console.log(`Sending lecture data: ${JSON.stringify(lectureData)}`);
-  
+      console.log("Lecture data to be sent:", JSON.stringify(lectureData, null, 2));
+
       const response = await fetch(`http://localhost:8080/api/attendances/addNewLecture`, {
         method: "POST",
         headers,
         credentials: "include",
         body: JSON.stringify(lectureData),
       });
-  
+
       if (!response.ok) {
         const errorBody = await response.text();
         let errorMessage;
@@ -268,11 +292,11 @@ const CourseDashboard = () => {
         }
         throw new Error(`Failed to create lecture: ${response.status} ${errorMessage}`);
       }
-  
+
       const responseData = await response.json();
       const newLectureId = responseData.lectureId;
       console.log(`Lecture created successfully: ${newLectureId}`);
-  
+
       // Update lectures state
       const newLecture = {
         courseId,
@@ -288,7 +312,7 @@ const CourseDashboard = () => {
         lateThreshold: courseData.lateThreshold,
       };
       setLectures(prev => [...prev, newLecture]);
-  
+
       navigate(`/attendance/${courseId}/${newLectureId}`);
     } catch (err) {
       setError(`${t("Navigation Error")}: ${err.message}`);
@@ -296,9 +320,9 @@ const CourseDashboard = () => {
     }
   };
 
-  if (loading) return <div className="loading">{t("loading")}</div>;
+  if (loading) return <div className="loading">{t("Loading")}</div>;
   if (error) return <div className="error">{error}</div>;
-  if (!courseData) return <div className="loading">{t("no Data")}</div>;
+  if (!courseData) return <div className="loading">{t("No Data")}</div>;
 
   return (
     <div className="course-dashboard-container">
@@ -331,13 +355,13 @@ const CourseDashboard = () => {
                 <span>{t("minutes")}</span>
                 <div>
                   <button onClick={handleLateThresholdSave} disabled={loading}>
-                    {loading ? t("saving") : t("save")}
+                    {loading ? t("Saving") : t("Save")}
                   </button>
                   <button
                     onClick={() => setShowLateModal(false)}
                     disabled={loading}
                   >
-                    {t("cancel")}
+                    {t("Cancel")}
                   </button>
                 </div>
               </div>
@@ -349,7 +373,7 @@ const CourseDashboard = () => {
           <div key={weekData.week} className="week-item">
             <details className="week-details">
               <summary className="week-summary">
-                <span className="week-title">{t("Week")} {weekData.week}</span>
+                <span className="week-title">{t("week")} {weekData.week}</span>
                 <svg
                   className="arrow-icon"
                   fill="none"
@@ -374,7 +398,7 @@ const CourseDashboard = () => {
                   >
                     {t(day)}
                     {weekData.lectures.some(l => l.day === day) ? (
-                      <span className="lecture-status">{t("Attendance Taken")}</span>
+                      <span className="lecture-status">{t("")}</span>
                     ) : (
                       <span className="lecture-status">{t("")}</span>
                     )}
@@ -388,7 +412,7 @@ const CourseDashboard = () => {
 
       <div className="upcoming-section">
         <div className="upcoming-card">
-          <h3 className="upcoming-title">{t("upcomingClasses")}</h3>
+          <h3 className="upcoming-title">{t("Upcoming Classes")}</h3>
           {upcomingClasses.length === 0 ? (
             <p>{t("No Upcoming Classes")}</p>
           ) : (
@@ -397,7 +421,7 @@ const CourseDashboard = () => {
                 <li key={index} className="upcoming-item">
                   <div className="course-name">{t(cls.courseName)}</div>
                   <div className="room-info">
-                    {t("Room")}: {cls.roomId || t("No Room")}
+                    {t("Room")}: {cls.roomId || t("noRoom")}
                   </div>
                   <div className="time-info">
                     {t("Time")}:{" "}
