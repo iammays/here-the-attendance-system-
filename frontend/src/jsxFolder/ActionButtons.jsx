@@ -1,17 +1,20 @@
 import React from 'react';
-import '../cssFolder/ActionButtons.css';
+import { useTranslation } from 'react-i18next';
+import '../cssFolder/ActionButtons.css'; 
 
-const ActionButtons = ({ onAddNewLecture, onExport, onSave, onDelete }) => {
+const ActionButtons = ({ onExport, onSave, onClearStatuses }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="action-buttons">
-      <button className="btn btn-success" onClick={onExport}>
-        Export to Excel
+      <button className="btn btn-primary" onClick={onSave}>
+        {t('save')}
       </button>
-      <button className="btn btn-info" onClick={onSave}>
-        Save
+      <button className="btn btn-secondary" onClick={onExport}>
+        {t('export')}
       </button>
-      <button className="btn btn-danger" onClick={onDelete}>
-        Delete
+      <button className="btn btn-danger" onClick={onClearStatuses}>
+        {t('clear Statuses')}
       </button>
     </div>
   );

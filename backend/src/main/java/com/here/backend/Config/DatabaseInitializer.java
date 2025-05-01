@@ -1,17 +1,15 @@
 package com.here.backend.Config;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 @Component
 public class DatabaseInitializer implements CommandLineRunner {
+
     private static final Logger logger = LoggerFactory.getLogger(DatabaseInitializer.class);
 
     private final MongoTemplate mongoTemplate;
@@ -23,18 +21,20 @@ public class DatabaseInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Create collections if they do not exist
-        mongoTemplate.createCollection("rooms");
-        mongoTemplate.createCollection("teachers");
-        mongoTemplate.createCollection("students");
-        mongoTemplate.createCollection("attendances");
-        mongoTemplate.createCollection("cameras");
-        mongoTemplate.createCollection("courses");
-        mongoTemplate.createCollection("emails");
-        mongoTemplate.createCollection("excellimports");
-        mongoTemplate.createCollection("facerecognitions");
-        mongoTemplate.createCollection("scheduals");
-        mongoTemplate.createCollection("sessions");
-        // Add more collections as needed
+        // List of all collections you want to create
+        String[] collections = {
+            "rooms", "teachers", "students", "attendances", "cameras",
+            "courses", "emails", "excellimports", "facerecognitions", "scheduals", "sessions", "lectures"
+        };
+
+        // Create each collection ONLY if it does not exist
+        for (String collectionName : collections) {
+            if (!mongoTemplate.collectionExists(collectionName)) {
+                mongoTemplate.createCollection(collectionName);
+                logger.info("Created collection: {}", collectionName);
+            } else {
+                logger.info("Collection already exists: {}", collectionName);
+            }
+        }
     }
 }

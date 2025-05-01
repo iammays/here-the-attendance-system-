@@ -1,4 +1,3 @@
-
 package com.here.backend.Emails;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,15 +13,17 @@ public class EmailSenderService {
     public void sendSimpleEmail(String toEmail, String subject, String body) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("maysalbutmah311@gmail.com");
+            message.setFrom("\"Attendance System\" <maysalbutmah311@gmail.com>");
             message.setTo(toEmail);
             message.setText(body);
             message.setSubject(subject);
             mailSender.send(message);
-            System.out.println("✅ Mail Sent to: " + toEmail);
+            System.out.println(" Mail Sent to: " + toEmail);
         } catch (Exception e) {
-            System.out.println("❌ Failed to send email to " + toEmail + ": " + e.getMessage());
+            System.out.println(" Failed to send email to " + toEmail + ": " + e.getMessage());
             e.printStackTrace();
-        }
-    }
+}
+}
+
+
 }

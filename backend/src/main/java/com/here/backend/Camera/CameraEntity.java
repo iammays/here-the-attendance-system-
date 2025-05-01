@@ -1,11 +1,9 @@
 package com.here.backend.Camera;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "cameras")
 public class CameraEntity {
-    @Id
     private String cameraId;
     private String roomId;
 

@@ -76,9 +76,9 @@ public class CourseEntity {
     public String getStudentId() { return studentId; }
     public void setStudentId(String studentId) { this.studentId = studentId; }
     public String getStartTime() { return startTime; }
-    public void setStartTime(String startTime) { this.startTime = startTime; }
+    //public void setStartTime(String startTime) { this.startTime = startTime; }
     public String getEndTime() { return endTime; }
-    public void setEndTime(String endTime) { this.endTime = endTime; }
+    //public void setEndTime(String endTime) { this.endTime = endTime; }
     public String getDay() { return day; }
     public void setDay(String day) { this.day = day; }
     public String getCategory() { return category; }
@@ -87,4 +87,21 @@ public class CourseEntity {
     public void setCredits(int credits) { Credits = credits; }
     public int getLateThreshold() { return lateThreshold; }
     public void setLateThreshold(int lateThreshold) { this.lateThreshold = lateThreshold != 0 ? lateThreshold : 300; }
+
+
+    public void setStartTime(String startTime) {
+        if (startTime != null && startTime.matches("\\d{2}:\\d{2}")) {
+            this.startTime = startTime;
+        } else {
+            throw new IllegalArgumentException("Start time must be in HH:mm format");
+        }
+    }
+
+    public void setEndTime(String endTime) {
+        if (endTime != null && endTime.matches("\\d{2}:\\d{2}")) {
+            this.endTime = endTime;
+        } else {
+            throw new IllegalArgumentException("End time must be in HH:mm format");
+        }
+    }
 }
