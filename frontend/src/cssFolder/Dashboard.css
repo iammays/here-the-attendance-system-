@@ -74,11 +74,28 @@
   background-color: #e6ecf3;
 }
 
+.course-name {
+  font-weight: 700; /* Bold */
+  font-size: 20px; /* أكبر */
+  color: #2A4B70; /* اختيار لون غامق أو تركه أسود حسب ستايل موقعك */
+  margin-bottom: 5px; /* مسافة بسيطة تحت الاسم */
+}
+
+.course-name:hover {
+  color: #1d3557;
+  cursor: pointer;
+}
+
+
 .course-title {
   display: flex;
   align-items: center;
   cursor: pointer;
 }
+
+/*   font-size: 22px;
+  font-weight: bold;
+  color: #1a1a1a; */
 
 .course-dot {
   width: 12px;
@@ -117,9 +134,13 @@ summary::-webkit-details-marker {
 }
 
 .subtopic-item {
-  font-size: 14px;
+  font-size: 18px;
+  /* font-weight: bold; */
+  color: #3f526d;
+  /*font-size: 14px; */
   line-height: 1.5;
-  color: #6b7280;
+  /* color: #6b7280; */
+  padding: 5px;
 }
 
 /* Upcoming Classes Section (Right) */

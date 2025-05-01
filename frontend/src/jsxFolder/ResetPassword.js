@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useTranslation } from 'react-i18next';
 
-const Reset_Password = () => {
+const ResetPassword = () => {
   const { t, i18n } = useTranslation();
   const [formData, setFormData] = useState({
     currentPassword: '',
@@ -150,4 +150,4 @@ const Reset_Password = () => {
   );
 };
 
-export default Reset_Password;
+export default ResetPassword;

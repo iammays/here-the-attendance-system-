@@ -149,6 +149,31 @@ public class TeacherController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @PutMapping("/api/{teacherId}/password")
+    public ResponseEntity<?> forgotPassword(@PathVariable String teacherId, @RequestBody Map<String, String> request) {
+        String newPassword = request.get("newPassword");
+
+        if (newPassword == null || newPassword.isEmpty()) {
+            return ResponseEntity.badRequest().body("Error: New password is required.");
+        }
+
+        if (newPassword.length() < 8) {
+            return ResponseEntity.badRequest().body("Error: New password must be at least 8 characters long.");
+        }
+
+        Optional<TeacherEntity> teacher = teacherRepository.findByTeacherId(teacherId);
+        if (teacher.isPresent()) {
+            TeacherEntity updatedTeacher = teacher.get();
+            updatedTeacher.setPassword(encoder.encode(newPassword));
+            teacherRepository.save(updatedTeacher);
+
+            return ResponseEntity.ok("Password updated successfully.");
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: Teacher not found.");
+    }
+
     @PostMapping("/validate-password")
     public ResponseEntity<?> validatePassword(@RequestBody PasswordValidationRequest request) {
         boolean isValid = teacherRepository.validatePassword(request.getName(), request.getPassword());

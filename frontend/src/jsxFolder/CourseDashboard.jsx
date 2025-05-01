@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next"; // ✅ Added
+import { useTranslation } from "react-i18next"; 
 import "../cssFolder/CourseDashboard.css";
 
 const CourseDashboard = () => {
-  const { t } = useTranslation(); // ✅ Setup
+  const { t } = useTranslation();
   const { courseName } = useParams();
   const navigate = useNavigate();
   const [courseData, setCourseData] = useState([]);
@@ -173,7 +173,7 @@ const CourseDashboard = () => {
     }
   };
 
-  if (!courseData.length) return <div className="loading">{t('loading')}</div>; // ✅ Translated
+  if (!courseData.length) return <div className="loading">{t('loading')}</div>; 
 
   return (
     <div className="course-dashboard-container">
@@ -191,13 +191,6 @@ const CourseDashboard = () => {
     >
       {t('change Late Time') || "Change Late Time"}
     </button>
-
-{/* <span
-  className="change-late-text"
-  onClick={() => setShowLateModal(true)}
->
-  {t('change Late Time') || "Change Late Time"}
-</span> */}
 
 
     {showLateModal && (
@@ -292,48 +285,6 @@ const CourseDashboard = () => {
           </ul>
         </div>
       </div>
-
-      {/* Late Threshold Popup */}
-      {/* <span
-        className="late-icon"
-        onClick={() => setShowLateModal(true)}
-        title={t('setLateThreshold')}
-      >
-        ⏰
-      </span> */}
-
-      {/* {showLateModal && (
-        <div className="late-popup">
-          <label style={{ fontSize: "14px" }}>{t('lateAfter')}:</label>
-          <input
-            type="number"
-            value={lateThreshold}
-            onChange={(e) => setLateThreshold(e.target.value)}
-            min="0"
-            style={{
-              width: "50px",
-              padding: "4px",
-              marginLeft: "5px",
-              fontSize: "14px",
-            }}
-          />
-          <span style={{ fontSize: "14px", marginLeft: "4px" }}>{t('minutes')}</span>
-          <div style={{ marginTop: "8px", textAlign: "right" }}>
-            <button
-              onClick={handleLateThresholdSave}
-              style={{ padding: "4px 8px", fontSize: "12px", marginRight: "5px" }}
-            >
-              {t('save')}
-            </button>
-            <button
-              onClick={() => setShowLateModal(false)}
-              style={{ padding: "4px 8px", fontSize: "12px" }}
-            >
-              {t('cancel')}
-            </button>
-          </div>
-        </div>
-      )} */}
     </div>
   );
 };
