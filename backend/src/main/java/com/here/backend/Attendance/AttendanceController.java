@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import com.here.backend.Course.CourseEntity;
 import com.here.backend.Course.CourseRepository;
 import com.here.backend.Emails.EmailSenderService;
@@ -15,7 +14,6 @@ import com.here.backend.Teacher.TeacherEntity;
 import com.here.backend.Teacher.TeacherRepository;
 import com.here.backend.Lecture.LectureEntity;
 import com.here.backend.Lecture.LectureRepository;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -198,6 +196,7 @@ public class AttendanceController {
         }
         attendance.setStatus(newStatus);
         attendanceRepository.save(attendance);
+        logger.info("Updated attendance status to {} for lectureId: {}, studentId: {}", newStatus, lectureId, studentId);
         return ResponseEntity.ok("Attendance status updated to " + newStatus);
     }
 
@@ -220,6 +219,8 @@ public class AttendanceController {
             String oldStatus = attendance.getStatus();
             attendance.setStatus(newStatus);
             attendanceRepository.save(attendance);
+            logger.info("Updated attendance status with email to {} from {} for lectureId: {}, studentId: {}", 
+                    newStatus, oldStatus, lectureId, studentId);
 
             StudentEntity student = studentRepository.findById(studentId).orElse(null);
             if (student == null) {
@@ -290,6 +291,7 @@ public class AttendanceController {
     @DeleteMapping("/{lectureId}")
     public ResponseEntity<String> deleteAttendance(@PathVariable String lectureId) {
         attendanceRepository.deleteByLectureId(lectureId);
+        logger.info("Deleted attendance records for lectureId: {}", lectureId);
         return ResponseEntity.ok("Attendance records for lecture " + lectureId + " deleted");
     }
 
@@ -299,8 +301,10 @@ public class AttendanceController {
         Optional<LectureEntity> lectureOpt = lectureRepository.findByLectureId(lectureId);
         if (lectureOpt.isPresent()) {
             lectureRepository.delete(lectureOpt.get());
+            logger.info("Deleted lecture and attendance records for lectureId: {}", lectureId);
             return ResponseEntity.ok("Lecture " + lectureId + " and its attendance records deleted");
         } else {
+            logger.warn("Lecture not found for lectureId: {}", lectureId);
             return ResponseEntity.badRequest().body("Lecture not found for lectureId: " + lectureId);
         }
     }
@@ -614,19 +618,32 @@ public class AttendanceController {
 
     @PostMapping("/finalize/{lectureId}")
     public ResponseEntity<String> finalizeAttendance(@PathVariable String lectureId) {
+        logger.info("Finalizing attendance for lectureId: {}", lectureId);
         List<AttendanceEntity> attendances = attendanceRepository.findByLectureId(lectureId);
         if (attendances == null || attendances.isEmpty()) {
+            logger.warn("No attendance records found for lectureId: {}", lectureId);
             return ResponseEntity.badRequest().body("No attendance records found for lecture " + lectureId);
         }
 
         for (AttendanceEntity attendance : attendances) {
             try {
+                String currentStatus = attendance.getStatus();
                 String finalStatus = attendanceService.determineStatus(lectureId, attendance.getStudentId(), 5);
-                if (!"Absent".equals(attendance.getStatus()) && "Absent".equals(finalStatus)) {
-                    attendanceService.sendAbsenceEmail(lectureId, attendance.getStudentId());
+                logger.debug("Student: {}, Current status: {}, Determined status: {}", 
+                        attendance.getStudentId(), currentStatus, finalStatus);
+
+                if (!finalStatus.equals(currentStatus)) {
+                    if (!"Absent".equals(currentStatus) && "Absent".equals(finalStatus)) {
+                        attendanceService.sendAbsenceEmail(lectureId, attendance.getStudentId());
+                    }
+                    attendance.setStatus(finalStatus);
+                    attendanceRepository.save(attendance);
+                    logger.info("Updated status to {} for student: {} in lectureId: {}", 
+                            finalStatus, attendance.getStudentId(), lectureId);
+                } else {
+                    logger.debug("No status change needed for student: {} in lectureId: {}", 
+                            attendance.getStudentId(), lectureId);
                 }
-                attendance.setStatus(finalStatus);
-                attendanceRepository.save(attendance);
             } catch (Exception e) {
                 logger.error("Error processing attendance for student {}: {}", attendance.getStudentId(), e.getMessage());
                 return ResponseEntity.status(500).body("Error finalizing attendance: " + e.getMessage());
@@ -645,234 +662,235 @@ public class AttendanceController {
     }
 
     @PostMapping("/addNewDay")
-public ResponseEntity<Map<String, Object>> addNewDay(@RequestBody Map<String, String> request) {
-    logger.info("Received request to add new day");
-    String courseId = request.get("courseId");
-    String date = request.get("date");
-    String startTime = request.get("startTime");
-    String endTime = request.get("endTime");
-    String roomId = request.getOrDefault("roomId", "");
+    public ResponseEntity<Map<String, Object>> addNewDay(@RequestBody Map<String, String> request) {
+        logger.info("Received request to add new day");
+        String courseId = request.get("courseId");
+        String date = request.get("date");
+        String startTime = request.get("startTime");
+        String endTime = request.get("endTime");
+        String roomId = request.getOrDefault("roomId", "");
 
-    // Validation
-    if (courseId == null || date == null || startTime == null || endTime == null) {
-        logger.error("Missing required fields: courseId, date, startTime, or endTime");
-        return ResponseEntity.badRequest().body(Map.of("error", "يجب إدخال معرف الكورس، التاريخ، وقت البداية، وقت النهاية"));
-    }
-
-    // Validate date and time formats
-    LocalDate parsedDate;
-    LocalTime parsedStartTime;
-    LocalTime parsedEndTime;
-    try {
-        parsedDate = LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
-        parsedStartTime = LocalTime.parse(startTime, DateTimeFormatter.ofPattern("HH:mm"));
-        parsedEndTime = LocalTime.parse(endTime, DateTimeFormatter.ofPattern("HH:mm"));
-        if (parsedEndTime.isBefore(parsedStartTime) || parsedEndTime.equals(parsedStartTime)) {
-            logger.error("End time must be after start time: startTime={}, endTime={}", startTime, endTime);
-            return ResponseEntity.badRequest().body(Map.of("error", "وقت النهاية يجب أن يكون بعد وقت البداية"));
+        // Validation
+        if (courseId == null || date == null || startTime == null || endTime == null) {
+            logger.error("Missing required fields: courseId, date, startTime, or endTime");
+            return ResponseEntity.badRequest().body(Map.of("error", "يجب إدخال معرف الكورس، التاريخ، وقت البداية، وقت النهاية"));
         }
-    } catch (DateTimeParseException e) {
-        logger.error("Invalid date or time format: {}", e.getMessage());
-        return ResponseEntity.badRequest().body(Map.of("error", "صيغة التاريخ أو الوقت غير صحيحة. استخدم YYYY-MM-DD للتاريخ و HH:mm للوقت"));
-    }
 
-    // Derive day from date
-    String normalizedDay = parsedDate.getDayOfWeek().name().toUpperCase();
-    logger.debug("Derived day from date {}: {}", date, normalizedDay);
-
-    // Check if course exists
-    Optional<CourseEntity> courseOpt = courseRepository.findByCourseIdAndLectureIdIsNull(courseId);
-    if (!courseOpt.isPresent()) {
-        logger.error("Course not found: {}", courseId);
-        return ResponseEntity.badRequest().body(Map.of("error", "الكورس غير موجود"));
-    }
-    CourseEntity course = courseOpt.get();
-
-    // Generate lectureId
-    String lectureId = courseId + "-" + date + "-" + startTime.replace(":", "");
-    logger.debug("Generated lectureId: {}", lectureId);
-
-    // Check for existing lecture
-    Optional<LectureEntity> existingLecture = lectureRepository.findByLectureId(lectureId);
-    if (existingLecture.isPresent()) {
-        logger.info("Lecture already exists: {}", lectureId);
-        return ResponseEntity.ok(Map.of(
-            "lectureId", lectureId,
-            "message", "المحاضرة موجودة مسبقًا"
-        ));
-    }
-
-    // Check for time conflicts
-    List<LectureEntity> existingLectures = lectureRepository.findAll().stream()
-            .filter(l -> l.getCourseId().equals(courseId) && l.getDay().equalsIgnoreCase(normalizedDay))
-            .collect(Collectors.toList());
-
-    for (LectureEntity existing : existingLectures) {
+        // Validate date and time formats
+        LocalDate parsedDate;
+        LocalTime parsedStartTime;
+        LocalTime parsedEndTime;
         try {
-            LocalTime existingStart = LocalTime.parse(existing.getStartTime(), DateTimeFormatter.ofPattern("HH:mm"));
-            LocalTime existingEnd = LocalTime.parse(existing.getEndTime(), DateTimeFormatter.ofPattern("HH:mm"));
-
-            if (!(parsedEndTime.isBefore(existingStart) || parsedStartTime.isAfter(existingEnd))) {
-                logger.error("Time conflict with existing lecture: {}", existing.getLectureId());
-                return ResponseEntity.badRequest().body(Map.of("error", "يوجد تعارض في الوقت مع محاضرة أخرى لنفس الكورس في نفس اليوم"));
+            parsedDate = LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
+            parsedStartTime = LocalTime.parse(startTime, DateTimeFormatter.ofPattern("HH:mm"));
+            parsedEndTime = LocalTime.parse(endTime, DateTimeFormatter.ofPattern("HH:mm"));
+            if (parsedEndTime.isBefore(parsedStartTime) || parsedEndTime.equals(parsedStartTime)) {
+                logger.error("End time must be after start time: startTime={}, endTime={}", startTime, endTime);
+                return ResponseEntity.badRequest().body(Map.of("error", "وقت النهاية يجب أن يكون بعد وقت البداية"));
             }
         } catch (DateTimeParseException e) {
-            logger.warn("Skipping lecture with invalid time format: {}", existing.getLectureId());
-            continue;
+            logger.error("Invalid date or time format: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", "صيغة التاريخ أو الوقت غير صحيحة. استخدم YYYY-MM-DD للتاريخ و HH:mm للوقت"));
         }
-    }
 
-    // Create new lecture
-    LectureEntity newLecture = new LectureEntity();
-    newLecture.setCourseId(courseId);
-    newLecture.setLectureId(lectureId);
-    newLecture.setName(course.getName());
-    newLecture.setRoomId(roomId.isEmpty() ? course.getRoomId() : roomId);
-    newLecture.setTeacherId(course.getTeacherId());
-    newLecture.setStartTime(startTime);
-    newLecture.setEndTime(endTime);
-    newLecture.setDay(normalizedDay);
-    newLecture.setCategory(course.getCategory());
-    newLecture.setCredits(course.getCredits());
-    newLecture.setLateThreshold(course.getLateThreshold());
+        // Derive day from date
+        String normalizedDay = parsedDate.getDayOfWeek().name().toUpperCase();
+        logger.debug("Derived day from date {}: {}", date, normalizedDay);
 
-    try {
-        lectureRepository.save(newLecture);
-        logger.info("Lecture saved successfully: {}", lectureId);
-    } catch (Exception e) {
-        logger.error("Error saving lecture: {}", e.getMessage(), e);
-        return ResponseEntity.status(500).body(Map.of("error", "فشل في حفظ المحاضرة: " + e.getMessage()));
-    }
-
-    // Initialize attendance table
-    ResponseEntity<String> initResponse = initializeAttendanceTable(lectureId);
-    if (!initResponse.getStatusCode().is2xxSuccessful()) {
-        logger.error("Failed to initialize attendance table for lecture: {}", lectureId);
-        lectureRepository.delete(newLecture);
-        return ResponseEntity.status(initResponse.getStatusCode()).body(Map.of("error", initResponse.getBody()));
-    }
-
-    // Return JSON response
-    Map<String, Object> response = new HashMap<>();
-    response.put("lectureId", lectureId);
-    response.put("message", "تم إنشاء المحاضرة بنجاح");
-    return ResponseEntity.ok(response);
-}
-
-@PostMapping("/addNewLecture")
-public ResponseEntity<Map<String, Object>> addNewLecture(@RequestBody Map<String, String> request) {
-    logger.info("Received request to add new lecture");
-    String courseId = request.get("courseId");
-    String date = request.get("date");
-    String startTime = request.get("startTime");
-    String endTime = request.get("endTime");
-    String roomId = request.getOrDefault("roomId", "");
-
-    // Validation
-    if (courseId == null || date == null || startTime == null || endTime == null) {
-        logger.error("Missing required fields: courseId, date, startTime, or endTime");
-        return ResponseEntity.badRequest().body(Map.of("error", "Course ID, date, start time, and end time are required"));
-    }
-
-    // Validate date and time formats
-    LocalDate parsedDate;
-    LocalTime parsedStartTime;
-    LocalTime parsedEndTime;
-    try {
-        parsedDate = LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
-        parsedStartTime = LocalTime.parse(startTime, DateTimeFormatter.ofPattern("HH:mm"));
-        parsedEndTime = LocalTime.parse(endTime, DateTimeFormatter.ofPattern("HH:mm"));
-        if (parsedEndTime.isBefore(parsedStartTime) || parsedEndTime.equals(parsedStartTime)) {
-            logger.error("End time must be after start time: startTime={}, endTime={}", startTime, endTime);
-            return ResponseEntity.badRequest().body(Map.of("error", "End time must be after start time"));
+        // Check if course exists
+        Optional<CourseEntity> courseOpt = courseRepository.findByCourseIdAndLectureIdIsNull(courseId);
+        if (!courseOpt.isPresent()) {
+            logger.error("Course not found: {}", courseId);
+            return ResponseEntity.badRequest().body(Map.of("error", "الكورس غير موجود"));
         }
-    } catch (DateTimeParseException e) {
-        logger.error("Invalid date or time format: {}", e.getMessage());
-        return ResponseEntity.badRequest().body(Map.of("error", "Invalid date or time format. Use YYYY-MM-DD for date and HH:mm for time"));
-    }
+        CourseEntity course = courseOpt.get();
 
-    // Derive day from date
-    String normalizedDay = parsedDate.getDayOfWeek().name().toUpperCase();
-    logger.debug("Derived day from date {}: {}", date, normalizedDay);
+        // Generate lectureId
+        String lectureId = courseId + "-" + date + "-" + startTime.replace(":", "");
+        logger.debug("Generated lectureId: {}", lectureId);
 
-    // Check if course exists
-    Optional<CourseEntity> courseOpt = courseRepository.findByCourseIdAndLectureIdIsNull(courseId);
-    if (!courseOpt.isPresent()) {
-        logger.error("Course not found: {}", courseId);
-        return ResponseEntity.badRequest().body(Map.of("error", "Course not found"));
-    }
-    CourseEntity course = courseOpt.get();
+        // Check for existing lecture
+        Optional<LectureEntity> existingLecture = lectureRepository.findByLectureId(lectureId);
+        if (existingLecture.isPresent()) {
+            logger.info("Lecture already exists: {}", lectureId);
+            return ResponseEntity.ok(Map.of(
+                "lectureId", lectureId,
+                "message", "المحاضرة موجودة مسبقًا"
+            ));
+        }
 
-    // Generate lectureId
-    String lectureId = courseId + "-" + date + "-" + startTime.replace(":", "");
-    logger.debug("Generated lectureId: {}", lectureId);
+        // Check for time conflicts
+        List<LectureEntity> existingLectures = lectureRepository.findAll().stream()
+                .filter(l -> l.getCourseId().equals(courseId) && l.getDay().equalsIgnoreCase(normalizedDay))
+                .collect(Collectors.toList());
 
-    // Check for existing lecture
-    Optional<LectureEntity> existingLecture = lectureRepository.findByLectureId(lectureId);
-    if (existingLecture.isPresent()) {
-        logger.info("Lecture already exists: {}", lectureId);
-        return ResponseEntity.ok(Map.of(
-            "lectureId", lectureId,
-            "message", "Lecture already exists"
-        ));
-    }
+        for (LectureEntity existing : existingLectures) {
+            try {
+                LocalTime existingStart = LocalTime.parse(existing.getStartTime(), DateTimeFormatter.ofPattern("HH:mm"));
+                LocalTime existingEnd = LocalTime.parse(existing.getEndTime(), DateTimeFormatter.ofPattern("HH:mm"));
 
-    // Check for time conflicts on the same date
-    List<LectureEntity> existingLectures = lectureRepository.findAll().stream()
-            .filter(l -> l.getCourseId().equals(courseId) && l.getLectureId().contains(date))
-            .collect(Collectors.toList());
+                if (!(parsedEndTime.isBefore(existingStart) || parsedStartTime.isAfter(existingEnd))) {
+                    logger.error("Time conflict with existing lecture: {}", existing.getLectureId());
+                    return ResponseEntity.badRequest().body(Map.of("error", "يوجد تعارض في الوقت مع محاضرة أخرى لنفس الكورس في نفس اليوم"));
+                }
+            } catch (DateTimeParseException e) {
+                logger.warn("Skipping lecture with invalid time format: {}", existing.getLectureId());
+                continue;
+            }
+        }
 
-    for (LectureEntity existing : existingLectures) {
+        // Create new lecture
+        LectureEntity newLecture = new LectureEntity();
+        newLecture.setCourseId(courseId);
+        newLecture.setLectureId(lectureId);
+        newLecture.setName(course.getName());
+        newLecture.setRoomId(roomId.isEmpty() ? course.getRoomId() : roomId);
+        newLecture.setTeacherId(course.getTeacherId());
+        newLecture.setStartTime(startTime);
+        newLecture.setEndTime(endTime);
+        newLecture.setDay(normalizedDay);
+        newLecture.setCategory(course.getCategory());
+        newLecture.setCredits(course.getCredits());
+        newLecture.setLateThreshold(course.getLateThreshold());
+
         try {
-            LocalTime existingStart = LocalTime.parse(existing.getStartTime(), DateTimeFormatter.ofPattern("HH:mm"));
-            LocalTime existingEnd = LocalTime.parse(existing.getEndTime(), DateTimeFormatter.ofPattern("HH:mm"));
+            lectureRepository.save(newLecture);
+            logger.info("Lecture saved successfully: {}", lectureId);
+        } catch (Exception e) {
+            logger.error("Error saving lecture: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(Map.of("error", "فشل في حفظ المحاضرة: " + e.getMessage()));
+        }
 
-            if (!(parsedEndTime.isBefore(existingStart) || parsedStartTime.isAfter(existingEnd))) {
-                logger.error("Time conflict with existing lecture: {}", existing.getLectureId());
-                return ResponseEntity.badRequest().body(Map.of("error", "Time conflict with another lecture for the same course on the same date"));
+        // Initialize attendance table
+        ResponseEntity<String> initResponse = initializeAttendanceTable(lectureId);
+        if (!initResponse.getStatusCode().is2xxSuccessful()) {
+            logger.error("Failed to initialize attendance table for lecture: {}", lectureId);
+            lectureRepository.delete(newLecture);
+            return ResponseEntity.status(initResponse.getStatusCode()).body(Map.of("error", initResponse.getBody()));
+        }
+
+        // Return JSON response
+        Map<String, Object> response = new HashMap<>();
+        response.put("lectureId", lectureId);
+        response.put("message", "تم إنشاء المحاضرة بنجاح");
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/addNewLecture")
+    public ResponseEntity<Map<String, Object>> addNewLecture(@RequestBody Map<String, String> request) {
+        logger.info("Received request to add new lecture: {}", request);
+        String courseId = request.get("courseId");
+        String date = request.get("date");
+        String startTime = request.get("startTime");
+        String endTime = request.get("endTime");
+        String day = request.get("day");
+        String roomId = request.getOrDefault("roomId", "");
+
+        // Validation
+        if (courseId == null || date == null || startTime == null || endTime == null) {
+            logger.error("Missing required fields: courseId, date, startTime, or endTime");
+            return ResponseEntity.badRequest().body(Map.of("error", "Course ID, date, start time, and end time are required"));
+        }
+
+        // Validate date and time formats
+        LocalDate parsedDate;
+        LocalTime parsedStartTime;
+        LocalTime parsedEndTime;
+        try {
+            parsedDate = LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
+            parsedStartTime = LocalTime.parse(startTime, DateTimeFormatter.ofPattern("HH:mm"));
+            parsedEndTime = LocalTime.parse(endTime, DateTimeFormatter.ofPattern("HH:mm"));
+            if (parsedEndTime.isBefore(parsedStartTime) || parsedEndTime.equals(parsedStartTime)) {
+                logger.error("End time must be after start time: startTime={}, endTime={}", startTime, endTime);
+                return ResponseEntity.badRequest().body(Map.of("error", "End time must be after start time"));
             }
         } catch (DateTimeParseException e) {
-            logger.warn("Skipping lecture with invalid time format: {}", existing.getLectureId());
-            continue;
+            logger.error("Invalid date or time format: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid date or time format. Use YYYY-MM-DD for date and HH:mm for time"));
         }
+
+        // Derive day from date
+        String normalizedDay = parsedDate.getDayOfWeek().name().toUpperCase();
+        logger.debug("Derived day from date {}: {}, sent day: {}", date, normalizedDay, day);
+
+        // Check if course exists
+        Optional<CourseEntity> courseOpt = courseRepository.findByCourseIdAndLectureIdIsNull(courseId);
+        if (!courseOpt.isPresent()) {
+            logger.error("Course not found: {}", courseId);
+            return ResponseEntity.badRequest().body(Map.of("error", "Course not found"));
+        }
+        CourseEntity course = courseOpt.get();
+
+        // Generate lectureId
+        String lectureId = courseId + "-" + date + "-" + startTime.replace(":", "");
+        logger.debug("Generated lectureId: {}", lectureId);
+
+        // Check for existing lecture
+        Optional<LectureEntity> existingLecture = lectureRepository.findByLectureId(lectureId);
+        if (existingLecture.isPresent()) {
+            logger.info("Lecture already exists: {}", lectureId);
+            return ResponseEntity.ok(Map.of(
+                "lectureId", lectureId,
+                "message", "Lecture already exists"
+            ));
+        }
+
+        // Check for time conflicts on the same date
+        List<LectureEntity> existingLectures = lectureRepository.findAll().stream()
+                .filter(l -> l.getCourseId().equals(courseId) && l.getLectureId().contains(date))
+                .collect(Collectors.toList());
+
+        for (LectureEntity existing : existingLectures) {
+            try {
+                LocalTime existingStart = LocalTime.parse(existing.getStartTime(), DateTimeFormatter.ofPattern("HH:mm"));
+                LocalTime existingEnd = LocalTime.parse(existing.getEndTime(), DateTimeFormatter.ofPattern("HH:mm"));
+
+                if (!(parsedEndTime.isBefore(existingStart) || parsedStartTime.isAfter(existingEnd))) {
+                    logger.error("Time conflict with existing lecture: {}", existing.getLectureId());
+                    return ResponseEntity.badRequest().body(Map.of("error", "Time conflict with another lecture for the same course on the same date"));
+                }
+            } catch (DateTimeParseException e) {
+                logger.warn("Skipping lecture with invalid time format: {}", existing.getLectureId());
+                continue;
+            }
+        }
+
+        // Create new lecture
+        LectureEntity newLecture = new LectureEntity();
+        newLecture.setCourseId(courseId);
+        newLecture.setLectureId(lectureId);
+        newLecture.setName(course.getName());
+        newLecture.setRoomId(roomId.isEmpty() ? course.getRoomId() : roomId);
+        newLecture.setTeacherId(course.getTeacherId());
+        newLecture.setStartTime(startTime);
+        newLecture.setEndTime(endTime);
+        newLecture.setDay(normalizedDay);
+        newLecture.setCategory(course.getCategory());
+        newLecture.setCredits(course.getCredits());
+        newLecture.setLateThreshold(course.getLateThreshold());
+
+        try {
+            lectureRepository.save(newLecture);
+            logger.info("Lecture saved successfully: {}", lectureId);
+        } catch (Exception e) {
+            logger.error("Error saving lecture: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to save lecture: " + e.getMessage()));
+        }
+
+        // Initialize attendance table
+        ResponseEntity<String> initResponse = initializeAttendanceTable(lectureId);
+        if (!initResponse.getStatusCode().is2xxSuccessful()) {
+            logger.error("Failed to initialize attendance table for lecture: {}", lectureId);
+            lectureRepository.delete(newLecture);
+            return ResponseEntity.status(initResponse.getStatusCode()).body(Map.of("error", initResponse.getBody()));
+        }
+
+        // Return JSON response
+        Map<String, Object> response = new HashMap<>();
+        response.put("lectureId", lectureId);
+        response.put("message", "Lecture created successfully");
+        return ResponseEntity.ok(response);
     }
-
-    // Create new lecture
-    LectureEntity newLecture = new LectureEntity();
-    newLecture.setCourseId(courseId);
-    newLecture.setLectureId(lectureId);
-    newLecture.setName(course.getName());
-    newLecture.setRoomId(roomId.isEmpty() ? course.getRoomId() : roomId);
-    newLecture.setTeacherId(course.getTeacherId());
-    newLecture.setStartTime(startTime);
-    newLecture.setEndTime(endTime);
-    newLecture.setDay(normalizedDay);
-    newLecture.setCategory(course.getCategory());
-    newLecture.setCredits(course.getCredits());
-    newLecture.setLateThreshold(course.getLateThreshold());
-
-    try {
-        lectureRepository.save(newLecture);
-        logger.info("Lecture saved successfully: {}", lectureId);
-    } catch (Exception e) {
-        logger.error("Error saving lecture: {}", e.getMessage(), e);
-        return ResponseEntity.status(500).body(Map.of("error", "Failed to save lecture: " + e.getMessage()));
-    }
-
-    // Initialize attendance table
-    ResponseEntity<String> initResponse = initializeAttendanceTable(lectureId);
-    if (!initResponse.getStatusCode().is2xxSuccessful()) {
-        logger.error("Failed to initialize attendance table for lecture: {}", lectureId);
-        lectureRepository.delete(newLecture);
-        return ResponseEntity.status(initResponse.getStatusCode()).body(Map.of("error", initResponse.getBody()));
-    }
-
-    // Return JSON response
-    Map<String, Object> response = new HashMap<>();
-    response.put("lectureId", lectureId);
-    response.put("message", "Lecture created successfully");
-    return ResponseEntity.ok(response);
-}
 
     @PostMapping("/initialize/{lectureId}")
     public ResponseEntity<String> initializeAttendanceTable(@PathVariable String lectureId) {
@@ -905,6 +923,7 @@ public ResponseEntity<Map<String, Object>> addNewLecture(@RequestBody Map<String
             }
         }
 
+        logger.info("Initialized empty attendance table for lectureId: {}", lectureId);
         return ResponseEntity.ok("Empty attendance table initialized for lecture: " + lectureId);
     }
 
@@ -912,6 +931,7 @@ public ResponseEntity<Map<String, Object>> addNewLecture(@RequestBody Map<String
     public ResponseEntity<String> deleteAttendanceStatuses(@PathVariable String lectureId) {
         List<AttendanceEntity> attendances = attendanceRepository.findByLectureId(lectureId);
         if (attendances.isEmpty()) {
+            logger.info("No attendance records found for lectureId: {}, nothing to clear", lectureId);
             return ResponseEntity.ok("No attendance records found for lecture: " + lectureId + ", nothing to clear");
         }
 
@@ -937,6 +957,7 @@ public ResponseEntity<Map<String, Object>> addNewLecture(@RequestBody Map<String
             }
         }
 
+        logger.info("Cleared attendance statuses for lectureId: {}, changed: {}", lectureId, anyStatusChanged);
         if (!anyStatusChanged) {
             return ResponseEntity.ok("All statuses were already null for lecture: " + lectureId);
         }
