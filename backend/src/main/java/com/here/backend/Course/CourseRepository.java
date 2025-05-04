@@ -1,6 +1,7 @@
 package com.here.backend.Course;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +31,12 @@ public interface CourseRepository extends MongoRepository<CourseEntity, String> 
     List<CourseEntity> findByRoomId(String roomId);
 
     String findNameByCourseId(String courseId);
+
+    @Query("{ 'courseId': ?0, 'lectureId': { $exists: false } }")
+Optional<CourseEntity> findByCourseIdAndLectureIdDoesNotExist(String courseId);
+
+
+    Optional<CourseEntity> findByCourseIdAndLectureIdIsNull(String courseId);
 
     List<String> findDistinctDaysByName(String courseName);
 }

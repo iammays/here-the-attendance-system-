@@ -1,9 +1,11 @@
-
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '../cssFolder/WFReports.css'; // Import the custom styles
+import '../cssFolder/WFReports.css';
 
 const WFReports = () => {
+  const { t, i18n } = useTranslation();
+
   const [reports, setReports] = useState([]);
   const [filteredReports, setFilteredReports] = useState([]);
   const [search, setSearch] = useState('');
@@ -13,6 +15,10 @@ const WFReports = () => {
   const teacherData = JSON.parse(localStorage.getItem('teacher'));
   const token = teacherData?.accessToken;
   const teacherId = teacherData?.id;
+
+  useEffect(() => {
+    document.body.dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
+  }, [i18n.language]);
 
   useEffect(() => {
     if (!teacherId || !token) return;
@@ -73,7 +79,7 @@ const WFReports = () => {
       if (res.ok) {
         const updatedReports = reports.map(r =>
           r.studentId === studentId && r.courseId === courseId
-            ? { ...r, status: action === 'approve' ? 'Approved' : 'Ignored' }
+            ? { ...r, status: action === 'approve' ? t('statusApproved') : t('statusIgnored') }
             : r
         );
         setReports(updatedReports);
@@ -91,7 +97,7 @@ const WFReports = () => {
 
   return (
     <div className="wf-reports-wrapper">
-      <h1 className="wf-title">WF Reports</h1>
+      <h1 className="wf-title">{t('wfTitle')}</h1>
 
       {loading && (
         <div className="wf-spinner">
@@ -101,18 +107,22 @@ const WFReports = () => {
 
       <div className="row wf-filters">
         <div className="col-md-3">
-          <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-            <option value="">Filter By</option>
-            <option value="Ignored">Ignored</option>
-            <option value="Approved">Approved</option>
-            <option value="Pending">Pending</option>
+
+          <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+                style={{
+                  padding: '0.75rem 2rem' // ✅ Added vertical and horizontal padding
+                }}>
+            <option value="">{t('filterBy')}</option>
+            <option value="Ignored">{t('statusIgnored')}</option>
+            <option value="Approved">{t('statusApproved')}</option>
+            <option value="Pending">{t('statusPending')}</option>
           </select>
         </div>
         <div className="col-md-6">
           <input
             type="text"
             className="form-control"
-            placeholder="Search"
+            placeholder={t('searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -122,7 +132,7 @@ const WFReports = () => {
             setStatusFilter('');
             setSearch('');
           }}>
-            Reset Filter
+            {t('resetFilter')}
           </button>
         </div>
       </div>
@@ -131,13 +141,13 @@ const WFReports = () => {
         <table className="table table-bordered table-striped">
           <thead>
             <tr>
-              <th>Student ID</th>
-              <th>Student Name</th>
-              <th>Course Name</th>
-              <th>Teacher Name</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Actions</th>
+              <th>{t('studentId')}</th>
+              <th>{t('studentName')}</th>
+              <th>{t('courseName')}</th>
+              <th>{t('teacherName')}</th>
+              <th>{t('date')}</th>
+              <th>{t('status')}</th>
+              <th>{t('actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -156,7 +166,7 @@ const WFReports = () => {
                       ? 'bg-secondary'
                       : 'bg-warning text-dark'
                   }`}>
-                    {report.status}
+                    {t(`status${report.status}`)}
                   </span>
                 </td>
                 <td>
@@ -167,18 +177,18 @@ const WFReports = () => {
                         disabled={loading}
                         onClick={() => handleAction(report.studentId, report.courseId, 'approve')}
                       >
-                        Approve
+                        {t('approve')}
                       </button>
                       <button
                         className="btn btn-danger btn-sm"
                         disabled={loading}
                         onClick={() => handleAction(report.studentId, report.courseId, 'ignore')}
                       >
-                        Ignore
+                        {t('ignore')}
                       </button>
                     </>
                   ) : (
-                    <span className="text-muted">{report.status}</span>
+                    <span className="text-muted">{t(`status${report.status}`)}</span>
                   )}
                 </td>
               </tr>

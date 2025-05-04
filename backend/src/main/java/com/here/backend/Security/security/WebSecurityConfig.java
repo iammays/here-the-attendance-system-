@@ -81,6 +81,7 @@ public class WebSecurityConfig {
     auth
       .requestMatchers("/api/auth/**").permitAll()
       .requestMatchers("/api/excel/**").permitAll()
+      .requestMatchers("/teachers/api/**").permitAll()
 
       .requestMatchers("/teachers/**").authenticated()
       .requestMatchers("/students/**").authenticated()

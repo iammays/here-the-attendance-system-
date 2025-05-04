@@ -17,13 +17,13 @@ public class StudentEntity {
     private String advisor;
     private List<String> courseId;
     private Map<String, Integer> courseAbsences;
-    private Map<String, String> courseAttendanceStatus;
+    // private Map<String, String> courseAttendanceStatus;
     private Map<String, String> courseWfStatus; // CHANGED from Boolean to String
 
     public StudentEntity() {
         this.courseId = new ArrayList<>();
         this.courseAbsences = new HashMap<>();
-        this.courseAttendanceStatus = new HashMap<>();
+        // this.courseAttendanceStatus = new HashMap<>();
         this.courseWfStatus = new HashMap<>();
     }
 
@@ -34,13 +34,13 @@ public class StudentEntity {
         this.advisor = advisor;
         this.courseId = (courseId != null) ? courseId : new ArrayList<>();
         this.courseAbsences = new HashMap<>();
-        this.courseAttendanceStatus = new HashMap<>();
+        // this.courseAttendanceStatus = new HashMap<>();
         this.courseWfStatus = new HashMap<>();
         if (courseId != null) {
             for (String course : courseId) {
                 this.courseAbsences.put(course, 0);
-                this.courseAttendanceStatus.put(course, "Absent");
-                this.courseWfStatus.put(course, "Pending"); // Default
+                // this.courseAttendanceStatus.put(course, "Absent");
+                this.courseWfStatus.put(course, "Pending"); 
             }
         }
     }
@@ -60,12 +60,12 @@ public class StudentEntity {
     public void setCourseId(List<String> courseId) {
         this.courseId = (courseId != null) ? courseId : new ArrayList<>();
         this.courseAbsences.clear();
-        this.courseAttendanceStatus.clear();
+        // this.courseAttendanceStatus.clear();
         this.courseWfStatus.clear();
         if (courseId != null) {
             for (String course : courseId) {
                 this.courseAbsences.put(course, 0);
-                this.courseAttendanceStatus.put(course, "Absent");
+                // this.courseAttendanceStatus.put(course, "Absent");
                 this.courseWfStatus.put(course, "Pending");
             }
         }
@@ -74,10 +74,10 @@ public class StudentEntity {
     public void setCourseAbsences(Map<String, Integer> courseAbsences) {
         this.courseAbsences = (courseAbsences != null) ? courseAbsences : new HashMap<>();
     }
-    public Map<String, String> getCourseAttendanceStatus() { return courseAttendanceStatus; }
-    public void setCourseAttendanceStatus(Map<String, String> courseAttendanceStatus) {
-        this.courseAttendanceStatus = (courseAttendanceStatus != null) ? courseAttendanceStatus : new HashMap<>();
-    }
+    // public Map<String, String> getCourseAttendanceStatus() { return courseAttendanceStatus; }
+    // public void setCourseAttendanceStatus(Map<String, String> courseAttendanceStatus) {
+    //     this.courseAttendanceStatus = (courseAttendanceStatus != null) ? courseAttendanceStatus : new HashMap<>();
+    // }
     public Map<String, String> getCourseWfStatus() { return courseWfStatus; } // CHANGED
     public void setCourseWfStatus(Map<String, String> courseWfStatus) { // CHANGED
         this.courseWfStatus = (courseWfStatus != null) ? courseWfStatus : new HashMap<>();
@@ -88,10 +88,10 @@ public class StudentEntity {
     public void updateCourseWfStatus(String courseId, String wfStatus) {
         this.courseWfStatus.put(courseId, wfStatus);
     }
-    public void addCourseAttendanceStatus(String courseId, String attendanceStatus) {
-        this.courseAttendanceStatus.put(courseId, attendanceStatus);
-    }
+    // public void addCourseAttendanceStatus(String courseId, String attendanceStatus) {
+    //     this.courseAttendanceStatus.put(courseId, attendanceStatus);
+    // }
     public void removeCourseAbsence(String courseId) { this.courseAbsences.remove(courseId); }
     public void removeCourseWfStatus(String courseId) { this.courseWfStatus.remove(courseId); }
-    public void removeCourseAttendanceStatus(String courseId) { this.courseAttendanceStatus.remove(courseId); }
+    // public void removeCourseAttendanceStatus(String courseId) { this.courseAttendanceStatus.remove(courseId); }
 }

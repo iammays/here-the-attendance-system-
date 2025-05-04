@@ -1,30 +1,30 @@
 .lecture-navigation {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  
-  .lecture-info span {
-    margin-right: 20px;
-  }
-  
-  .navigation-buttons {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  
-  .navigation-buttons button {
-    padding: 5px 10px;
-    border: none;
-    background-color: #007bff;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .navigation-buttons button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.lecture-info span {
+  margin-right: 20px;
+}
+
+.navigation-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navigation-buttons button {
+  padding: 5px 10px;
+  border: none;
+  background-color: #4f6986;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.navigation-buttons button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

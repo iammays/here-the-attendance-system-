@@ -1,44 +1,44 @@
 package com.here.backend.Room;
 
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.annotation.Id;
 
 @Document(collection = "rooms")
 public class RoomEntity {
 
-    @Field("room_id")
-    private String Room_id;
-    private String scheduleId;
+    @Id
+    private String roomId;
+    private String courseId;
 
     public RoomEntity() {
     }
 
     public RoomEntity(String roomId, String courseId) {
-        this.Room_id = roomId;
-        this.scheduleId = courseId;
+        this.roomId = roomId;
+        this.courseId = courseId;
     }
 
     public String getRoom_id() {
-        return Room_id;
+        return roomId;
     }
 
-    public void setRoom_id(String room_id) {
-        Room_id = room_id;
+    public void setRoom_id(String roomId) {
+        this.roomId = roomId;
     }
 
     public String getCourse_id() {
-        return scheduleId;
+        return courseId;
     }
 
-    public void setCourse_id(String course_id) {
-        scheduleId = course_id;
+    public void setCourse_id(String courseId) {
+        this.courseId = courseId;
     }
 
     public String getScheduleId() {
-        return scheduleId;
+        return courseId;
     }
 
-    public void setScheduleId(String scheduleId) {
-        this.scheduleId = scheduleId;
+    public void setScheduleId(String courseId) {
+        this.courseId = courseId;
     }
 }

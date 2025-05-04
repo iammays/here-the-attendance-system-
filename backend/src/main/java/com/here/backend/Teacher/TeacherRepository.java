@@ -1,7 +1,6 @@
 package com.here.backend.Teacher;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
@@ -20,10 +19,11 @@ public interface TeacherRepository extends MongoRepository<TeacherEntity, String
     Set<TeacherEntity> findByCourseId(String courseId);
 
 
-default boolean validatePassword(String name, String rawPassword) {
-    Optional<TeacherEntity> teacher = findByName(name);
-    return teacher.isPresent() && 
-           org.springframework.security.crypto.bcrypt.BCrypt.checkpw(rawPassword, teacher.get().getPassword());
-}
+    default boolean validatePassword(String name, String rawPassword) {
+        Optional<TeacherEntity> teacher = findByName(name);
+        return teacher.isPresent() && 
+        org.springframework.security.crypto.bcrypt.BCrypt.checkpw(rawPassword, teacher.get().getPassword());
+    }
+    Optional<TeacherEntity> Password(String teacherId, String newPassword);
 
 }

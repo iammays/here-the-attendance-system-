@@ -1,5 +1,4 @@
 body {
-  background-color: #fff;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
 }
@@ -9,7 +8,6 @@ body {
   margin-left: 220px; /* equal to sidebar width */
   padding: 84px 2rem 2rem; /* top: 60px navbar + 24px safe space */
   min-height: calc(100vh - 60px);
-  background-color: #fff;
   box-sizing: border-box;
 }
 

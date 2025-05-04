@@ -71,11 +71,6 @@ public class RoomController {
 
 
     
-    // Find rooms by schedule ID
-    @GetMapping("/schedule/{schedule_id}")
-    public List<RoomEntity> getRoomsByScheduleId(@PathVariable String schedule_id) {
-        return roomRepository.findByScheduleId(schedule_id);
-    }
 
 
         @GetMapping("/{roomId}/schedule")
@@ -88,6 +83,11 @@ public class RoomController {
         }
         
         return ResponseEntity.ok(schedules);
+    }
+
+    @GetMapping("/schedule/{schedule_id}")
+    public List<RoomEntity> getRoomsByScheduleId(@PathVariable String courseId) {
+        return roomRepository.findBycourseId(courseId);
     }
 
 @GetMapping("/all-with-sessions")

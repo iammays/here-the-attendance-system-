@@ -1,58 +1,106 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import "../cssFolder/CourseDashboard.css";
 
 const CourseDashboard = () => {
+  const { t } = useTranslation();
   const { courseName } = useParams();
   const navigate = useNavigate();
-  const [courseData, setCourseData] = useState([]);
+  const [courseData, setCourseData] = useState(null);
+  const [lectures, setLectures] = useState([]);
   const [courseDays, setCourseDays] = useState([]);
   const [weeks, setWeeks] = useState([]);
   const [upcomingClasses, setUpcomingClasses] = useState([]);
   const [courseId, setCourseId] = useState(null);
-
   const [lateThreshold, setLateThreshold] = useState("5");
   const [showLateModal, setShowLateModal] = useState(false);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const getAuthHeaders = () => {
+    const teacher = JSON.parse(localStorage.getItem("teacher"));
+    if (!teacher?.accessToken) {
+      setError(t("Login Required"));
+      navigate("/login");
+      return {};
+    }
+    return {
+      Authorization: `${teacher.tokenType || "Bearer"} ${teacher.accessToken}`,
+      "Content-Type": "application/json",
+    };
+  };
 
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
-        const storedUser = JSON.parse(localStorage.getItem("teacher"));
-        if (!storedUser) throw new Error("No teacher data found in localStorage");
+        setLoading(true);
+        setError(null);
+        const headers = getAuthHeaders();
+        if (!headers.Authorization) return;
 
-        const headers = {
-          Authorization: `${storedUser.tokenType} ${storedUser.accessToken}`,
-        };
-
-        const res = await fetch(`http://localhost:8080/courses/name/${courseName}`, {
-          credentials: "include",
+        // Fetch course template
+        const courseResponse = await fetch(`http://localhost:8080/courses/name/${courseName}`, {
           headers,
+          credentials: "include",
         });
+        if (!courseResponse.ok) {
+          const errorText = await courseResponse.text();
+          throw new Error(`Failed to fetch course data: ${courseResponse.status} ${errorText}`);
+        }
+        const courses = await courseResponse.json();
+        if (!courses.length) {
+          throw new Error(t("No Data"));
+        }
+        const courseTemplate = courses.find(c => !c.lectureId);
+        if (!courseTemplate) {
+          throw new Error(t("No Course Template"));
+        }
+        setCourseData(courseTemplate);
+        setCourseId(courseTemplate.courseId);
 
-        if (!res.ok) throw new Error("Failed to fetch course data");
+        // Fetch course days
+        const daysResponse = await fetch(`http://localhost:8080/courses/days/${courseName}`, {
+          headers,
+          credentials: "include",
+        });
+        if (!daysResponse.ok) {
+          const errorText = await daysResponse.text();
+          throw new Error(`Failed to fetch course days: ${daysResponse.status} ${errorText}`);
+        }
+        const daysData = await daysResponse.json();
+        setCourseDays(daysData);
+        console.log("Course days:", daysData);
 
-        const data = await res.json();
-        setCourseData(data);
-        setCourseId(data[0]?.courseId);
+        // Fetch all lectures for the course
+        const lecturesResponse = await fetch(`http://localhost:8080/courses/${courseTemplate.courseId}/lectures`, {
+          headers,
+          credentials: "include",
+        });
+        if (!lecturesResponse.ok) {
+          const errorText = await lecturesResponse.text();
+          throw new Error(`Failed to fetch lectures: ${lecturesResponse.status} ${errorText}`);
+        }
+        const lecturesData = await lecturesResponse.json();
+        setLectures(lecturesData);
 
-        const startFromDate = new Date("2025-01-02");
+        // Generate weeks
+        const startFromDate = new Date("2025-01-28");
         startFromDate.setHours(0, 0, 0, 0);
-
         const today = new Date();
         const weeksData = [];
-
         const maxWeekToShow = Math.floor((today - startFromDate) / (1000 * 60 * 60 * 24 * 7)) + 1;
 
         for (let i = 0; i < Math.min(maxWeekToShow, 15); i++) {
           const weekStart = new Date(startFromDate);
           weekStart.setDate(startFromDate.getDate() + i * 7);
-
           const weekEnd = new Date(weekStart);
           weekEnd.setDate(weekStart.getDate() + 6);
 
-          const lecturesThisWeek = data.filter((lecture) => {
-            const lectureDate = new Date(lecture.startTime);
-            return lectureDate >= weekStart && lectureDate <= weekEnd;
+          const lecturesThisWeek = lecturesData.filter((lecture) => {
+            const lectureDate = lecture.lectureId.split('-')[1];
+            const date = new Date(lectureDate);
+            return date >= weekStart && date <= weekEnd;
           });
 
           weeksData.push({
@@ -60,62 +108,50 @@ const CourseDashboard = () => {
             lectures: lecturesThisWeek,
           });
         }
-
         setWeeks(weeksData);
       } catch (err) {
-        console.error(err.message);
+        const errorMessage = err.message.includes("401") ? t('Unauthorized') :
+                            err.message.includes("404") ? t('No Data') :
+                            err.message.includes("500") ? t('Server Error') :
+                            err.message;
+        setError(`${t("Fetch Error")}: ${errorMessage}`);
+        console.error("Error fetching course data:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
     const fetchUpcoming = async () => {
       try {
-        const storedUser = JSON.parse(localStorage.getItem("teacher"));
-        const headers = {
-          Authorization: `${storedUser.tokenType} ${storedUser.accessToken}`,
-        };
-
-        const res = await fetch(
-          `http://localhost:8080/teachers/${storedUser.id}/upcoming-classes`,
-          { credentials: "include", headers }
-        );
-
-        const data = await res.json();
+        const teacher = JSON.parse(localStorage.getItem("teacher"));
+        if (!teacher?.id) {
+          console.warn("No teacher ID found in localStorage");
+          return;
+        }
+        const headers = getAuthHeaders();
+        const response = await fetch(`http://localhost:8080/teachers/${teacher.id}/upcoming-classes`, {
+          headers,
+          credentials: "include",
+        });
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Failed to fetch upcoming classes: ${response.status} ${errorText}`);
+        }
+        const data = await response.json();
         const sortedClasses = data.sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
         setUpcomingClasses(sortedClasses);
       } catch (err) {
-        console.error("Error fetching upcoming classes", err);
-      }
-    };
-
-    const fetchCourseDays = async () => {
-      try {
-        const storedUser = JSON.parse(localStorage.getItem("teacher"));
-        const headers = {
-          Authorization: `${storedUser.tokenType} ${storedUser.accessToken}`,
-        };
-
-        const res = await fetch(`http://localhost:8080/courses/days/${courseName}`, {
-          credentials: "include",
-          headers,
-        });
-
-        if (!res.ok) throw new Error("Failed to fetch course days");
-
-        const days = await res.json();
-        setCourseDays(days);
-      } catch (err) {
-        console.error("Error fetching course days", err);
+        console.error("Error fetching upcoming classes:", err);
       }
     };
 
     fetchCourseData();
     fetchUpcoming();
-    fetchCourseDays();
-  }, [courseName]);
+  }, [courseName, t, navigate]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (!e.target.closest(".late-popup") && !e.target.closest(".late-icon")) {
+      if (!e.target.closest(".late-popup") && !e.target.closest(".change-late-btn")) {
         setShowLateModal(false);
       }
     };
@@ -125,68 +161,219 @@ const CourseDashboard = () => {
 
   const handleLateThresholdSave = async () => {
     try {
-      const storedUser = JSON.parse(localStorage.getItem("teacher"));
-      const headers = {
-        "Content-Type": "application/json",
-        Authorization: `${storedUser.tokenType} ${storedUser.accessToken}`,
-      };
+      setLoading(true);
+      setError(null);
+      if (!courseId) {
+        setError(t("No CourseId"));
+        return;
+      }
+      if (!lateThreshold || isNaN(lateThreshold) || Number(lateThreshold) < 0) {
+        setError(t("Invalid Late Threshold"));
+        return;
+      }
 
+      const headers = getAuthHeaders();
       const thresholdInSeconds = parseInt(lateThreshold) * 60;
-
-      const res = await fetch(`http://localhost:8080/courses/${courseId}/lateThreshold`, {
+      const response = await fetch(`http://localhost:8080/courses/${courseId}/lateThreshold`, {
         method: "PUT",
         headers,
         credentials: "include",
         body: JSON.stringify({ lateThreshold: thresholdInSeconds }),
       });
 
-      if (!res.ok) throw new Error("Failed to update late threshold");
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to update late threshold: ${response.status} ${errorText}`);
+      }
 
-      alert("تم تحديث وقت التأخير بنجاح ✅");
       setShowLateModal(false);
+      // alert(t("Late Threshold Updated"));
     } catch (err) {
-      console.error("Error updating late threshold:", err.message);
-      alert("فشل التحديث ❌");
+      setError(`${t("Late Threshold Error")}: ${err.message}`);
+      console.error("Error updating late threshold:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDayClick = async (day, week) => {
     try {
-      const storedUser = JSON.parse(localStorage.getItem("teacher"));
-      const headers = {
-        Authorization: `${storedUser.tokenType} ${storedUser.accessToken}`,
-      };
+      setError(null);
+      // Calculate the lecture date
+      const semesterStart = new Date("2025-01-28"); // Tuesday
+      semesterStart.setHours(0, 0, 0, 0);
 
-      const weekData = weeks.find((w) => w.week === week);
-      const lecture = weekData?.lectures.find((l) => {
-        const lectureDate = new Date(l.startTime);
-        return lectureDate.toLocaleDateString("en-US", { weekday: "long" }) === day;
+      // Define days of week aligned with Date.getDay() (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+      const daysOfWeek = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+      const targetDayIndex = daysOfWeek.indexOf(day.toUpperCase());
+      if (targetDayIndex === -1) {
+        throw new Error(`Invalid day: ${day}`);
+      }
+
+      // Get the day of the week for the semester start (Tuesday = 2)
+      const startDayIndex = semesterStart.getDay();
+
+      // Calculate days to target day in the first week
+      const daysToTargetDay = targetDayIndex < startDayIndex 
+        ? 7 - (startDayIndex - targetDayIndex) 
+        : (targetDayIndex - startDayIndex) + 1;
+      const daysToAdd = (week - 1) * 7 + daysToTargetDay;
+
+      // Calculate the target date in UTC to avoid timezone issues
+      const lectureDate = new Date(Date.UTC(
+        semesterStart.getUTCFullYear(),
+        semesterStart.getUTCMonth(),
+        semesterStart.getUTCDate() + daysToAdd
+      ));
+      const formattedDate = lectureDate.toISOString().split('T')[0]; // YYYY-MM-DD
+      const calculatedDay = daysOfWeek[lectureDate.getDay()];
+
+      // Log for debugging
+      console.log(`Clicked day: ${day}, Week: ${week}, Days to add: ${daysToAdd}, Target day index: ${targetDayIndex}, Start day index: ${startDayIndex}, Days to target: ${daysToTargetDay}, Calculated date: ${formattedDate}, Calculated day: ${calculatedDay}`);
+
+      // Validate that the calculated day matches the clicked day
+      if (calculatedDay.toUpperCase() !== day.toUpperCase()) {
+        throw new Error(`Date calculation error: Expected ${day}, got ${calculatedDay} for date ${formattedDate}`);
+      }
+
+      // Validate courseData and time formats
+      if (!courseData || !courseData.startTime || !courseData.endTime) {
+        throw new Error(t("Missing Course Data"));
+      }
+      let startTime = courseData.startTime;
+      let endTime = courseData.endTime;
+      const timeRegex = /^\d{2}:\d{2}$/;
+      if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
+        console.warn(`Invalid time format - startTime: ${startTime}, endTime: ${endTime}`);
+        startTime = "15:00"; // Default to match observed time
+        endTime = "16:00";   // Default to match observed time
+      }
+
+      const formattedStartTime = startTime.replace(":", "");
+      const lectureId = `${courseId}-${formattedDate}-${formattedStartTime}`;
+
+      console.log(`Attempting to navigate to lecture: ${lectureId}`);
+
+      // Check if lecture exists
+      const existingLecture = lectures.find(l => l.lectureId === lectureId);
+      if (existingLecture) {
+        console.log(`Lecture already exists: ${lectureId}`);
+        navigate(`/attendance/${courseId}/${lectureId}`);
+        return;
+      }
+
+      // Create new lecture
+      const headers = getAuthHeaders();
+      const lectureData = {
+        courseId,
+        date: formattedDate,
+        startTime,
+        endTime,
+        day: calculatedDay,
+        roomId: courseData?.roomId || "B-205",
+      };
+      console.log("Lecture data to be sent:", JSON.stringify(lectureData, null, 2));
+
+      const response = await fetch(`http://localhost:8080/api/attendances/addNewLecture`, {
+        method: "POST",
+        headers,
+        credentials: "include",
+        body: JSON.stringify(lectureData),
       });
 
-      if (lecture) {
-        navigate(`/attendance/${courseId}/${lecture.lectureId}`);
-      } else {
-        navigate(`/attendance/${courseId}/no-lecture`);
+      if (!response.ok) {
+        const errorBody = await response.text();
+        let errorMessage;
+        try {
+          const errorJson = JSON.parse(errorBody);
+          errorMessage = errorJson.error || errorBody;
+        } catch {
+          errorMessage = errorBody || "Unknown error";
+        }
+        throw new Error(`Failed to create lecture: ${response.status} ${errorMessage}`);
       }
+
+      const responseData = await response.json();
+      const newLectureId = responseData.lectureId;
+      console.log(`Lecture created successfully: ${newLectureId}`);
+
+      // Update lectures state
+      const newLecture = {
+        courseId,
+        lectureId: newLectureId,
+        name: courseData.name,
+        roomId: courseData?.roomId || "B-205",
+        teacherId: courseData.teacherId,
+        startTime,
+        endTime,
+        day: calculatedDay,
+        category: courseData.category,
+        credits: courseData.credits,
+        lateThreshold: courseData.lateThreshold,
+      };
+      setLectures(prev => [...prev, newLecture]);
+
+      navigate(`/attendance/${courseId}/${newLectureId}`);
     } catch (err) {
+      setError(`${t("Navigation Error")}: ${err.message}`);
       console.error("Error navigating to attendance:", err);
     }
   };
 
-  if (!courseData.length) return <div className="loading">Loading...</div>;
+  if (loading) return <div className="loading">{t("Loading")}</div>;
+  if (error) return <div className="error">{error}</div>;
+  if (!courseData) return <div className="loading">{t("No Data")}</div>;
 
   return (
     <div className="course-dashboard-container">
-      {/* Left Section */}
       <div className="weeks-section">
         <h2 className="course-title">
-          {courseData[0]?.name} - {courseData[0]?.courseId}
+          <span className="course-info">
+            {courseData.name} - {courseData.courseId}
+          </span>
+          <div className="late-container">
+            <button
+              className="change-late-btn"
+              onClick={() => setShowLateModal(true)}
+              disabled={loading}
+            >
+              {t("Change Late Time")}
+            </button>
+            {showLateModal && (
+              <div className="late-popup">
+                <h3>{t("Edit Late Time")}</h3>
+                {error && <div className="error">{error}</div>}
+                <label htmlFor="lateThreshold">{t("Late After")}:</label>
+                <input
+                  type="number"
+                  id="lateThreshold"
+                  name="lateThreshold"
+                  value={lateThreshold}
+                  onChange={(e) => setLateThreshold(e.target.value)}
+                  min="0"
+                />
+                <span>{t("minutes")}</span>
+                <div>
+                  <button onClick={handleLateThresholdSave} disabled={loading}>
+                    {loading ? t("Saving") : t("Save")}
+                  </button>
+                  <button
+                    onClick={() => setShowLateModal(false)}
+                    disabled={loading}
+                  >
+                    {t("Cancel")}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </h2>
+
         {[...weeks].reverse().map((weekData) => (
           <div key={weekData.week} className="week-item">
             <details className="week-details">
               <summary className="week-summary">
-                <span className="week-title">Week {weekData.week}</span>
+                <span className="week-title">{t("week")} {weekData.week}</span>
                 <svg
                   className="arrow-icon"
                   fill="none"
@@ -209,7 +396,12 @@ const CourseDashboard = () => {
                     className="day-item"
                     onClick={() => handleDayClick(day, weekData.week)}
                   >
-                    {day}
+                    {t(day)}
+                    {weekData.lectures.some(l => l.day === day) ? (
+                      <span className="lecture-status">{t("")}</span>
+                    ) : (
+                      <span className="lecture-status">{t("")}</span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -218,78 +410,32 @@ const CourseDashboard = () => {
         ))}
       </div>
 
-      {/* Right Section */}
       <div className="upcoming-section">
         <div className="upcoming-card">
-          <h3 className="upcoming-title">Upcoming Classes</h3>
-          <ul className="upcoming-list">
-            {upcomingClasses.map((cls, index) => (
-              <li key={index} className="upcoming-item">
-                <div className="course-name">{cls.courseName}</div>
-                <div className="room-info">Room: {cls.roomId}</div>
-                <div className="time-info">
-                  Time:{" "}
-                  {new Date(cls.dateTime).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </div>
-              </li>
-            ))}
-          </ul>
+          <h3 className="upcoming-title">{t("Upcoming Classes")}</h3>
+          {upcomingClasses.length === 0 ? (
+            <p>{t("No Upcoming Classes")}</p>
+          ) : (
+            <ul className="upcoming-list">
+              {upcomingClasses.map((cls, index) => (
+                <li key={index} className="upcoming-item">
+                  <div className="course-name">{t(cls.courseName)}</div>
+                  <div className="room-info">
+                    {t("Room")}: {cls.roomId || t("noRoom")}
+                  </div>
+                  <div className="time-info">
+                    {t("Time")}:{" "}
+                    {new Date(cls.dateTime).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
-
-      {/* Late Threshold Popup */}
-      <span
-        className="late-icon"
-        onClick={() => setShowLateModal(true)}
-        title="Set Late Threshold"
-        style={{
-          marginLeft: "10px",
-          cursor: "pointer",
-          fontSize: "20px",
-          color: "#555",
-          position: "fixed",
-          top: "80px",
-          right: "20px",
-        }}
-      >
-        ⏰
-      </span>
-
-      {showLateModal && (
-        <div className="late-popup">
-          <label style={{ fontSize: "14px" }}>Late after:</label>
-          <input
-            type="number"
-            value={lateThreshold}
-            onChange={(e) => setLateThreshold(e.target.value)}
-            min="0"
-            style={{
-              width: "50px",
-              padding: "4px",
-              marginLeft: "5px",
-              fontSize: "14px",
-            }}
-          />
-          <span style={{ fontSize: "14px", marginLeft: "4px" }}>minutes</span>
-          <div style={{ marginTop: "8px", textAlign: "right" }}>
-            <button
-              onClick={handleLateThresholdSave}
-              style={{ padding: "4px 8px", fontSize: "12px", marginRight: "5px" }}
-            >
-              Save
-            </button>
-            <button
-              onClick={() => setShowLateModal(false)}
-              style={{ padding: "4px 8px", fontSize: "12px" }}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
