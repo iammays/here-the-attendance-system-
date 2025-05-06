@@ -116,7 +116,7 @@ const AttendanceTable = () => {
     filtered.sort((a, b) => {
       let aValue = a[sortConfig.key] || '';
       let bValue = b[sortConfig.key] || '';
-      if (sortConfig.key === 'first Detected At') {
+      if (sortConfig.key === 'firstDetectedAt') {
         aValue = aValue === 'undetected' ? '' : aValue;
         bValue = bValue === 'undetected' ? '' : bValue;
       }
@@ -156,7 +156,7 @@ const AttendanceTable = () => {
         await Promise.all(
           updates.map(update =>
             axios.put(
-              `http://localhost:8080/api/attendances/updateWithEmail/${lectureId}/${update.studentId}`,
+              `httpM://localhost:8080/api/attendances/updateWithEmail/${lectureId}/${update.studentId}`,
               { status: update.status },
               { headers: getAuthHeaders() }
             )
@@ -253,10 +253,10 @@ const AttendanceTable = () => {
   };
 
   const formatFirstCheckTimes = (firstCheckTimes) => {
-    if (!firstCheckTimes || firstCheckTimes.length === 0) return t('no Detections');
-    const validCheckTimes = firstCheckTimes.filter(time => time !== 'un detected')
-      .map((time, index) => `Session ${index + 1}: ${time}`);
-    return validCheckTimes.length > 0 ? validCheckTimes.join(', ') : t('no Detections');
+    if (!firstCheckTimes || firstCheckTimes.length === 0 || firstCheckTimes.every(time => time === 'undetected')) {
+      return t('Not Detected');
+    }
+    return firstCheckTimes.map((time, index) => `S${index + 1}: ${time}`).join(', ');
   };
 
   if (loading) return <div className="loading">{t('loading')}</div>;
@@ -291,7 +291,7 @@ const AttendanceTable = () => {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="col-md-3" style={{ width: '250px',height: '40px' }}>
+        <div className="col-md-3" style={{ width: '250px', height: '40px' }}>
           <button
             className="btn btn-outline-secondary w-100"
             onClick={() => {
@@ -465,7 +465,7 @@ const AttendanceTable = () => {
                       <span></span>
                     </label>
                   </td>
-                  <td>{row.firstDetectedAt === 'undetected' ? t('No Detections') : row.firstDetectedAt}</td>
+                  <td>{row.firstDetectedAt === 'undetected' ? t('Not Detected') : row.firstDetectedAt}</td>
                   <td className="notes-tooltip">
                     {formatFirstCheckTimes(row.firstCheckTimes)}
                     <span className="tooltip-text">{formatFirstCheckTimes(row.firstCheckTimes)}</span>

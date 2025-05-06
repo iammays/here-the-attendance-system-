@@ -102,32 +102,32 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  transition: transform 0.2s, background-color 0.2s;
+  transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
   border: 2px solid;
 }
 
 .radio-label.present span {
-  /* border-color: #d3d3d3; */
-  border-color: #4773a7;
+  border-color: #7A9A7A; /* Grayish green */
   background-color: transparent;
+  box-shadow: 0 0 3px rgba(122, 154, 122, 0.2); /* Softer grayish green shadow */
 }
 
 .radio-label.absent span {
-  /* border-color: #a9a9a9; */
-  border-color: #2A4B70;
+  border-color: #A66B66; /* Grayish red */
   background-color: transparent;
+  box-shadow: 0 0 3px rgba(166, 107, 102, 0.2); /* Softer grayish red shadow */
 }
 
 .radio-label.late span {
-  /* border-color: #808080; */
-  border-color: #1c2a4d;
+  border-color: #B38F5C; /* Grayish orange-yellow */
   background-color: transparent;
+  box-shadow: 0 0 3px rgba(179, 143, 92, 0.2); /* Softer grayish orange-yellow shadow */
 }
 
 .radio-label.excuse span {
-  /* border-color: #595959; */
-  border-color: #0f1a2e;
+  border-color: #757575; /* Gray */
   background-color: transparent;
+  box-shadow: 0 0 3px rgba(117, 117, 117, 0.2); /* Softer gray shadow */
 }
 
 .radio-label input:checked + span {
@@ -135,33 +135,42 @@
 }
 
 .radio-label.present input:checked + span {
-  background-color: #4773a7;
+  background-color: #7A9A7A;
+  border-color: #7A9A7A; /* Match grayish green fill */
+  box-shadow: 0 0 5px rgba(122, 154, 122, 0.4); /* Enhanced but softer grayish green shadow */
 }
 
 .radio-label.absent input:checked + span {
-  background-color: #2A4B70;
+  background-color: #A66B66;
+  border-color: #A66B66; /* Match grayish red fill */
+  box-shadow: 0 0 5px rgba(166, 107, 102, 0.4); /* Enhanced but softer grayish red shadow */
 }
 
 .radio-label.late input:checked + span {
-  background-color: #1c2a4d;
+  background-color: #B38F5C;
+  border-color: #B38F5C; /* Match grayish orange-yellow fill */
+  box-shadow: 0 0 5px rgba(179, 143, 92, 0.4); /* Enhanced but softer grayish orange-yellow shadow */
 }
 
 .radio-label.excuse input:checked + span {
-  background-color: #0f1a2e;
+  background-color: #757575;
+  border-color: #757575; /* Match gray fill */
+  box-shadow: 0 0 5px rgba(117, 117, 117, 0.4); /* Enhanced but softer gray shadow */
 }
 
 .notes-tooltip {
   position: relative;
+  padding: 10px;
 }
 
 .notes-tooltip .tooltip-text {
   visibility: hidden;
-  width: 200px;
+  width: 250px;
   background-color: #3f526d;
   color: #fff;
   text-align: center;
   border-radius: 6px;
-  padding: 5px;
+  padding: 10px;
   position: absolute;
   z-index: 1;
   bottom: 125%;
@@ -169,11 +178,32 @@
   transform: translateX(-50%);
   opacity: 0;
   transition: opacity 0.3s;
+  line-height: 1.6;
+}
+
+.notes-tooltip .tooltip-text::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 8px solid transparent;
+  border-top-color: #3f526d;
 }
 
 .notes-tooltip:hover .tooltip-text {
   visibility: visible;
   opacity: 1;
+}
+
+.notes-tooltip .tooltip-text span {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.notes-tooltip .tooltip-text span:not(:last-child) {
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .error {

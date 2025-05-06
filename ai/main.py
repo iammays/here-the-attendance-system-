@@ -25,8 +25,11 @@ class FaceAttendanceSystem:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         logger.info(f"Using device: {self.device}")
 
-        sys.path.append("C:/Users/MaysM.M/yolov5")
-        self.model = torch.hub.load("C:/Users/MaysM.M/yolov5", "custom", path="C:\\Users\\MaysM.M\\yolov5\\best.pt", source="local", force_reload=True)
+        sys.path.append("C:/Users/user/yolov5")
+        sys.path.append("C:/Users/user/yolov5")
+        from utils.general import scale_boxes
+        pathlib.PosixPath = pathlib.WindowsPath
+        self.model = torch.hub.load("C:/Users/user/yolov5", "custom", path="C:\\Users\\user\\yolov5\\best.pt", source="local", force_reload=True)
         self.model.conf = 0.6
         self.model.iou = 0.1
         self.model.to(self.device)
