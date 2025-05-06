@@ -26,6 +26,8 @@ class FaceAttendanceSystem:
         logger.info(f"Using device: {self.device}")
 
         sys.path.append("C:/Users/MaysM.M/yolov5")
+        from utils.general import scale_boxes
+        pathlib.PosixPath = pathlib.WindowsPath
         self.model = torch.hub.load("C:/Users/MaysM.M/yolov5", "custom", path="C:\\Users\\MaysM.M\\yolov5\\best.pt", source="local", force_reload=True)
         self.model.conf = 0.6
         self.model.iou = 0.1
