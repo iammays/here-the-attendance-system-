@@ -1,6 +1,6 @@
 .wf-reports-wrapper {
-  margin-left: 220px; /* sidebar width */
-  padding: 84px 24px 24px; /* navbar (60px) + spacing */
+  margin-left: 220px;
+  padding: 84px 24px 24px;
   min-height: calc(100vh - 60px);
   box-sizing: border-box;
 }
@@ -29,7 +29,17 @@
 .wf-filters .form-control {
   border-radius: 8px;
   font-size: 0.95rem;
+  border: 1px solid #ccc;
+  outline: none;
+  box-shadow: none;
 }
+
+.wf-filters .form-select:focus,
+.wf-filters .form-control:focus {
+  border-color: #aaa; /* Replace default blue */
+  box-shadow: none;
+}
+
 
 .wf-filters .btn {
   border-radius: 8px;
@@ -66,4 +76,18 @@
 .badge.bg-secondary {
   background-color: #d9d9d9 !important;
   color: #333 !important;
+}
+
+
+.form-select {
+  outline: none !important;
+  box-shadow: none !important;
+  border: 1px solid #ccc !important;
+}
+
+.form-select:hover,
+.form-select:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: 1px solid #aaa !important; /* Optional: softer gray on hover */
 }

@@ -22,6 +22,7 @@
   width: 100%;
   text-align: center;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  border-top: 6px solid var(--accent-color);
 }
 
 /* Modal Title */
@@ -72,4 +73,15 @@
 
 .logout-actions .btn-secondary:hover {
   background-color: #4a5a73;
+}
+
+
+.logout-actions .btn-danger:hover {
+  background-color: #e55b5b;
+}
+
+/* You can optionally add accent-colored border or shadow on focus */
+.logout-actions .btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.3); /* Accent ring */
 }

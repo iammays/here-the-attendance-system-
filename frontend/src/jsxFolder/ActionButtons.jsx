@@ -10,9 +10,7 @@ const ActionButtons = ({ onExport, onSave, onClearStatuses }) => {
       <button className="btn btn-primary" onClick={onSave}>
         {t('save')}
       </button>
-      <button className="btn btn-secondary" onClick={onExport}>
-        {t('export')}
-      </button>
+
       <button className="btn btn-danger" onClick={onClearStatuses}>
         {t('clear Statuses')}
       </button>

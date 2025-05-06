@@ -24,10 +24,10 @@ const Logout = ({ onClose }) => {
         </p>
         <div className="logout-actions">
           <button onClick={handleLogout} className="btn btn-danger">
-            {t('yesLogout') || 'Yes, log me out'}
+            {t('yesLogout') || 'Logout'}
           </button>
           <button onClick={onClose} className="btn btn-secondary">
-            {t('noCancel') || "No, take me back"}
+            {t('noCancel') || "Cancel"}
           </button>
         </div>
       </div>
