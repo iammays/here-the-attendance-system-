@@ -1,3 +1,17 @@
+insightface
+opencv-python
+scipy
+pymongo
+torch
+ultralytics
+flask
+fastapi
+matplotlib
+pillow
+requests
+numpy
+torchvision
+scikit-learn
 albucore
 albumentations
 annotated-types
@@ -57,7 +71,3 @@ tqdm
 typing_extensions
 urllib3
 wcwidth
-ultralytics
-flask
-fastapi
-pymongo

@@ -1,274 +1,331 @@
 import cv2
 import torch
-import pymongo
-from insightface.app import FaceAnalysis
-from pymongo import MongoClient
-import pathlib
 import sys
 import time
-from datetime import datetime
+import schedule
 import requests
+import logging
+from datetime import datetime
+from pymongo import MongoClient
+from insightface.app import FaceAnalysis
 from face_utils import load_student_embeddings, recognize_face, ensure_dir
 
-# إعداد المسار المحلي لـ YOLOv5
-sys.path.append("C:\\Users\\MaysM.M\\yolov5")
-from utils.general import scale_boxes
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
-# حل مشكلة توافق المسارات في Windows
-pathlib.PosixPath = pathlib.WindowsPath
+class FaceAttendanceSystem:
+    def __init__(self):
+        self.mongo_client = MongoClient("mongodb://localhost:27017")
+        self.face_db = self.mongo_client["face_attendance"]
+        self.backend_db = self.mongo_client["backend_db"]
+        self.students_collection = self.face_db["students_embeddings"]
+        self.attendance_collection = self.face_db["attendance"]
+        self.courses_collection = self.backend_db["courses"]
 
-# تحميل نموذج YOLOv5
-model = torch.hub.load("C:/Users/MaysM.M/yolov5", "custom", path="C:\\Users\\MaysM.M\\yolov5\\best.pt", source="local", force_reload=True)
-model.conf = 0.25
-model.iou = 0.4
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model.to(device)
-print(f"Using device: {device}")
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        logger.info(f"Using device: {self.device}")
 
-# تحميل نموذج ArcFace
-app = FaceAnalysis(allowed_modules=['detection', 'recognition'])
-app.prepare(ctx_id=0 if torch.cuda.is_available() else -1, det_size=(320, 320))
+        sys.path.append("C:/Users/MaysM.M/yolov5")
+        self.model = torch.hub.load("C:/Users/MaysM.M/yolov5", "custom", path="C:\\Users\\MaysM.M\\yolov5\\best.pt", source="local", force_reload=True)
+        self.model.conf = 0.6
+        self.model.iou = 0.1
+        self.model.to(self.device)
+        logger.info("YOLOv5 model loaded successfully")
 
-# الاتصال بـ MongoDB
-mongo_client = MongoClient("mongodb://localhost:27017")
-db = mongo_client["face_attendance"]
-students_collection = db["students_embeddings"]
-attendance_collection = db["attendance"]
-students_embeddings = load_student_embeddings(students_collection)
+        self.app = FaceAnalysis(allowed_modules=['detection', 'recognition'])
+        self.app.prepare(ctx_id=0 if torch.cuda.is_available() else -1, det_size=(640, 640))
+        logger.info("InsightFace model loaded successfully")
 
-# إعداد المجلدات
-output_dir = "output"
-screenshots_dir = f"{output_dir}/screenshots"
-ensure_dir(screenshots_dir)
+        self.output_dir = "output"
+        self.screenshots_dir = f"{self.output_dir}/screenshots"
+        self.known_faces_dir = f"{self.output_dir}/known_faces"
+        self.unknown_faces_dir = f"{self.output_dir}/unknown_faces"
+        self.yolo_cropped_dir = f"{self.output_dir}/yolo_cropped_faces"
 
-def detect_faces_from_frame(frame):
-    original_shape = frame.shape
-    frame_resized = cv2.resize(frame, (1280, 720))
-    results = model(frame_resized)
-    faces = []
-    print(f"[DEBUG] Number of objects detected by YOLO: {len(results.xyxy[0])}")
-    
-    for *xyxy, conf, cls in results.xyxy[0]:
-        x1, y1, x2, y2 = map(int, xyxy)
-        x1 = int(x1 * original_shape[1] / 1280)
-        y1 = int(y1 * original_shape[0] / 720)
-        x2 = int(x2 * original_shape[1] / 1280)
-        y2 = int(y2 * original_shape[0] / 720)
-        x1, y1 = max(0, x1), max(0, y1)
-        x2, y2 = min(original_shape[1], x2), min(original_shape[0], y2)
-        
-        if x2 - x1 > 0 and y2 - y1 > 0:
-            face_location = {"bbox": (x1, y1, x2, y2), "confidence": float(conf)}
-            faces.append(face_location)
-    return faces
+        ensure_dir(self.screenshots_dir)
+        ensure_dir(self.known_faces_dir)
+        ensure_dir(self.unknown_faces_dir)
+        ensure_dir(self.yolo_cropped_dir)
 
-def calculate_sessions(lecture_duration, late_threshold, interval):
-    remaining_time = lecture_duration - late_threshold
-    num_sessions = max(1, remaining_time // (interval + 1)) + 1  # +1 للجلسة 0
-    return num_sessions
+        self.students_embeddings = self.load_embeddings()
 
-def run_camera_for_lecture(course_id, lecture_duration, late_threshold, interval, video_path=None):
-    cap = cv2.VideoCapture(video_path if video_path else 0)
-    if not cap.isOpened():
-        print("Error: Could not open video source.")
-        return
+    def load_embeddings(self):
+        students_embeddings = load_student_embeddings(self.students_collection)
+        logger.info(f"Loaded {len(students_embeddings)} student embeddings")
+        return students_embeddings
 
-    # إنشاء lectureId مؤقت
-    lecture_id = f"{course_id}-temp-{datetime.now().strftime('%Y%m%d-%H%M')}"
+    def detect_faces_from_frame(self, frame):
+        results = self.model(frame)
+        faces = []
+        logger.debug(f"Number of objects detected by YOLO: {len(results.xyxy[0])}")
 
-    # تتبع الاكتشافات لكل جلسة وأول اكتشاف في المحاضرة
-    detections = {}  # {session_id: [{"student_id": str, "time": str, "screenshot_path": str}]}
-    first_detected_at = {}  # {student_id: first_detected_time}
-    total_sessions = calculate_sessions(lecture_duration, late_threshold, interval)
-    session_times = [0]  # بداية كل جلسة بالثواني
-    for i in range(1, total_sessions):
-        if i == 1:
-            session_times.append(late_threshold)  # نهاية الجلسة 0
-        else:
-            session_times.append(session_times[i-1] + interval + 1)
+        for *xyxy, conf, cls in results.xyxy[0]:
+            x1, y1, x2, y2 = map(int, xyxy)
+            x1, y1 = max(0, x1), max(0, y1)
+            x2, y2 = min(frame.shape[1], x2), min(frame.shape[0], y2)
 
-    start_time = time.time()
-    current_session = 0
+            if x2 - x1 > 0 and y2 - y1 > 0:
+                face_location = {"bbox": (x1, y1, x2, y2), "confidence": float(conf)}
+                faces.append(face_location)
+        return faces
 
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            print("❌ End of video reached")
-            break
+    def calculate_sessions(self, lecture_duration, late_threshold, interval):
+        remaining_time = lecture_duration - late_threshold
+        num_sessions = max(1, remaining_time // (interval + 1)) + 1
+        return num_sessions
 
-        elapsed_time = time.time() - start_time
-        if elapsed_time >= lecture_duration:
-            print(f"✅ Lecture duration ({lecture_duration} seconds) completed")
-            break
+    def process_camera(self, course_id, lecture_duration, late_threshold, interval, video_path):
+        cap = cv2.VideoCapture(video_path)
+        cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        if not cap.isOpened():
+            logger.error(f"Could not open RTSP stream at {video_path}")
+            return
 
-        # تحديد الجلسة الحالية بناءً على الوقت
-        while current_session < total_sessions - 1 and elapsed_time >= session_times[current_session + 1]:
-            current_session += 1
-            print(f"[DEBUG] Switching to session {current_session} at {elapsed_time:.2f}s")
-
-        if current_session not in detections:
-            detections[current_session] = []
-
-        frame = cv2.resize(frame, (1280, 720))
-        faces = detect_faces_from_frame(frame)
-        current_time_str = datetime.now().strftime("%H:%M:%S")
-        screenshot_path = None
-
-        for face in faces:
-            x1, y1, x2, y2 = face["bbox"]
-            padding = int(max(x2 - x1, y2 - y1) * 0.5)
-            x1 = max(0, x1 - padding)
-            y1 = max(0, y1 - padding)
-            x2 = min(frame.shape[1], x2 + padding)
-            y2 = min(frame.shape[0], y2 + padding)
-            face_img = frame[y1:y2, x1:x2]
-            if face_img.shape[0] < 40 or face_img.shape[1] < 40:
-                continue
-            
-            face_img_rgb = cv2.cvtColor(face_img, cv2.COLOR_BGR2RGB)
-            detected_faces = app.get(face_img_rgb)
-            if not detected_faces:
-                continue
-            
-            face_embedding = detected_faces[0].embedding.flatten()
-            student_id, similarity = recognize_face(face_embedding, students_embeddings)
-            if student_id == "Unknown":
-                continue
-
-            # تسجيل أول اكتشاف في المحاضرة
-            if student_id not in first_detected_at:
-                first_detected_at[student_id] = current_time_str
-                print(f"[DEBUG] First detection for {student_id} at {current_time_str}")
-
-            # تسجيل الاكتشاف في الجلسة الحالية (إذا لم يكن مسجلاً بعد)
-            if student_id not in [d["student_id"] for d in detections[current_session]]:
-                screenshot_path = f"{screenshots_dir}/{lecture_id}_{current_session}_{student_id}.jpg"
-                cv2.imwrite(screenshot_path, frame)
-                detections[current_session].append({
-                    "student_id": student_id,
-                    "time": current_time_str,
-                    "screenshot_path": screenshot_path
-                })
-                print(f"✅ Detected {student_id} in session {current_session} at {current_time_str}, similarity: {similarity:.2f}")
-
-            color = (0, 255, 0)
-            cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-            cv2.putText(frame, f"{student_id} ({similarity:.2f})", (x1, y1 - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-
-        cv2.imshow("Face Recognition", frame)
-        print(f"[DEBUG] Displaying frame at {current_time_str}, Elapsed time: {elapsed_time:.2f}s")
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-        time.sleep(1)  # تحليل كل ثانية
-
-    cap.release()
-    cv2.destroyAllWindows()
-    save_final_attendance(lecture_id, course_id, detections, first_detected_at, late_threshold, interval, total_sessions, session_times)
-
-def save_final_attendance(lecture_id, course_id, detections, first_detected_at, late_threshold, interval, total_sessions, session_times):
-    all_students = students_embeddings.keys()
-    session_summary = []
-
-    # طباعة تفاصيل الجلسات
-    print("\n=== Session Details ===")
-    print(f"Total Sessions: {total_sessions}")
-    for i in range(total_sessions):
-        start_time = session_times[i]
-        end_time = session_times[i + 1] if i < total_sessions - 1 else session_times[i] + (late_threshold if i == 0 else interval + 1)
-        print(f"Session {i}: {start_time:.2f}s to {end_time:.2f}s")
-        session_summary.append({"session_id": i, "start_time": start_time, "end_time": end_time})
-
-    print("\n=== Attendance Summary ===")
-    for student_id in all_students:
-        status = "Absent"
-        sessions = []
-        first_check_times = []
-
-        # تتبع الاكتشافات عبر الجلسات
-        for sess_id in range(total_sessions):
-            first_detection_time = "undetected"
-            first_check_time = "undetected"
-            
-            for detection in detections.get(sess_id, []):
-                if detection["student_id"] == student_id:
-                    first_detection_time = detection["time"]
-                    first_check_time = detection["time"]
-                    if sess_id == 0:  # اكتشاف في الجلسة 0 (قبل lateThreshold)
-                        status = "Present"
-                    elif status != "Present":  # إذا لم يكن Present، يمكن أن يكون Late
-                        status = "Late"
-                    break
-            
-            sessions.append({
-                "sessionId": sess_id,
-                "firstDetectionTime": first_detection_time
-            })
-            first_check_times.append({
-                "sessionId": sess_id,
-                "firstCheckTime": first_check_time
-            })
-
-        # إنشاء سجل الحضور
-        attendance_record = {
-            "lectureId": lecture_id,
-            "studentId": student_id,
-            "courseId": course_id,
-            "status": status,
-            "sessions": sessions,
-            "firstCheckTimes": first_check_times,
-            "firstDetectedAt": first_detected_at.get(student_id, "undetected")  # إضافة أول اكتشاف
-        }
-
-        # طباعة ملخص الحضور للطالب
-        print(f"Student: {student_id}")
-        print(f"  Status: {status}")
-        print(f"  First Detected At: {attendance_record['firstDetectedAt']}")
-        print("  Sessions:")
-        for sess in sessions:
-            print(f"    Session {sess['sessionId']}: First Detection = {sess['firstDetectionTime']}")
-        print("  First Check Times:")
-        for check in first_check_times:
-            print(f"    Session {check['sessionId']}: First Check Time = {check['firstCheckTime']}")
-        print()
-
-        # حفظ السجل في MongoDB محليًا
-        attendance_collection.update_one(
-            {"lecture_id": lecture_id, "student_id": student_id},
-            {"$set": attendance_record},
-            upsert=True
-        )
-        print(f"✅ Saved final status for {student_id}: {status} in MongoDB")
-
-        # إرسال السجل إلى الـ backend
-        try:
-            response = requests.post("http://localhost:8080/api/attendances", json=attendance_record)
-            if response.status_code == 200:
-                response_text = response.text
-                if "lectureId" in response_text:
-                    new_lecture_id = response_text.split("lectureId: ")[1].replace("\"", "").strip()
-                    if new_lecture_id != lecture_id:
-                        lecture_id = new_lecture_id
-                        attendance_collection.update_one(
-                            {"lecture_id": lecture_id, "student_id": student_id},
-                            {"$set": {"lectureId": lecture_id}}
-                        )
-                        print(f"✅ Updated lectureId to {lecture_id} in MongoDB")
-                print(f"✅ Saved attendance for {student_id}: {status} - Backend Response: {response.status_code}")
+        lecture_id = f"{course_id}-{datetime.now().strftime('%Y%m%d-%H%M')}"
+        detections = {}
+        first_detected_at = {}
+        total_sessions = self.calculate_sessions(lecture_duration, late_threshold, interval)
+        session_times = [0]
+        for i in range(1, total_sessions):
+            if i == 1:
+                session_times.append(late_threshold)
             else:
-                print(f"⚠️ Backend returned status {response.status_code} for {student_id}")
-        except requests.exceptions.RequestException as e:
-            print(f"⚠️ Failed to send attendance for {student_id}: {e}")
+                session_times.append(session_times[i-1] + interval + 1)
 
-    # طباعة ملخص نهائي
-    print("\n=== Final Summary ===")
-    print(f"Total Students: {len(all_students)}")
-    present_count = sum(1 for s in all_students if any(d["student_id"] == s and d["time"] != "undetected" for d in detections.get(0, [])))
-    late_count = sum(1 for s in all_students if any(d["student_id"] == s and d["time"] != "undetected" for sess in detections if sess > 0 for d in detections[sess]) and not any(d["student_id"] == s for d in detections.get(0, [])))
-    absent_count = len(all_students) - present_count - late_count
-    print(f"Present: {present_count}")
-    print(f"Late: {late_count}")
-    print(f"Absent: {absent_count}")
+        logger.info(f"Starting IP camera with course_id: {course_id}, lecture_duration: {lecture_duration}, "
+                    f"late_threshold: {late_threshold}, interval: {interval}, total_sessions: {total_sessions}")
+
+        start_time = time.time()
+        current_session = 0
+        frame_count = 0
+
+        while True:
+            ret, frame = cap.read()
+            if not ret or frame is None or frame.size == 0:
+                logger.warning("Failed to retrieve frame. Reconnecting...")
+                cap.release()
+                cap = cv2.VideoCapture(video_path)
+                cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+                if not cap.isOpened():
+                    logger.error("Failed to reconnect to RTSP. Exiting...")
+                    break
+                continue
+
+            frame_count += 1
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= lecture_duration:
+                logger.info(f"Lecture duration ({lecture_duration} seconds) completed")
+                break
+
+            while current_session < total_sessions - 1 and elapsed_time >= session_times[current_session + 1]:
+                current_session += 1
+                logger.debug(f"Switching to session {current_session} at {elapsed_time:.2f}s")
+
+            if current_session not in detections:
+                detections[current_session] = []
+
+            faces = self.detect_faces_from_frame(frame)
+            current_time_str = datetime.now().strftime("%H:%M:%S")
+            screenshot_path = f"{self.screenshots_dir}/frame_{lecture_id}_{frame_count}.jpg"
+            cv2.imwrite(screenshot_path, frame)
+
+            for face in faces:
+                x1, y1, x2, y2 = face["bbox"]
+                padding = int(max(x2 - x1, y2 - y1) * 0.5)
+                x1 = max(0, x1 - padding)
+                y1 = max(0, y1 - padding)
+                x2 = min(frame.shape[1], x2 + padding)
+                y2 = min(frame.shape[0], y2 + padding)
+                face_img = frame[y1:y2, x1:x2]
+                if face_img.shape[0] < 40 or face_img.shape[1] < 40:
+                    continue
+
+                yolo_face_path = f"{self.yolo_cropped_dir}/yolo_face_{lecture_id}_{frame_count}_{current_session}.jpg"
+                cv2.imwrite(yolo_face_path, face_img)
+
+                face_img_rgb = cv2.cvtColor(face_img, cv2.COLOR_BGR2RGB)
+                detected_faces = self.app.get(face_img_rgb)
+                if not detected_faces:
+                    face_path = f"{self.unknown_faces_dir}/face_{lecture_id}_{frame_count}_unknown.jpg"
+                    cv2.imwrite(face_path, face_img_rgb)
+                    continue
+
+                face_embedding = detected_faces[0].embedding.flatten()
+                student_id, similarity = recognize_face(face_embedding, self.students_embeddings, threshold=0.6)
+                detection_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                if student_id != "Unknown":
+                    if student_id not in first_detected_at:
+                        first_detected_at[student_id] = current_time_str
+                    if student_id not in [d["student_id"] for d in detections[current_session]]:
+                        face_path = f"{self.known_faces_dir}/face_{lecture_id}_{frame_count}_{student_id}_{similarity:.2f}.jpg"
+                        cv2.imwrite(face_path, face_img_rgb)
+                        detections[current_session].append({
+                            "student_id": student_id,
+                            "time": current_time_str,
+                            "screenshot_path": screenshot_path
+                        })
+                        logger.info(f"Detected {student_id} in session {current_session} at {detection_time}, "
+                                    f"similarity: {similarity:.2f}")
+                else:
+                    face_path = f"{self.unknown_faces_dir}/face_{lecture_id}_{frame_count}_unknown.jpg"
+                    cv2.imwrite(face_path, face_img_rgb)
+
+                color = (0, 255, 0) if student_id != "Unknown" else (0, 0, 255)
+                cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+                cv2.putText(frame, f"{student_id} ({similarity:.2f})", (x1, y1 - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
+            cv2.imshow("Face Recognition", frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+            time.sleep(1)
+
+        cap.release()
+        cv2.destroyAllWindows()
+        self.save_final_attendance(lecture_id, course_id, detections, first_detected_at, late_threshold, interval, total_sessions, session_times)
+
+    def save_final_attendance(self, lecture_id, course_id, detections, first_detected_at, late_threshold, interval, total_sessions, session_times):
+        all_students = self.students_embeddings.keys()
+        session_summary = []
+
+        logger.info("\n=== Session Details ===")
+        logger.info(f"Total Sessions: {total_sessions}")
+        for i in range(total_sessions):
+            start_time = session_times[i]
+            end_time = session_times[i + 1] if i < total_sessions - 1 else session_times[i] + (
+                late_threshold if i == 0 else interval + 1)
+            logger.info(f"Session {i}: {start_time:.2f}s to {end_time:.2f}s")
+            session_summary.append({"session_id": i, "start_time": start_time, "end_time": end_time})
+
+        logger.info("\n=== Attendance Summary ===")
+        for student_id in all_students:
+            status = "Absent"
+            sessions = []
+            first_check_times = []
+
+            for sess_id in range(total_sessions):
+                first_detection_time = "undetected"
+                first_check_time = "undetected"
+
+                for detection in detections.get(sess_id, []):
+                    if detection["student_id"] == student_id:
+                        first_detection_time = detection["time"]
+                        first_check_time = detection["time"]
+                        if sess_id == 0:
+                            status = "Present"
+                        elif status != "Present":
+                            status = "Late"
+                        break
+
+                sessions.append({
+                    "sessionId": sess_id,
+                    "firstDetectionTime": first_detection_time
+                })
+                first_check_times.append({
+                    "sessionId": sess_id,
+                    "firstCheckTime": first_check_time
+                })
+
+            attendance_record = {
+                "lectureId": lecture_id,
+                "studentId": student_id,
+                "courseId": course_id,
+                "status": status,
+                "sessions": sessions,
+                "firstCheckTimes": first_check_times,
+                "firstDetectedAt": first_detected_at.get(student_id, "undetected")
+            }
+
+            logger.info(f"Student: {student_id}, Status: {status}, First Detected: {attendance_record['firstDetectedAt']}")
+            self.attendance_collection.update_one(
+                {"lecture_id": lecture_id, "student_id": student_id},
+                {"$set": attendance_record},
+                upsert=True
+            )
+
+            try:
+                response = requests.post("http://localhost:8080/api/attendances", json=attendance_record)
+                if response.status_code == 200:
+                    logger.info(f"Backend saved attendance for {student_id}: {response.status_code}")
+                else:
+                    logger.warning(f"Backend failed for {student_id}: {response.status_code}")
+            except requests.exceptions.RequestException as e:
+                logger.error(f"Failed to send attendance for {student_id}: {e}")
+
+        logger.info("\n=== Final Summary ===")
+        logger.info(f"Total Students: {len(all_students)}")
+        present_count = sum(1 for s in all_students if any(
+            d["student_id"] == s for d in detections.get(0, [])))
+        late_count = sum(1 for s in all_students if any(
+            d["student_id"] == s for sess in detections if sess > 0 for d in detections[sess]) and not any(
+            d["student_id"] == s for d in detections.get(0, [])))
+        absent_count = len(all_students) - present_count - late_count
+        logger.info(f"Present: {present_count}, Late: {late_count}, Absent: {absent_count}")
+
+        try:
+            response = requests.post(f"http://localhost:8080/api/attendances/finalize/{lecture_id}")
+            if response.status_code == 200:
+                logger.info(f"Finalized attendance for lecture {lecture_id}")
+            else:
+                logger.warning(f"Failed to finalize attendance: {response.status_code}")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error finalizing attendance: {e}")
+
+    def fetch_lectures_for_today(self):
+        today = datetime.now().strftime("%Y-%m-%d")
+        day_name = datetime.now().strftime("%A")
+        logger.info(f"Fetching lectures for day: {day_name}, date: {today}")
+        lectures = self.courses_collection.find({
+            "$or": [
+                {"day": {"$regex": f"^{day_name}$", "$options": "i"}},
+                {"date": today}
+            ]
+        })
+        lectures_list = list(lectures)
+        if lectures_list:
+            logger.info(f"Found {len(lectures_list)} lectures for today: {[lecture['_id'] for lecture in lectures_list]}")
+        else:
+            logger.warning("No lectures found for today")
+        return lectures_list
+
+    def schedule_lectures(self):
+        lectures = self.fetch_lectures_for_today()
+        if not lectures:
+            logger.warning("No lectures found for today")
+            return
+        for lecture in lectures:
+            course_id = lecture["_id"]
+            start_time = lecture["startTime"]
+            end_time = lecture["endTime"]
+            late_threshold = lecture.get("lateThreshold", 300)
+            interval = lecture.get("interval", 15)
+
+            try:
+                start_dt = datetime.strptime(f"{datetime.now().strftime('%Y-%m-%d')} {start_time}", "%Y-%m-%d %H:%M")
+                end_dt = datetime.strptime(f"{datetime.now().strftime('%Y-%m-%d')} {end_time}", "%Y-%m-%d %H:%M")
+                lecture_duration = int((end_dt - start_dt).total_seconds())
+                if lecture_duration <= 0:
+                    logger.error(f"Invalid lecture duration for {course_id}")
+                    continue
+
+                schedule.every().day.at(start_time).do(
+                    self.process_camera,
+                    course_id=course_id,
+                    lecture_duration=lecture_duration,
+                    late_threshold=late_threshold,
+                    interval=interval,
+                    video_path="rtsp://admin:maysjoelleshouq@192.168.0.109:554/Streaming/Channels/1"
+                )
+                logger.info(f"Scheduled lecture {course_id} at {start_time}")
+            except ValueError as e:
+                logger.error(f"Error scheduling lecture {course_id}: {e}")
+
+    def run(self):
+        self.schedule_lectures()
+        while True:
+            schedule.run_pending()
+            time.sleep(60)
 
 if __name__ == "__main__":
-    run_camera_for_lecture("L001", 300, 10, 15, "C:/Users/MaysM.M/face-attendance-system/8.mp4")
+    system = FaceAttendanceSystem()
+    system.run()

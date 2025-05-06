@@ -21,7 +21,7 @@ const CourseDashboard = () => {
   const getAuthHeaders = () => {
     const teacher = JSON.parse(localStorage.getItem("teacher"));
     if (!teacher?.accessToken) {
-      setError(t("Login Required"));
+      setError(t("loginRequired"));
       navigate("/login");
       return {};
     }
@@ -50,11 +50,11 @@ const CourseDashboard = () => {
         }
         const courses = await courseResponse.json();
         if (!courses.length) {
-          throw new Error(t("No Data"));
+          throw new Error(t("noData"));
         }
         const courseTemplate = courses.find(c => !c.lectureId);
         if (!courseTemplate) {
-          throw new Error(t("No Course Template"));
+          throw new Error(t("noCourseTemplate"));
         }
         setCourseData(courseTemplate);
         setCourseId(courseTemplate.courseId);
@@ -110,11 +110,11 @@ const CourseDashboard = () => {
         }
         setWeeks(weeksData);
       } catch (err) {
-        const errorMessage = err.message.includes("401") ? t('Unauthorized') :
-                            err.message.includes("404") ? t('No Data') :
-                            err.message.includes("500") ? t('Server Error') :
+        const errorMessage = err.message.includes("401") ? t('unauthorized') :
+                            err.message.includes("404") ? t('noData') :
+                            err.message.includes("500") ? t('serverError') :
                             err.message;
-        setError(`${t("Fetch Error")}: ${errorMessage}`);
+        setError(`${t("fetchError")}: ${errorMessage}`);
         console.error("Error fetching course data:", err);
       } finally {
         setLoading(false);
@@ -164,11 +164,11 @@ const CourseDashboard = () => {
       setLoading(true);
       setError(null);
       if (!courseId) {
-        setError(t("No CourseId"));
+        setError(t("noCourseId"));
         return;
       }
       if (!lateThreshold || isNaN(lateThreshold) || Number(lateThreshold) < 0) {
-        setError(t("Invalid Late Threshold"));
+        setError(t("invalidLateThreshold"));
         return;
       }
 
@@ -187,9 +187,9 @@ const CourseDashboard = () => {
       }
 
       setShowLateModal(false);
-      // alert(t("Late Threshold Updated"));
+      alert(t("lateThresholdUpdated"));
     } catch (err) {
-      setError(`${t("Late Threshold Error")}: ${err.message}`);
+      setError(`${t("lateThresholdError")}: ${err.message}`);
       console.error("Error updating late threshold:", err);
     } finally {
       setLoading(false);
@@ -214,9 +214,14 @@ const CourseDashboard = () => {
       const startDayIndex = semesterStart.getDay();
 
       // Calculate days to target day in the first week
-      const daysToTargetDay = targetDayIndex < startDayIndex 
-        ? 7 - (startDayIndex - targetDayIndex) 
-        : (targetDayIndex - startDayIndex) + 1;
+      let daysToTargetDay;
+      if (targetDayIndex === 1) { // MONDAY
+        daysToTargetDay = 7; // Always 7 days from Tuesday to next Monday
+      } else {
+        daysToTargetDay = targetDayIndex < startDayIndex 
+          ? 7 - (startDayIndex - targetDayIndex) 
+          : (targetDayIndex - startDayIndex) + 1;
+      }
       const daysToAdd = (week - 1) * 7 + daysToTargetDay;
 
       // Calculate the target date in UTC to avoid timezone issues
@@ -238,7 +243,7 @@ const CourseDashboard = () => {
 
       // Validate courseData and time formats
       if (!courseData || !courseData.startTime || !courseData.endTime) {
-        throw new Error(t("Missing Course Data"));
+        throw new Error(t("missingCourseData"));
       }
       let startTime = courseData.startTime;
       let endTime = courseData.endTime;
@@ -315,14 +320,14 @@ const CourseDashboard = () => {
 
       navigate(`/attendance/${courseId}/${newLectureId}`);
     } catch (err) {
-      setError(`${t("Navigation Error")}: ${err.message}`);
+      setError(`${t("navigationError")}: ${err.message}`);
       console.error("Error navigating to attendance:", err);
     }
   };
 
-  if (loading) return <div className="loading">{t("Loading")}</div>;
+  if (loading) return <div className="loading">{t("loading")}</div>;
   if (error) return <div className="error">{error}</div>;
-  if (!courseData) return <div className="loading">{t("No Data")}</div>;
+  if (!courseData) return <div className="loading">{t("noData")}</div>;
 
   return (
     <div className="course-dashboard-container">
@@ -337,13 +342,13 @@ const CourseDashboard = () => {
               onClick={() => setShowLateModal(true)}
               disabled={loading}
             >
-              {t("Change Late Time")}
+              {t("changeLateTime")}
             </button>
             {showLateModal && (
               <div className="late-popup">
-                <h3>{t("Edit Late Time")}</h3>
+                <h3>{t("editLateTime")}</h3>
                 {error && <div className="error">{error}</div>}
-                <label htmlFor="lateThreshold">{t("Late After")}:</label>
+                <label htmlFor="lateThreshold">{t("lateAfter")}:</label>
                 <input
                   type="number"
                   id="lateThreshold"
@@ -355,13 +360,13 @@ const CourseDashboard = () => {
                 <span>{t("minutes")}</span>
                 <div>
                   <button onClick={handleLateThresholdSave} disabled={loading}>
-                    {loading ? t("Saving") : t("Save")}
+                    {loading ? t("saving") : t("save")}
                   </button>
                   <button
                     onClick={() => setShowLateModal(false)}
                     disabled={loading}
                   >
-                    {t("Cancel")}
+                    {t("cancel")}
                   </button>
                 </div>
               </div>
@@ -389,7 +394,15 @@ const CourseDashboard = () => {
                   ></path>
                 </svg>
               </summary>
-              <ul className="days-list">
+              <ul 
+                className="days-list" 
+                style={{ 
+                  fontWeight: 500,
+                  fontSize: '20px',
+                  color: '#2A4B70',
+                  marginBottom: '5px'
+                }}
+              >
                 {courseDays.map((day, index) => (
                   <li
                     key={index}
@@ -412,19 +425,19 @@ const CourseDashboard = () => {
 
       <div className="upcoming-section">
         <div className="upcoming-card">
-          <h3 className="upcoming-title">{t("Upcoming Classes")}</h3>
+          <h3 className="upcoming-title">{t("upcomingClasses")}</h3>
           {upcomingClasses.length === 0 ? (
-            <p>{t("No Upcoming Classes")}</p>
+            <p>{t("noUpcomingClasses")}</p>
           ) : (
             <ul className="upcoming-list">
               {upcomingClasses.map((cls, index) => (
                 <li key={index} className="upcoming-item">
                   <div className="course-name">{t(cls.courseName)}</div>
                   <div className="room-info">
-                    {t("Room")}: {cls.roomId || t("noRoom")}
+                    {t("room")}: {cls.roomId || t("noRoom")}
                   </div>
                   <div className="time-info">
-                    {t("Time")}:{" "}
+                    {t("time")}:{" "}
                     {new Date(cls.dateTime).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",

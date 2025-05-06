@@ -4,12 +4,11 @@ FROM python:3.12.0-slim
 # Set working directory
 WORKDIR /app
 
-# Install CMake, system dependencies, and OpenCV library support
+# Install CMake and system dependencies
 RUN apt-get update && apt-get install -y \
     cmake \
     g++ \
     build-essential \
-    libgl1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python packages
